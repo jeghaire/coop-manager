@@ -45,125 +45,169 @@ enum PaymentMethod {
 }
 
 model Cooperative {
-  id Int @id @default(autoincrement())
-  name String
-  stripeCustomerId String? @unique
+  id                   Int               @id @default(autoincrement())
+  name                 String
+  stripeCustomerId     String?           @unique
   stripeSubscriptionId String?
-  subscriptionStatus CooperativeStatus @default(ACTIVE)
-  billingCycleEnd DateTime?
-  deletedAt DateTime? // Soft delete
+  subscriptionStatus   CooperativeStatus @default(ACTIVE)
+  billingCycleEnd      DateTime?
+  deletedAt            DateTime? // Soft delete
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+
+  users         User[]
+  contributions Contribution[]
+  loans         LoanApplication[]
+  events        Event[]
+}
+
+model Account {
+  id           String    @id @default(cuid())
+  accountId    String
+  providerId   String
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken  String?
+  refreshToken String?
+  idToken      String?
+  expiresAt    DateTime?
+  password     String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
-  users User[]
-  contributions Contribution[]
-  loans LoanApplication[]
-  events Event[]
+
+  @@unique([providerId, accountId])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ipAddress String?
+  userAgent String?
+}
+
+model Verification {
+  id         String    @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime? @default(now())
+  updatedAt  DateTime? @updatedAt
+
+  @@unique([identifier, value])
 }
 
 model User {
-  id Int @id @default(autoincrement())
-  cooperativeId Int
-  cooperative Cooperative @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
-  email String @unique
-  name String
-  passwordHash String
-  role UserRole @default(MEMBER)
-  monthlyContributionAmount Decimal @default(0)
-  emailVerified Boolean @default(false)
-  invitedAt DateTime?
-  joinedAt DateTime?
-  deletedAt DateTime? // Soft delete
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  loanApplications LoanApplication[]
-  guarantorFor LoanGuarantor[] @relation("guarantor")
-  approvalsGiven LoanApplication[] @relation("approvedBy")
-  verificationsGiven Contribution[] @relation("verifiedBy")
-  contributions Contribution[]
+  id                        String      @id @default(cuid())
+  cooperativeId             Int
+  cooperative               Cooperative @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
+  email                     String      @unique
+  emailVerified             Boolean     @default(false)
+  name                      String
+  image                     String?
+  passwordHash              String?
+  role                      UserRole    @default(MEMBER)
+  monthlyContributionAmount String     @default("0")
+  invitedAt                 DateTime?
+  joinedAt                  DateTime?
+  deletedAt                 DateTime?
+  createdAt                 DateTime    @default(now())
+  updatedAt                 DateTime    @updatedAt
+
+  accounts           Account[]
+  sessions           Session[]
+  loanApplications   LoanApplication[]
+  guarantorFor       LoanGuarantor[]   @relation("guarantor")
+  approvalsGiven     LoanApplication[] @relation("approvedBy")
+  verificationsGiven Contribution[]    @relation("verifiedBy")
+  contributions      Contribution[]
 }
 
 model LoanApplication {
-  id Int @id @default(autoincrement())
-  cooperativeId Int
-  cooperative Cooperative @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
-  userId Int
-  applicant User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id              Int         @id @default(autoincrement())
+  cooperativeId   Int
+  cooperative     Cooperative @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
+  userId          String
+  applicant       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   amountRequested Decimal
-  status LoanStatus @default(PENDING_GUARANTORS)
-  appliedAt DateTime @default(now())
-  
+  status          LoanStatus  @default(PENDING_GUARANTORS)
+  appliedAt       DateTime    @default(now())
+
   guarantors LoanGuarantor[]
-  
-  reviewedBy Int?
-  reviewer User? @relation("approvedBy", fields: [reviewedBy], references: [id], onDelete: SetNull)
-  reviewedAt DateTime?
+
+  reviewedBy      String?
+  reviewer        User?     @relation("approvedBy", fields: [reviewedBy], references: [id], onDelete: SetNull)
+  reviewedAt      DateTime?
   rejectionReason String?
-  deletedAt DateTime? // Soft delete
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
+  deletedAt       DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
   @@index([cooperativeId])
   @@index([userId])
   @@index([status])
 }
 
 model LoanGuarantor {
-  id Int @id @default(autoincrement())
-  loanId Int
-  loan LoanApplication @relation(fields: [loanId], references: [id], onDelete: Cascade)
-  guarantorId Int
-  guarantor User @relation("guarantor", fields: [guarantorId], references: [id], onDelete: Cascade)
-  status GuarantorStatus @default(PENDING)
-  acceptedAt DateTime?
+  id              Int             @id @default(autoincrement())
+  loanId          Int
+  loan            LoanApplication @relation(fields: [loanId], references: [id], onDelete: Cascade)
+  guarantorId     String
+  guarantor       User            @relation("guarantor", fields: [guarantorId], references: [id], onDelete: Cascade)
+  status          GuarantorStatus @default(PENDING)
+  acceptedAt      DateTime?
   rejectionReason String?
-  deletedAt DateTime? // Soft delete
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
+  deletedAt       DateTime?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
   @@unique([loanId, guarantorId])
   @@index([guarantorId])
 }
 
 model Contribution {
-  id Int @id @default(autoincrement())
-  cooperativeId Int
-  cooperative Cooperative @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
-  userId Int
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  amount Decimal
-  status ContributionStatus @default(PENDING_VERIFICATION)
-  paymentMethod PaymentMethod
-  receiptUrl String?
-  submittedAt DateTime @default(now())
-  verifiedByUserId Int?
-  verifiedBy User? @relation("verifiedBy", fields: [verifiedByUserId], references: [id], onDelete: SetNull)
-  verifiedAt DateTime?
-  rejectionReason String?
-  deletedAt DateTime? // Soft delete
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
+  id               Int                @id @default(autoincrement())
+  cooperativeId    Int
+  cooperative      Cooperative        @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
+  userId           String
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount           Decimal
+  status           ContributionStatus @default(PENDING_VERIFICATION)
+  paymentMethod    PaymentMethod
+  receiptUrl       String?
+  submittedAt      DateTime           @default(now())
+  verifiedByUserId String?
+  verifiedBy       User?              @relation("verifiedBy", fields: [verifiedByUserId], references: [id], onDelete: SetNull)
+  verifiedAt       DateTime?
+  rejectionReason  String?
+  deletedAt        DateTime?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
   @@index([cooperativeId])
   @@index([userId])
   @@index([status])
 }
 
 model Event {
-  id Int @id @default(autoincrement())
+  id            Int         @id @default(autoincrement())
   cooperativeId Int
-  cooperative Cooperative @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
-  eventType String
-  actorId Int?
-  actorType String?
-  entityType String?
-  entityId Int?
-  data Json
-  deletedAt DateTime? // For completeness, but events should rarely be soft-deleted
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
+  cooperative   Cooperative @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
+  eventType     String
+  actorId       String?
+  actorType     String?
+  entityType    String?
+  entityId      Int?
+  data          Json
+  deletedAt     DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
   @@index([cooperativeId, createdAt])
   @@index([eventType])
 }

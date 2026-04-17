@@ -9,10 +9,14 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@better-auth/prisma-adapter": "^1.6.2",
+    "@prisma/adapter-pg": "^7.7.0",
     "@prisma/client": "^7.7.0",
     "bcryptjs": "^3.0.3",
+    "better-auth": "^1.6.2",
     "next": "16.2.3",
     "next-auth": "^4.24.13",
+    "pg": "^8.20.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "stripe": "^22.0.1"
@@ -20,6 +24,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/pg": "^8.20.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "dotenv": "^17.4.2",
@@ -27,6 +32,7 @@
     "eslint-config-next": "16.2.3",
     "prisma": "^7.7.0",
     "tailwindcss": "^4",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   }
 }
