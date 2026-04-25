@@ -1,48 +1,59 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "@better-auth/prisma-adapter";
-import { prisma } from "./prisma";
+import prisma from "./prisma";
+import { sendVerificationEmail } from "./email";
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
-    provider: "postgresql",
+    provider: "postgresql"
   }),
 
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: true,
-    minPasswordLength: 8,
+    minPasswordLength: 8
   },
 
-  // Add custom fields to user
+  emailVerification: {
+    sendVerificationEmail: async ({ user, url }) => {
+      await sendVerificationEmail({
+        to: user.email,
+        subject: "Verify your Cooperative Manager account",
+        html: `<p>Click the link below to verify your email address:</p><p><a href="${url}">${url}</a></p>`
+      });
+    }
+  },
+
   user: {
     additionalFields: {
       role: {
         type: "string",
         default: "MEMBER",
-        input: true, // Allow setting on signup
+        input: true
       },
       cooperativeId: {
-        type: "number",
+        type: "string",
         required: true,
-        input: true,
+        input: true
       },
       monthlyContributionAmount: {
         type: "string",
         default: "0",
-        input: false,
-      },
-    },
+        input: false
+      }
+    }
   },
 
   session: {
-    expiresIn: 30 * 24 * 60 * 60, // 30 days in seconds
+    expiresIn: 30 * 24 * 60 * 60,
+    // cookieCache disabled: Prisma Decimal fields can't pass structuredClone
+    // which better-auth uses internally when building the cache cookie.
     cookieCache: {
-      enabled: true,
-    },
+      enabled: false
+    }
   },
 
   socialProviders: {},
-  plugins: [],
+  plugins: []
 });
 
 export type Session = typeof auth.$Infer.Session;
