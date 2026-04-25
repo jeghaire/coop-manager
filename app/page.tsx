@@ -308,11 +308,11 @@ function Hero() {
       {/* Animated background blobs */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div
-          className="absolute top-0 right-0 w-[600px] h-[600px] bg-emerald-500/5 dark:bg-emerald-500/7 rounded-full translate-x-1/4 -translate-y-1/4"
+          className="absolute top-0 right-0 w-150 h-150 bg-emerald-500/5 dark:bg-emerald-500/7 rounded-full translate-x-1/4 -translate-y-1/4"
           style={{ animation: "floatA 18s ease-in-out infinite" }}
         />
         <div
-          className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-zinc-300/20 dark:bg-zinc-800/50 rounded-full -translate-x-1/4 translate-y-1/4"
+          className="absolute bottom-0 left-0 w-100 h-100 bg-zinc-300/20 dark:bg-zinc-800/50 rounded-full -translate-x-1/4 translate-y-1/4"
           style={{ animation: "floatB 22s ease-in-out infinite" }}
         />
       </div>
@@ -663,7 +663,7 @@ function CtaBanner() {
         className="pointer-events-none absolute inset-0 flex items-center justify-center"
         style={{ animation: "floatA 20s ease-in-out infinite" }}
       >
-        <div className="w-[700px] h-[400px] bg-emerald-500/10 rounded-full blur-3xl" />
+        <div className="w-175 h-100 bg-emerald-500/10 rounded-full blur-3xl" />
       </div>
 
       <div className="relative max-w-3xl mx-auto px-6 text-center">

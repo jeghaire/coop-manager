@@ -63,7 +63,7 @@ export function SignupForm({ cooperatives }: { cooperatives: Cooperative[] }) {
         <Label htmlFor="cooperative">Cooperative</Label>
         {/* Hidden input carries the value to FormData */}
         <input type="hidden" name="cooperativeId" value={cooperativeId} />
-        <Select value={cooperativeId} onValueChange={setCooperativeId} required>
+        <Select value={cooperativeId} onValueChange={(v) => setCooperativeId(v ?? "")} required>
           <SelectTrigger id="cooperative">
             <SelectValue placeholder="Select your cooperative" />
           </SelectTrigger>

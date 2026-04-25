@@ -3,9 +3,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 
 export async function POST(request: NextRequest) {
-  const { cooperativeName, email, password, name } = await request.json();
+  const { cooperativeId, email, password, name } = await request.json();
 
-  if (!cooperativeName || !email || !password || !name) {
+  if (!cooperativeId || !email || !password || !name) {
     return NextResponse.json(
       { error: "Missing required fields" },
       { status: 400 }
@@ -18,8 +18,8 @@ export async function POST(request: NextRequest) {
         email,
         password,
         name,
-        cooperativeName,
-        role: "OWNER"
+        cooperativeId,
+        role: "MEMBER"
       },
       headers: await headers()
     });
