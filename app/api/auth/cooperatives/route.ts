@@ -13,7 +13,7 @@ export async function GET() {
   });
 
   return NextResponse.json(
-    cooperatives.map((c) => ({
+    cooperatives.map((c: typeof cooperatives[number]) => ({
       id: c.id,
       name: c.name,
       memberCount: c._count.users
