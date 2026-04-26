@@ -12,9 +12,9 @@ import Link from "next/link";
 export default async function SigninPage({
   searchParams
 }: {
-  searchParams: Promise<{ registered?: string }>;
+  searchParams: Promise<{ registered?: string; reset?: string }>;
 }) {
-  const { registered } = await searchParams;
+  const { registered, reset } = await searchParams;
 
   return (
     <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-[#0c0c0c]">
@@ -26,7 +26,7 @@ export default async function SigninPage({
             <CardDescription>Access your cooperative dashboard.</CardDescription>
           </CardHeader>
           <CardContent>
-            <SigninForm registered={registered === "1"} />
+            <SigninForm registered={registered === "1"} reset={reset === "1"} />
             <p className="mt-5 text-center text-sm text-zinc-500 dark:text-zinc-400">
               Don&apos;t have an account?{" "}
               <Link

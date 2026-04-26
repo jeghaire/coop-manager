@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(d.get\\('version','?'\\)\\); deps = {**d.get\\('dependencies',{}\\), **d.get\\('devDependencies',{}\\)}; [print\\(k,v\\) for k,v in deps.items\\(\\) if any\\(x in k for x in ['next','react','shadcn','tailwind','zod','hook-form']\\)]\")",
+      "Bash(node -e \"const p=require\\('./package.json'\\); const deps={...p.dependencies,...\\(p.devDependencies||{}\\)}; ['next','react','@hookform','zod','tailwind','shadcn','class-variance','lucide'].forEach\\(k=>Object.entries\\(deps\\).filter\\(\\([n]\\)=>n.includes\\(k\\)\\).forEach\\(\\([n,v]\\)=>console.log\\(n,v\\)\\)\\)\")",
+      "Bash(pnpm dlx *)",
+      "Bash(node -e \"const m = require\\('better-auth'\\); console.log\\(Object.keys\\(m\\).filter\\(k => k.toLowerCase\\(\\).includes\\('hash'\\) || k.toLowerCase\\(\\).includes\\('pass'\\)\\)\\)\")",
+      "Bash(pnpm exec tsx -e ' *)",
+      "Bash(pnpm exec tsx --env-file=.env -e ' *)",
+      "Bash(cd /d \"C:\\\\Users\\\\Mavi\\\\Documents\\\\Development\\\\Web\\\\coop-manager\")",
+      "Bash(node --import=tsx/esm --env-file=.env -e ' *)",
+      "Bash(node --import=tsx/esm --env-file=.env -e \"import { PrismaClient } from '@prisma/client'; import { PrismaPg } from '@prisma/adapter-pg'; const a = new PrismaPg\\({ connectionString: process.env.DATABASE_URL }\\); const p = new PrismaClient\\({ adapter: a }\\); const u = await p.user.findMany\\({ select: { email: true, role: true, cooperativeId: true } }\\); console.log\\(JSON.stringify\\(u, null, 2\\)\\); const acc = await p.account.findMany\\(\\); console.log\\('accounts with pwd:', acc.filter\\(x => x.password\\).length\\);\")",
+      "Bash(curl -s -X POST http://localhost:3000/api/auth/sign-in/email -H 'Content-Type: application/json' -d '{\"email\":\"owner@lagos.test\",\"password\":\"Password123!\"}')",
+      "Bash(curl -sv -X POST http://localhost:3000/api/auth/sign-in/email -H 'Content-Type: application/json' -H 'Origin: http://localhost:3000' -d '{\"email\":\"owner@lagos.test\",\"password\":\"Password123!\"}')",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(node -e \"const p=require\\('./package.json'\\); console.log\\('next:', p.dependencies.next, 'react:', p.dependencies.react\\)\")",
+      "Bash(npx tsc *)",
+      "Bash(npx next *)",
+      "Bash(node -e \"require\\('./package.json'\\).dependencies['stripe'] ? console.log\\('installed'\\) : console.log\\('missing'\\)\")"
+    ]
+  }
+}

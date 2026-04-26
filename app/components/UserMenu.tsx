@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { ChevronDown, LogOut } from "lucide-react";
+import { ChevronDown, LogOut, Settings } from "lucide-react";
 import { signOut } from "@/app/lib/auth-client";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const roleColor: Record<string, string> = {
   OWNER: "text-emerald-600 dark:text-emerald-400",
@@ -76,14 +77,26 @@ export function UserMenu({
             <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate leading-snug">
               {name}
             </p>
-            <p className="text-xs text-zinc-500 dark:text-zinc-500 truncate mt-0.5">{email}</p>
-            <span className={`text-[11px] font-mono font-semibold mt-1.5 inline-block ${roleColor[role] ?? roleColor.MEMBER}`}>
+            <p className="text-xs text-zinc-500 dark:text-zinc-500 truncate mt-0.5">
+              {email}
+            </p>
+            <span
+              className={`text-[11px] font-mono font-semibold mt-1.5 inline-block ${roleColor[role] ?? roleColor.MEMBER}`}
+            >
               {role}
             </span>
           </div>
 
           {/* Actions */}
           <div className="py-1">
+            <Link
+              href="/dashboard/settings"
+              onClick={() => setOpen(false)}
+              className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+            >
+              <Settings className="w-4 h-4 shrink-0" strokeWidth={1.75} />
+              Account Settings
+            </Link>
             <button
               onClick={handleSignOut}
               className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors text-left"

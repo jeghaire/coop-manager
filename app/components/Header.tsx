@@ -12,7 +12,10 @@ export async function Header() {
   return (
     <header className="sticky top-0 z-50 bg-white/90 dark:bg-[#0c0c0c]/90 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800/60">
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        <Link href={user ? "/dashboard" : "/"} className="flex items-center gap-2.5 group">
+        <Link
+          href={user ? "/dashboard" : "/"}
+          className="flex items-center gap-2.5 group"
+        >
           <div className="w-7 h-7 bg-emerald-600 dark:bg-emerald-500 rounded-md flex items-center justify-center shadow-sm group-hover:bg-emerald-700 dark:group-hover:bg-emerald-400 transition-colors">
             <Building2 className="w-4 h-4 text-white" strokeWidth={1.75} />
           </div>
@@ -25,11 +28,7 @@ export async function Header() {
           <ThemeToggle />
 
           {user ? (
-            <UserMenu
-              name={user.name}
-              email={user.email}
-              role={role}
-            />
+            <UserMenu name={user.name} email={user.email} role={role} />
           ) : (
             <>
               <Link

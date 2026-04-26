@@ -10,7 +10,20 @@ export const auth = betterAuth({
 
   emailAndPassword: {
     enabled: true,
-    minPasswordLength: 8
+    minPasswordLength: 8,
+    sendResetPassword: async ({ user, url }) => {
+      const { sendVerificationEmail } = await import("./email");
+      await sendVerificationEmail({
+        to: user.email,
+        subject: "Reset your Cooperative Manager password",
+        html: `
+          <p>Hi ${user.name},</p>
+          <p>Click the link below to reset your password. This link expires in 1 hour.</p>
+          <p><a href="${url}">${url}</a></p>
+          <p>If you didn't request this, ignore this email.</p>
+        `,
+      });
+    },
   },
 
   emailVerification: {

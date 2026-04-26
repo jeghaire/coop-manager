@@ -15,7 +15,9 @@ export function proxy(request: NextRequest) {
     request.cookies.get("__Secure-better-auth.session_token")?.value;
 
   if (isProtected && !sessionToken) {
-    return NextResponse.redirect(new URL("/auth/signin", request.url));
+    const signin = new URL("/auth/signin", request.url);
+    signin.searchParams.set("next", pathname);
+    return NextResponse.redirect(signin);
   }
 
   if (isAuthRoute && sessionToken) {

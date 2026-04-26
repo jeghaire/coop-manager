@@ -867,5 +867,51 @@ When complete, you should be able to:
 Done. This spec now includes:
 - ✅ shadcn/ui components
 - ✅ Server Actions (Next.js 15)
+
+---
+
+## Phase 6: Gaps & Hardening
+
+### Bugs
+
+**TREASURER locked out of admin routes**
+- `AdminLayout` only admits `ADMIN` and `OWNER`; TREASURER cannot reach `/admin/contributions` or `/admin/reports` even though those pages allow them
+- Fix: extend layout role check to include `TREASURER`; individual pages already enforce their own permissions
+
+**No edge-level route protection**
+- Auth guards live inside each page/layout. A `middleware.ts` at the project root intercepts unauthenticated requests before any server component runs
+- Fix: add `middleware.ts` — check for `better-auth.session_token` cookie, redirect to `/auth/signin` if missing on protected routes
+
+**No mobile navigation**
+- Sidebar is `hidden md:block`; mobile users have no navigation
+- Fix: add a slide-up bottom nav bar on mobile with primary member + admin links
+
+### Missing Features
+
+**Forgot password / password reset**
+- Invited members get a temp password but have no way to reset it
+- Requires `emailAndPassword.sendResetPassword` in auth config + two new pages: `/auth/forgot-password` and `/auth/reset-password`
+
+**Account settings**
+- No page to change name or password after signing in
+- Implement via better-auth's `updateUser` and `changePassword` APIs
+
+**Cooperative creation UI**
+- Cooperatives are seeded manually; no onboarding flow for new customers
+- Add `/cooperatives/new` — takes cooperative name + first user details, creates Cooperative + OWNER user in one transaction
+
+**Stripe billing**
+- Spec requirement: £500/year per cooperative
+- Scaffold: checkout on cooperative creation, webhook handler for subscription events, billing portal link in dashboard
+
+### Cleanup
+
+**Dead routes**
+- `/login`, `/signup`, `/test`, `/api/admin/dashboard`, `/api/member/dashboard` are bootstrap stubs with no purpose
+- Delete them
+
+**Report CSV export**
+- Reports are browser-only; AGM submissions need downloadable files
+- Add CSV download endpoint for financial summary and dividend snapshot
 - ✅ App Router patterns
 - ✅ Full examples
