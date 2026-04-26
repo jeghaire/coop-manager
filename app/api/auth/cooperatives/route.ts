@@ -2,7 +2,7 @@ import prisma from "@/app/lib/prisma";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const cooperatives = await prisma.cooperative.findMany({
+  const rows = await prisma.cooperative.findMany({
     where: { deletedAt: null, subscriptionStatus: "ACTIVE" },
     select: {
       id: true,
@@ -12,11 +12,11 @@ export async function GET() {
     orderBy: { name: "asc" }
   });
 
-  return NextResponse.json(
-    cooperatives.map((c: { id: string; name: string; _count: { users: number } }) => ({
-      id: c.id,
-      name: c.name,
-      memberCount: c._count.users
-    }))
-  );
+  const cooperatives = rows.map(({ id, name, _count }) => ({
+    id,
+    name,
+    memberCount: _count.users
+  }));
+
+  return NextResponse.json(cooperatives);
 }
