@@ -189,10 +189,30 @@ export default async function LoansPage() {
                       </div>
                     )}
 
-                    {loan.status === "REJECTED" && loan.rejectionReason && (
-                      <p className="mt-2 text-xs text-red-600 dark:text-red-400">
-                        Reason: {loan.rejectionReason}
-                      </p>
+                    {(loan.status === "APPROVED" || loan.status === "REPAID") && (
+                      <div className="mt-2">
+                        <Link
+                          href={`/dashboard/loans/${loan.id}`}
+                          className="text-xs text-emerald-600 dark:text-emerald-400 hover:underline"
+                        >
+                          View details →
+                        </Link>
+                      </div>
+                    )}
+                    {loan.status === "REJECTED" && (
+                      <div className="mt-2 space-y-1">
+                        {loan.rejectionReason && (
+                          <p className="text-xs text-red-600 dark:text-red-400">
+                            Reason: {loan.rejectionReason}
+                          </p>
+                        )}
+                        <Link
+                          href={`/dashboard/loans/${loan.id}/rejected`}
+                          className="text-xs text-emerald-600 dark:text-emerald-400 hover:underline"
+                        >
+                          View details & retry →
+                        </Link>
+                      </div>
                     )}
                   </div>
                 </div>

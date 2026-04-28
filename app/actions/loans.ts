@@ -1,7 +1,8 @@
 "use server";
 
 import prisma from "@/app/lib/prisma";
-import { requireAuth, requireCooperativeAccess } from "@/app/lib/auth-helpers";
+import { requireAuth, protectVerifiedAction, protectAdminAction, getTotalContributed } from "@/app/lib/auth-helpers";
+import { calculateLoanTotals } from "@/app/lib/loan-helpers";
 import { revalidatePath } from "next/cache";
 
 export type LoanActionState = {
@@ -16,6 +17,18 @@ export async function applyForLoan(
   const session = await requireAuth();
   const userId = session.user.id;
   const cooperativeId = session.user.cooperativeId as string;
+
+  // Verify user is verified (members only — admins/owners are exempt)
+  const role = session.user.role as string;
+  if (role === "MEMBER") {
+    const dbUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { verifiedAt: true },
+    });
+    if (!dbUser?.verifiedAt) {
+      return { error: "Your account must be verified before applying for a loan." };
+    }
+  }
 
   const amountStr = (formData.get("amount") as string)?.trim();
   const guarantor1Id = (formData.get("guarantor1Id") as string)?.trim();
@@ -39,7 +52,28 @@ export async function applyForLoan(
     return { error: "You cannot be your own guarantor." };
   }
 
-  // Validate guarantors exist, belong to same cooperative, are not deleted, not admin/owner
+  // Check user's contribution total
+  const totalContributed = await getTotalContributed(userId);
+  if (totalContributed === 0) {
+    return { error: "You must have at least one verified contribution to apply for a loan." };
+  }
+
+  // Fetch cooperative settings for borrowing capacity and guarantor mode
+  const cooperative = await prisma.cooperative.findUnique({
+    where: { id: cooperativeId },
+    select: { borrowingMultiplier: true, guarantorCoverageMode: true },
+  });
+
+  if (!cooperative) return { error: "Cooperative not found." };
+
+  const borrowingCapacity = totalContributed * cooperative.borrowingMultiplier;
+  if (amount > borrowingCapacity) {
+    return {
+      error: `Loan amount exceeds your borrowing capacity of ₦${borrowingCapacity.toLocaleString()} (${cooperative.borrowingMultiplier}× your contributions).`,
+    };
+  }
+
+  // Validate guarantors exist, belong to same cooperative, not deleted, not admin/owner
   const guarantors = await prisma.user.findMany({
     where: {
       id: { in: [guarantor1Id, guarantor2Id] },
@@ -47,14 +81,45 @@ export async function applyForLoan(
       deletedAt: null,
       role: { notIn: ["ADMIN", "OWNER"] },
     },
-    select: { id: true, name: true },
+    select: { id: true, name: true, verifiedAt: true },
   });
 
   if (guarantors.length !== 2) {
     return {
-      error:
-        "One or both guarantors are invalid. Guarantors must be active members of your cooperative and cannot be admins.",
+      error: "One or both guarantors are invalid. Guarantors must be active members of your cooperative and cannot be admins.",
     };
+  }
+
+  // Validate guarantors are verified
+  const unverifiedGuarantor = guarantors.find((g) => !g.verifiedAt);
+  if (unverifiedGuarantor) {
+    return { error: `${unverifiedGuarantor.name} is not verified and cannot act as a guarantor.` };
+  }
+
+  // Validate guarantor coverage based on cooperative mode
+  if (cooperative.guarantorCoverageMode !== "OFF") {
+    const [g1Total, g2Total] = await Promise.all([
+      getTotalContributed(guarantor1Id),
+      getTotalContributed(guarantor2Id),
+    ]);
+
+    if (cooperative.guarantorCoverageMode === "COMBINED") {
+      const combined = g1Total + g2Total;
+      if (combined < amount) {
+        return {
+          error: `Guarantors' combined contributions (₦${combined.toLocaleString()}) must cover the loan amount (₦${amount.toLocaleString()}).`,
+        };
+      }
+    } else if (cooperative.guarantorCoverageMode === "INDIVIDUAL") {
+      const g1 = guarantors.find((g) => g.id === guarantor1Id)!;
+      const g2 = guarantors.find((g) => g.id === guarantor2Id)!;
+      if (g1Total < amount) {
+        return { error: `${g1.name}'s contributions (₦${g1Total.toLocaleString()}) must individually cover the loan amount (₦${amount.toLocaleString()}).` };
+      }
+      if (g2Total < amount) {
+        return { error: `${g2.name}'s contributions (₦${g2Total.toLocaleString()}) must individually cover the loan amount (₦${amount.toLocaleString()}).` };
+      }
+    }
   }
 
   try {
@@ -87,6 +152,9 @@ export async function applyForLoan(
             amount,
             purpose: purposeText || null,
             guarantorIds: [guarantor1Id, guarantor2Id],
+            userContribution: totalContributed,
+            borrowingCapacity,
+            guarantorCoverageMode: cooperative.guarantorCoverageMode,
           },
         },
       });
@@ -123,7 +191,6 @@ export async function respondAsGuarantor(
     return { error: "Please provide a reason for rejection." };
   }
 
-  // Find the guarantor record
   const guarantorRecord = await prisma.loanGuarantor.findFirst({
     where: { loanId, guarantorId: userId, deletedAt: null },
     include: {
@@ -161,8 +228,7 @@ export async function respondAsGuarantor(
       await tx.event.create({
         data: {
           cooperativeId,
-          eventType:
-            response === "ACCEPTED" ? "guarantor_accepted" : "guarantor_rejected",
+          eventType: response === "ACCEPTED" ? "guarantor_accepted" : "guarantor_rejected",
           actorId: userId,
           actorType: "user",
           entityType: "loan",
@@ -174,9 +240,7 @@ export async function respondAsGuarantor(
         },
       });
 
-      // Check if we need to update loan status
       if (response === "REJECTED") {
-        // Auto-reject the loan
         await tx.loanApplication.update({
           where: { id: loanId },
           data: {
@@ -196,7 +260,6 @@ export async function respondAsGuarantor(
           },
         });
       } else {
-        // Check if all guarantors have accepted
         const pendingGuarantors = await tx.loanGuarantor.count({
           where: { loanId, status: "PENDING", deletedAt: null },
         });
@@ -258,7 +321,7 @@ export async function reviewLoan(
 
   const loan = await prisma.loanApplication.findUnique({
     where: { id: loanId },
-    select: { status: true, cooperativeId: true },
+    select: { status: true, cooperativeId: true, amountRequested: true },
   });
 
   if (!loan || loan.cooperativeId !== cooperativeId) {
@@ -270,6 +333,27 @@ export async function reviewLoan(
   }
 
   try {
+    // If approving, calculate interest-based totals from cooperative settings
+    let approvalData: Record<string, unknown> = {};
+    if (decision === "APPROVED") {
+      const cooperative = await prisma.cooperative.findUnique({
+        where: { id: cooperativeId },
+        select: { loanInterestRate: true, loanRepaymentMonths: true },
+      });
+      if (cooperative) {
+        const { totalDue } = calculateLoanTotals(
+          Number(loan.amountRequested),
+          Number(cooperative.loanInterestRate)
+        );
+        approvalData = {
+          interestRate: cooperative.loanInterestRate,
+          repaymentMonths: cooperative.loanRepaymentMonths,
+          totalAmountDue: totalDue,
+          approvedAt: new Date(),
+        };
+      }
+    }
+
     await prisma.$transaction(async (tx) => {
       await tx.loanApplication.update({
         where: { id: loanId },
@@ -278,16 +362,14 @@ export async function reviewLoan(
           reviewedBy: session.user.id,
           reviewedAt: new Date(),
           rejectionReason: decision === "REJECTED" ? reason : null,
+          ...approvalData,
         },
       });
 
       await tx.event.create({
         data: {
           cooperativeId,
-          eventType:
-            decision === "APPROVED"
-              ? "loan_application_approved"
-              : "loan_application_rejected",
+          eventType: decision === "APPROVED" ? "loan_application_approved" : "loan_application_rejected",
           actorId: session.user.id,
           actorType: "admin",
           entityType: "loan",
@@ -295,6 +377,7 @@ export async function reviewLoan(
             loanId,
             decision,
             reason: reason || null,
+            amount: loan.amountRequested,
           },
         },
       });
@@ -304,6 +387,200 @@ export async function reviewLoan(
   }
 
   revalidatePath("/dashboard/loans");
+  revalidatePath("/admin/loans");
+  revalidatePath("/admin/notifications");
+  return { success: true };
+}
+
+export async function repayLoan(
+  _prev: LoanActionState,
+  formData: FormData
+): Promise<LoanActionState> {
+  const session = await requireAuth();
+  const userId = session.user.id;
+  const cooperativeId = session.user.cooperativeId as string;
+
+  const loanId = (formData.get("loanId") as string)?.trim();
+  const loanAmountStr = (formData.get("loanAmount") as string)?.trim();
+  const contributionAmountStr = (formData.get("contributionAmount") as string)?.trim();
+
+  if (!loanId) return { error: "Missing loan ID." };
+
+  const loanAmount = parseFloat(loanAmountStr || "0");
+  const contributionAmount = parseFloat(contributionAmountStr || "0");
+
+  if (loanAmount < 0 || contributionAmount < 0) {
+    return { error: "Amounts cannot be negative." };
+  }
+
+  if (loanAmount === 0 && contributionAmount === 0) {
+    return { error: "Enter at least one payment amount." };
+  }
+
+  const loan = await prisma.loanApplication.findUnique({
+    where: { id: loanId },
+    include: {
+      repayments: { select: { amount: true } },
+    },
+  });
+
+  if (!loan || loan.cooperativeId !== cooperativeId) {
+    return { error: "Loan not found." };
+  }
+
+  if (loan.userId !== userId) {
+    return { error: "Can only repay your own loans." };
+  }
+
+  if (loan.status !== "APPROVED") {
+    return { error: "This loan is not currently active." };
+  }
+
+  const totalDue = Number(loan.totalAmountDue ?? loan.amountRequested);
+  const totalPaid = loan.repayments.reduce((s, r) => s + Number(r.amount), 0);
+  const remaining = totalDue - totalPaid;
+
+  if (loanAmount > remaining + 0.01) {
+    return { error: `Payment of ₦${loanAmount.toLocaleString()} exceeds remaining balance of ₦${remaining.toLocaleString()}.` };
+  }
+
+  try {
+    const now = new Date();
+    await prisma.$transaction(async (tx) => {
+      if (loanAmount > 0) {
+        await tx.loanRepayment.create({
+          data: {
+            loanId,
+            amount: loanAmount,
+            paymentType: "LOAN_REPAYMENT",
+            paidAt: now,
+          },
+        });
+
+        // Mark repaid if balance cleared
+        const newTotalPaid = totalPaid + loanAmount;
+        if (newTotalPaid >= totalDue - 0.01) {
+          await tx.loanApplication.update({
+            where: { id: loanId },
+            data: { status: "REPAID", repaidAt: now },
+          });
+        }
+      }
+
+      if (contributionAmount > 0) {
+        await tx.contribution.create({
+          data: {
+            cooperativeId,
+            userId,
+            amount: contributionAmount,
+            status: "VERIFIED",
+            paymentMethod: "DIRECT_PAYMENT",
+            verifiedAt: now,
+            verifiedByUserId: userId,
+          },
+        });
+      }
+
+      await tx.event.create({
+        data: {
+          cooperativeId,
+          eventType: "loan_repayment_made",
+          actorId: userId,
+          actorType: "user",
+          entityType: "loan",
+          data: { loanId, loanAmount, contributionAmount },
+        },
+      });
+    });
+  } catch {
+    return { error: "Failed to record payment. Please try again." };
+  }
+
+  revalidatePath(`/dashboard/loans/${loanId}`);
+  revalidatePath("/dashboard/loans");
+  return { success: true };
+}
+
+export async function recordRepaymentForMember(
+  _prev: LoanActionState,
+  formData: FormData
+): Promise<LoanActionState> {
+  const session = await requireAuth();
+  const role = session.user.role as string;
+
+  if (role !== "ADMIN" && role !== "OWNER" && role !== "TREASURER") {
+    return { error: "Only admins and treasurers can record repayments." };
+  }
+
+  const cooperativeId = session.user.cooperativeId as string;
+  const loanId = (formData.get("loanId") as string)?.trim();
+  const amountStr = (formData.get("amount") as string)?.trim();
+  const note = (formData.get("note") as string)?.trim();
+
+  if (!loanId || !amountStr) return { error: "Missing required fields." };
+
+  const amount = parseFloat(amountStr);
+  if (isNaN(amount) || amount <= 0) return { error: "Invalid amount." };
+
+  const loan = await prisma.loanApplication.findUnique({
+    where: { id: loanId },
+    include: { repayments: { select: { amount: true } } },
+  });
+
+  if (!loan || loan.cooperativeId !== cooperativeId) {
+    return { error: "Loan not found." };
+  }
+
+  if (loan.status !== "APPROVED") {
+    return { error: "This loan is not currently active." };
+  }
+
+  const totalDue = Number(loan.totalAmountDue ?? loan.amountRequested);
+  const totalPaid = loan.repayments.reduce((s, r) => s + Number(r.amount), 0);
+  const remaining = totalDue - totalPaid;
+
+  if (amount > remaining + 0.01) {
+    return { error: `Amount exceeds remaining balance of ₦${remaining.toLocaleString()}.` };
+  }
+
+  try {
+    const now = new Date();
+    await prisma.$transaction(async (tx) => {
+      await tx.loanRepayment.create({
+        data: {
+          loanId,
+          amount,
+          paymentType: "LOAN_REPAYMENT",
+          paidAt: now,
+          recordedBy: session.user.id,
+          note: note || null,
+        },
+      });
+
+      const newTotalPaid = totalPaid + amount;
+      if (newTotalPaid >= totalDue - 0.01) {
+        await tx.loanApplication.update({
+          where: { id: loanId },
+          data: { status: "REPAID", repaidAt: now },
+        });
+      }
+
+      await tx.event.create({
+        data: {
+          cooperativeId,
+          eventType: "loan_repayment_recorded",
+          actorId: session.user.id,
+          actorType: role.toLowerCase(),
+          entityType: "loan",
+          data: { loanId, amount, recordedBy: session.user.id, note },
+        },
+      });
+    });
+  } catch {
+    return { error: "Failed to record repayment." };
+  }
+
+  revalidatePath(`/dashboard/loans/${loanId}`);
   revalidatePath("/admin/loans");
   return { success: true };
 }

@@ -24,6 +24,7 @@ enum LoanStatus {
   PENDING_ADMIN_REVIEW
   APPROVED
   REJECTED
+  REPAID
 }
 
 enum GuarantorStatus {
@@ -42,6 +43,7 @@ enum PaymentMethod {
   BANK_TRANSFER
   MOBILE_MONEY
   CASH
+  DIRECT_PAYMENT
 }
 
 model Cooperative {
@@ -51,7 +53,14 @@ model Cooperative {
   stripeSubscriptionId String?
   subscriptionStatus   CooperativeStatus @default(ACTIVE)
   billingCycleEnd      DateTime?
-  deletedAt            DateTime? // Soft delete
+  borrowingMultiplier    Int               @default(3)
+  guarantorCoverageMode  String            @default("COMBINED")
+  loanInterestRate       Decimal           @default(10)
+  loanRepaymentMonths    Int               @default(12)
+  defaultGracePeriodDays Int               @default(30)
+  currency               String            @default("NGN")
+  currencySymbol         String            @default("₦")
+  deletedAt              DateTime?
   createdAt            DateTime          @default(now())
   updatedAt            DateTime          @updatedAt
 
@@ -59,6 +68,7 @@ model Cooperative {
   contributions Contribution[]
   loans         LoanApplication[]
   events        Event[]
+  bankAccounts  CooperativeBank[]
 }
 
 model Account {
@@ -124,6 +134,8 @@ model User {
   passwordHash              String?
   role                      UserRole    @default(MEMBER)
   monthlyContributionAmount String      @default("0")
+  verifiedAt                DateTime?
+  verifiedBy                String?
   invitedAt                 DateTime?
   joinedAt                  DateTime?
   deletedAt                 DateTime?
@@ -152,7 +164,13 @@ model LoanApplication {
   appliedAt       DateTime    @default(now())
 
   guarantors LoanGuarantor[]
+  repayments LoanRepayment[]
 
+  interestRate    Decimal?
+  repaymentMonths Int?
+  totalAmountDue  Decimal?
+  approvedAt      DateTime?
+  repaidAt        DateTime?
   reviewedBy      String?
   reviewer        User?     @relation("approvedBy", fields: [reviewedBy], references: [id], onDelete: SetNull)
   reviewedAt      DateTime?
@@ -223,4 +241,34 @@ model Event {
 
   @@index([cooperativeId, createdAt])
   @@index([eventType])
+}
+
+model LoanRepayment {
+  id          String          @id @default(cuid())
+  loanId      String
+  loan        LoanApplication @relation(fields: [loanId], references: [id], onDelete: Cascade)
+  amount      Decimal
+  paymentType String
+  paidAt      DateTime
+  receiptUrl  String?
+  recordedBy  String?
+  note        String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@index([loanId])
+}
+
+model CooperativeBank {
+  id            String      @id @default(cuid())
+  cooperativeId String
+  cooperative   Cooperative @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
+  accountName   String
+  accountNumber String
+  bankName      String
+  isPreferred   Boolean     @default(false)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([cooperativeId])
 }

@@ -19,14 +19,24 @@ import { useEffect } from "react";
 
 type Member = { id: string; name: string };
 
-export function LoanApplicationForm({ members }: { members: Member[] }) {
+export function LoanApplicationForm({
+  members,
+  borrowingCapacity,
+  guarantorCoverageMode,
+  defaultValues,
+}: {
+  members: Member[];
+  borrowingCapacity: number;
+  guarantorCoverageMode: string;
+  defaultValues?: { amount: string; guarantor1Id: string; guarantor2Id: string };
+}) {
   const router = useRouter();
   const [state, action, pending] = useActionState<LoanActionState, FormData>(
     applyForLoan,
     {}
   );
-  const [guarantor1Id, setGuarantor1Id] = useState("");
-  const [guarantor2Id, setGuarantor2Id] = useState("");
+  const [guarantor1Id, setGuarantor1Id] = useState(defaultValues?.guarantor1Id ?? "");
+  const [guarantor2Id, setGuarantor2Id] = useState(defaultValues?.guarantor2Id ?? "");
 
   useEffect(() => {
     if (state.success) {
@@ -36,6 +46,13 @@ export function LoanApplicationForm({ members }: { members: Member[] }) {
 
   const availableFor1 = members.filter((m) => m.id !== guarantor2Id);
   const availableFor2 = members.filter((m) => m.id !== guarantor1Id);
+
+  const coverageLabel =
+    guarantorCoverageMode === "COMBINED"
+      ? "Guarantors' combined contributions must cover the loan amount."
+      : guarantorCoverageMode === "INDIVIDUAL"
+      ? "Each guarantor must individually have contributions ≥ loan amount."
+      : "No guarantor coverage check required.";
 
   return (
     <form action={action} className="space-y-5">
@@ -52,12 +69,14 @@ export function LoanApplicationForm({ members }: { members: Member[] }) {
           name="amount"
           type="number"
           min="1000"
+          max={borrowingCapacity}
           step="500"
           placeholder="e.g. 50000"
+          defaultValue={defaultValues?.amount}
           required
         />
         <p className="text-xs text-zinc-500 dark:text-zinc-400">
-          Minimum ₦1,000
+          Maximum: ₦{borrowingCapacity.toLocaleString()}
         </p>
       </div>
 
@@ -76,7 +95,7 @@ export function LoanApplicationForm({ members }: { members: Member[] }) {
         <input type="hidden" name="guarantor1Id" value={guarantor1Id} />
         <Select value={guarantor1Id} onValueChange={(v) => setGuarantor1Id(v ?? "")}>
           <SelectTrigger id="guarantor1">
-            <SelectValue placeholder="Select a member" />
+            <SelectValue placeholder="Select a verified member" />
           </SelectTrigger>
           <SelectContent>
             {availableFor1.map((m) => (
@@ -93,7 +112,7 @@ export function LoanApplicationForm({ members }: { members: Member[] }) {
         <input type="hidden" name="guarantor2Id" value={guarantor2Id} />
         <Select value={guarantor2Id} onValueChange={(v) => setGuarantor2Id(v ?? "")}>
           <SelectTrigger id="guarantor2">
-            <SelectValue placeholder="Select a member" />
+            <SelectValue placeholder="Select a verified member" />
           </SelectTrigger>
           <SelectContent>
             {availableFor2.map((m) => (
@@ -103,9 +122,7 @@ export function LoanApplicationForm({ members }: { members: Member[] }) {
             ))}
           </SelectContent>
         </Select>
-        <p className="text-xs text-zinc-500 dark:text-zinc-400">
-          Guarantors must be active members, not admins, and not yourself.
-        </p>
+        <p className="text-xs text-zinc-500 dark:text-zinc-400">{coverageLabel}</p>
       </div>
 
       <Button

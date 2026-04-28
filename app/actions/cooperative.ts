@@ -60,6 +60,12 @@ export async function createCooperative(
       return { error: "Failed to create account. Please try again." };
     }
 
+    // Auto-verify the owner
+    await prisma.user.update({
+      where: { id: result.user.id },
+      data: { verifiedAt: new Date(), verifiedBy: result.user.id },
+    });
+
     await prisma.event.create({
       data: {
         cooperativeId: cooperative.id,

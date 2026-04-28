@@ -22,7 +22,8 @@
       "Bash(pnpm run *)",
       "Bash(git -C \"c:/Users/Mavi/Documents/Development/Web/coop-manager\" ls-files \".next\")",
       "Bash(git -C \"c:/Users/Mavi/Documents/Development/Web/coop-manager\" status)",
-      "Bash(git -C \"c:/Users/Mavi/Documents/Development/Web/coop-manager\" diff)"
+      "Bash(git -C \"c:/Users/Mavi/Documents/Development/Web/coop-manager\" diff)",
+      "Bash(npx prisma *)"
     ]
   }
 }
