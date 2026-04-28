@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { ChevronDown, LogOut, Settings } from "lucide-react";
+import { ChevronDown, ArrowLeftToLine, Settings } from "lucide-react";
 import { signOut } from "@/app/lib/auth-client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -101,7 +101,7 @@ export function UserMenu({
               onClick={handleSignOut}
               className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors text-left"
             >
-              <LogOut className="w-4 h-4 shrink-0" strokeWidth={1.75} />
+              <ArrowLeftToLine className="w-4 h-4 shrink-0" strokeWidth={1.75} />
               Sign out
             </button>
           </div>

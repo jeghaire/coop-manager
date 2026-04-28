@@ -1,5 +1,5 @@
 import { getSession } from "@/app/lib/auth-helpers";
-import { Building2, LogIn } from "lucide-react";
+import { Building2, ArrowRightToLine } from "lucide-react";
 import Link from "next/link";
 import { ThemeToggle } from "./ThemeToggle";
 import { UserMenu } from "./UserMenu";
@@ -48,7 +48,7 @@ export async function Header() {
                 className="md:hidden p-1.5 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
                 aria-label="Sign in"
               >
-                <LogIn className="w-5 h-5" strokeWidth={1.75} />
+                <ArrowRightToLine className="w-5 h-5" strokeWidth={1.75} />
               </Link>
             </>
           )}

@@ -7,7 +7,7 @@ import { LoanApplicationForm } from "./LoanApplicationForm";
 import Link from "next/link";
 
 export default async function ApplyForLoanPage({
-  searchParams,
+  searchParams
 }: {
   searchParams: Promise<{ retryId?: string }>;
 }) {
@@ -21,16 +21,16 @@ export default async function ApplyForLoanPage({
   const [cooperative, contributions, dbUser] = await Promise.all([
     prisma.cooperative.findUnique({
       where: { id: cooperativeId },
-      select: { borrowingMultiplier: true, guarantorCoverageMode: true },
+      select: { borrowingMultiplier: true, guarantorCoverageMode: true }
     }),
     prisma.contribution.findMany({
       where: { userId, status: "VERIFIED", deletedAt: null },
-      select: { amount: true },
+      select: { amount: true }
     }),
     prisma.user.findUnique({
       where: { id: userId },
-      select: { verifiedAt: true, role: true },
-    }),
+      select: { verifiedAt: true, role: true }
+    })
   ]);
 
   // Fetch eligible guarantors: same coop, active, verified, not self, not ADMIN/OWNER
@@ -40,32 +40,45 @@ export default async function ApplyForLoanPage({
       deletedAt: null,
       id: { not: userId },
       role: { notIn: ["ADMIN", "OWNER"] },
-      verifiedAt: { not: null },
+      verifiedAt: { not: null }
     },
     select: { id: true, name: true },
-    orderBy: { name: "asc" },
+    orderBy: { name: "asc" }
   });
 
-  const totalContributed = contributions.reduce((sum, c) => sum + Number(c.amount), 0);
-  const borrowingCapacity = cooperative ? totalContributed * cooperative.borrowingMultiplier : 0;
+  const totalContributed = contributions.reduce(
+    (sum, c) => sum + Number(c.amount),
+    0
+  );
+  const borrowingCapacity = cooperative
+    ? totalContributed * cooperative.borrowingMultiplier
+    : 0;
 
   // If retrying a rejected loan, pre-fill form values
-  let retryData: { amount: string; guarantor1Id: string; guarantor2Id: string } | null = null;
+  let retryData: {
+    amount: string;
+    guarantor1Id: string;
+    guarantor2Id: string;
+  } | null = null;
   if (retryId) {
     const originalLoan = await prisma.loanApplication.findUnique({
       where: { id: retryId, userId, cooperativeId },
       include: {
         guarantors: {
           where: { deletedAt: null },
-          select: { guarantorId: true },
-        },
-      },
+          select: { guarantorId: true }
+        }
+      }
     });
-    if (originalLoan && originalLoan.status === "REJECTED" && originalLoan.guarantors.length >= 2) {
+    if (
+      originalLoan &&
+      originalLoan.status === "REJECTED" &&
+      originalLoan.guarantors.length >= 2
+    ) {
       retryData = {
         amount: String(originalLoan.amountRequested),
         guarantor1Id: originalLoan.guarantors[0].guarantorId,
-        guarantor2Id: originalLoan.guarantors[1].guarantorId,
+        guarantor2Id: originalLoan.guarantors[1].guarantorId
       };
     }
   }
@@ -83,7 +96,8 @@ export default async function ApplyForLoanPage({
           {retryData ? "Retry Loan Application" : "Apply for a Loan"}
         </h1>
         <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-          Two verified members of your cooperative must guarantee your loan before an admin can approve it.
+          Two verified members of your cooperative must guarantee your loan
+          before an admin can approve it.
         </p>
       </div>
 
@@ -96,24 +110,30 @@ export default async function ApplyForLoanPage({
           ₦{borrowingCapacity.toLocaleString()}
         </p>
         <p className="text-xs text-emerald-700 dark:text-emerald-500">
-          Based on ₦{totalContributed.toLocaleString()} contributed × {cooperative?.borrowingMultiplier ?? 3}× multiplier
+          Based on ₦{totalContributed.toLocaleString()} contributed ×{" "}
+          {cooperative?.borrowingMultiplier ?? 3}
         </p>
       </div>
 
       <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-6">
         {members.length < 2 ? (
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            Your cooperative doesn&apos;t have enough eligible verified members to guarantee a loan yet. You need at least two other verified members.
+            Your cooperative doesn&apos;t have enough eligible verified members
+            to guarantee a loan yet. You need at least two other verified
+            members.
           </p>
         ) : totalContributed === 0 ? (
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            You need at least one verified contribution before applying for a loan.
+            You need at least one verified contribution before applying for a
+            loan.
           </p>
         ) : (
           <LoanApplicationForm
             members={members}
             borrowingCapacity={borrowingCapacity}
-            guarantorCoverageMode={cooperative?.guarantorCoverageMode ?? "COMBINED"}
+            guarantorCoverageMode={
+              cooperative?.guarantorCoverageMode ?? "COMBINED"
+            }
             defaultValues={retryData ?? undefined}
           />
         )}
