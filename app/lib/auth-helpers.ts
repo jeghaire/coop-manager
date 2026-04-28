@@ -3,11 +3,7 @@ import prisma from "./prisma";
 import { headers } from "next/headers";
 
 export async function getSession() {
-  try {
-    return await auth.api.getSession({ headers: await headers() });
-  } catch {
-    return null;
-  }
+  return auth.api.getSession({ headers: await headers() });
 }
 
 export async function requireAuth() {
