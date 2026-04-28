@@ -95,7 +95,11 @@ export function LoanApplicationForm({
         <input type="hidden" name="guarantor1Id" value={guarantor1Id} />
         <Select value={guarantor1Id} onValueChange={(v) => setGuarantor1Id(v ?? "")}>
           <SelectTrigger id="guarantor1">
-            <SelectValue placeholder="Select a verified member" />
+            <SelectValue>
+              {guarantor1Id
+                ? (members.find((m) => m.id === guarantor1Id)?.name ?? "Select a verified member")
+                : "Select a verified member"}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             {availableFor1.map((m) => (
@@ -112,7 +116,11 @@ export function LoanApplicationForm({
         <input type="hidden" name="guarantor2Id" value={guarantor2Id} />
         <Select value={guarantor2Id} onValueChange={(v) => setGuarantor2Id(v ?? "")}>
           <SelectTrigger id="guarantor2">
-            <SelectValue placeholder="Select a verified member" />
+            <SelectValue>
+              {guarantor2Id
+                ? (members.find((m) => m.id === guarantor2Id)?.name ?? "Select a verified member")
+                : "Select a verified member"}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             {availableFor2.map((m) => (

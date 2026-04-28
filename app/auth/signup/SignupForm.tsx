@@ -65,7 +65,11 @@ export function SignupForm({ cooperatives }: { cooperatives: Cooperative[] }) {
         <input type="hidden" name="cooperativeId" value={cooperativeId} />
         <Select value={cooperativeId} onValueChange={(v) => setCooperativeId(v ?? "")} required>
           <SelectTrigger id="cooperative">
-            <SelectValue placeholder="Select your cooperative" />
+            <SelectValue>
+              {cooperativeId
+                ? (cooperatives.find((c) => c.id === cooperativeId)?.name ?? "Select your cooperative")
+                : "Select your cooperative"}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             {cooperatives.map((c) => (

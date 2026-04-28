@@ -34,6 +34,7 @@ export async function updateGuarantorCoverageMode(
       eventType: "setting_updated",
       actorId: session.user.id,
       actorType: "admin",
+      entityType: "settings",
       data: { settingName: "guarantorCoverageMode", newValue: mode },
     },
   });
@@ -77,7 +78,8 @@ export async function addBankAccount(
       eventType: "bank_account_added",
       actorId: session.user.id,
       actorType: "admin",
-      data: { accountName, bankName },
+      entityType: "settings",
+      data: { accountName, accountNumber, bankName, isPreferred },
     },
   });
 
@@ -132,7 +134,8 @@ export async function updateBankAccount(
       eventType: "bank_account_updated",
       actorId: session.user.id,
       actorType: "admin",
-      data: { accountId, accountName },
+      entityType: "settings",
+      data: { accountId, accountName, accountNumber, bankName, isPreferred },
     },
   });
 
@@ -153,7 +156,7 @@ export async function deleteBankAccount(
 
   const existing = await prisma.cooperativeBank.findUnique({
     where: { id: accountId },
-    select: { cooperativeId: true },
+    select: { cooperativeId: true, accountName: true, accountNumber: true, bankName: true, isPreferred: true },
   });
 
   if (!existing || existing.cooperativeId !== cooperativeId) {
@@ -168,7 +171,14 @@ export async function deleteBankAccount(
       eventType: "bank_account_deleted",
       actorId: session.user.id,
       actorType: "admin",
-      data: { accountId },
+      entityType: "settings",
+      data: {
+        accountId,
+        accountName: existing.accountName,
+        accountNumber: existing.accountNumber,
+        bankName: existing.bankName,
+        isPreferred: existing.isPreferred,
+      },
     },
   });
 
@@ -226,6 +236,7 @@ export async function updateLoanSettings(
       eventType: "loan_settings_updated",
       actorId: session.user.id,
       actorType: "admin",
+      entityType: "settings",
       data: { interestRate, repaymentMonths, gracePeriod, currency, currencySymbol },
     },
   });
