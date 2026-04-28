@@ -317,7 +317,7 @@ function Hero() {
         />
       </div>
 
-      <div className="relative max-w-6xl mx-auto px-6 py-20 w-full">
+      <div className="relative max-w-7xl mx-auto px-6 py-20 w-full">
         {/* Two-layer 3D scene: outer scene tilts gently, inner TiltCard on mockup tilts deeper */}
         <HeroScene>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
@@ -405,7 +405,7 @@ function Hero() {
 function ContributionsFeature() {
   return (
     <section className="min-h-screen bg-zinc-50 dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800/60 flex items-center py-20">
-      <div className="max-w-6xl mx-auto px-6 w-full">
+      <div className="max-w-7xl mx-auto px-6 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           <ScrollReveal direction="up">
             <div className="inline-flex items-center gap-2 text-xs font-mono font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 px-3 py-1.5 rounded-full mb-6">
@@ -453,7 +453,7 @@ function ContributionsFeature() {
 function LoansFeature() {
   return (
     <section className="min-h-screen bg-white dark:bg-[#0f0f0f] border-b border-zinc-200 dark:border-zinc-800/60 flex items-center py-20">
-      <div className="max-w-6xl mx-auto px-6 w-full">
+      <div className="max-w-7xl mx-auto px-6 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           <ScrollReveal direction="scale" delay={80} className="relative">
             <div className="absolute inset-0 bg-sky-500/5 dark:bg-sky-500/6 rounded-3xl blur-2xl scale-110" />
@@ -501,7 +501,7 @@ function LoansFeature() {
 function MembersFeature() {
   return (
     <section className="min-h-screen bg-zinc-50 dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800/60 flex items-center py-20">
-      <div className="max-w-6xl mx-auto px-6 w-full">
+      <div className="max-w-7xl mx-auto px-6 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           <ScrollReveal direction="up">
             <div className="inline-flex items-center gap-2 text-xs font-mono font-medium text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 px-3 py-1.5 rounded-full mb-6">
@@ -567,7 +567,7 @@ function HowItWorks() {
 
   return (
     <section id="how-it-works" className="min-h-screen bg-white dark:bg-[#0c0c0c] border-b border-zinc-200 dark:border-zinc-800/60 flex items-center py-20">
-      <div className="max-w-6xl mx-auto px-6 w-full">
+      <div className="max-w-7xl mx-auto px-6 w-full">
         <ScrollReveal direction="up" className="mb-16 max-w-xl">
           <p className="text-xs font-mono uppercase tracking-widest text-zinc-400 dark:text-zinc-600 mb-4">How it works</p>
           <h2 className="text-3xl md:text-4xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight leading-[1.1] mb-4">
@@ -616,7 +616,7 @@ const securityPoints = [
 function Security() {
   return (
     <section id="security" className="min-h-screen bg-zinc-50 dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800/60 flex items-center py-20">
-      <div className="max-w-6xl mx-auto px-6 w-full">
+      <div className="max-w-7xl mx-auto px-6 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           <ScrollReveal direction="scale" delay={80} className="relative">
             <div className="absolute inset-0 bg-emerald-500/5 dark:bg-emerald-500/6 rounded-3xl blur-2xl scale-110" />
@@ -706,7 +706,7 @@ function CtaBanner() {
 function Footer() {
   return (
     <footer className="bg-zinc-950 border-t border-zinc-800/60 py-10">
-      <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-2.5">
           <div className="w-6 h-6 bg-emerald-500 rounded-md flex items-center justify-center">
             <Building2 className="w-3.5 h-3.5 text-zinc-950" strokeWidth={2} />

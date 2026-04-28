@@ -11,7 +11,7 @@ export async function Header() {
 
   return (
     <header className="sticky top-0 z-50 bg-white/90 dark:bg-[#0c0c0c]/90 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800/60">
-      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         <Link
           href={user ? "/dashboard" : "/"}
           className="flex items-center gap-2.5 group"
