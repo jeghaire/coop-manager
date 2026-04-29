@@ -2,6 +2,7 @@
 
 import prisma from "@/app/lib/prisma";
 import { requireAuth } from "@/app/lib/auth-helpers";
+import { notifyContributionVerified, notifyContributionRejected } from "@/app/lib/notifications";
 import { revalidatePath } from "next/cache";
 
 export type ContributionActionState = {
@@ -139,6 +140,9 @@ export async function recordContributionForMember(
     return { error: "Failed to record contribution. Please try again." };
   }
 
+  // Notify member their contribution was recorded (non-blocking)
+  notifyContributionVerified(memberId, cooperativeId, amount).catch(() => {});
+
   revalidatePath("/dashboard/contributions");
   revalidatePath("/admin/contributions");
   revalidatePath("/admin/treasurer");
@@ -175,7 +179,7 @@ export async function verifyContribution(
 
   const contribution = await prisma.contribution.findUnique({
     where: { id: contributionId },
-    select: { status: true, cooperativeId: true, userId: true },
+    select: { status: true, cooperativeId: true, userId: true, amount: true },
   });
 
   if (!contribution || contribution.cooperativeId !== cooperativeId) {
@@ -222,6 +226,13 @@ export async function verifyContribution(
     });
   } catch {
     return { error: "Failed to record decision. Please try again." };
+  }
+
+  // Notify member (non-blocking)
+  if (decision === "VERIFIED") {
+    notifyContributionVerified(contribution.userId, cooperativeId, Number(contribution.amount)).catch(() => {});
+  } else {
+    notifyContributionRejected(contribution.userId, cooperativeId, Number(contribution.amount), rejectionReason!).catch(() => {});
   }
 
   revalidatePath("/dashboard/contributions");

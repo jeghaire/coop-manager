@@ -8,8 +8,10 @@ type NavItem = { href: string; label: string; badge?: number };
 
 const memberLinks: NavItem[] = [
   { href: "/dashboard", label: "Overview" },
+  { href: "/dashboard/financial-summary", label: "Financial Summary" },
   { href: "/dashboard/loans", label: "My Loans" },
   { href: "/dashboard/contributions", label: "Contributions" },
+  { href: "/dashboard/transactions", label: "Transactions" },
   { href: "/dashboard/profile", label: "Profile" },
   { href: "/dashboard/cooperative-details", label: "Cooperative" },
   { href: "/dashboard/settings", label: "Settings" },
@@ -23,6 +25,7 @@ function adminLinks(pendingLoans: number): NavItem[] {
     { href: "/admin/notifications", label: "Notifications", badge: pendingLoans || undefined },
     { href: "/admin/contributions", label: "Contributions" },
     { href: "/admin/treasurer", label: "Manual Entry" },
+    { href: "/admin/dividends", label: "Dividends" },
     { href: "/admin/settings", label: "Settings" },
     { href: "/admin/reports", label: "Reports" },
   ];

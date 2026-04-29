@@ -64,11 +64,13 @@ model Cooperative {
   createdAt            DateTime          @default(now())
   updatedAt            DateTime          @updatedAt
 
-  users         User[]
-  contributions Contribution[]
-  loans         LoanApplication[]
-  events        Event[]
-  bankAccounts  CooperativeBank[]
+  users           User[]
+  contributions   Contribution[]
+  loans           LoanApplication[]
+  events          Event[]
+  bankAccounts    CooperativeBank[]
+  notifications   Notification[]
+  dividendPayouts DividendPayout[]
 }
 
 model Account {
@@ -139,6 +141,9 @@ model User {
   invitedAt                 DateTime?
   joinedAt                  DateTime?
   deletedAt                 DateTime?
+  phoneNumber               String?
+  emailNotifications        Boolean     @default(true)
+  smsNotifications          Boolean     @default(true)
   createdAt                 DateTime    @default(now())
   updatedAt                 DateTime    @updatedAt
 
@@ -270,5 +275,66 @@ model CooperativeBank {
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 
+  @@index([cooperativeId])
+}
+
+model Notification {
+  id            String      @id @default(cuid())
+  cooperativeId String
+  cooperative   Cooperative @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
+  userId        String
+  type          String
+  channel       String
+  recipient     String
+  subject       String?
+  body          String
+  status        String      @default("SENT")
+  externalId    String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([cooperativeId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model DividendPayout {
+  id              String           @id @default(cuid())
+  cooperativeId   String
+  cooperative     Cooperative      @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
+  period          String
+  year            Int
+  totalProfit     Decimal
+  adminCosts      Decimal
+  loanLossReserve Decimal
+  dividendPool    Decimal
+  totalMembers    Int
+  status          String           @default("PENDING")
+  approvedAt      DateTime?
+  approvedBy      String?
+  paidAt          DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  memberDividends MemberDividend[]
+
+  @@index([cooperativeId])
+}
+
+model MemberDividend {
+  id              String         @id @default(cuid())
+  payoutId        String
+  payout          DividendPayout @relation(fields: [payoutId], references: [id], onDelete: Cascade)
+  userId          String
+  cooperativeId   String
+  contributionPct Decimal
+  amount          Decimal
+  status          String         @default("PENDING")
+  paidAt          DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@index([payoutId])
+  @@index([userId])
   @@index([cooperativeId])
 }

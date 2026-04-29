@@ -131,7 +131,19 @@ export default async function DashboardPage() {
         <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest mb-3">
           Quick Actions
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <Link
+            href="/dashboard/financial-summary"
+            className="group bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 hover:border-emerald-300 dark:hover:border-emerald-500/30 rounded-xl p-5 transition-colors"
+          >
+            <p className="font-medium text-zinc-900 dark:text-zinc-100 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
+              Financial Summary →
+            </p>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+              Your full financial position at a glance
+            </p>
+          </Link>
+
           <Link
             href="/dashboard/contributions/submit"
             className="group bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 hover:border-emerald-300 dark:hover:border-emerald-500/30 rounded-xl p-5 transition-colors"

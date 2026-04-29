@@ -3,6 +3,7 @@
 import prisma from "@/app/lib/prisma";
 import { requireAuth, protectVerifiedAction, protectAdminAction, getTotalContributed } from "@/app/lib/auth-helpers";
 import { calculateLoanTotals } from "@/app/lib/loan-helpers";
+import { notifyLoanApproved, notifyLoanRejected, notifyGuarantorRequested } from "@/app/lib/notifications";
 import { revalidatePath } from "next/cache";
 
 export type LoanActionState = {
@@ -163,6 +164,11 @@ export async function applyForLoan(
     return { error: "Failed to submit loan application. Please try again." };
   }
 
+  // Notify guarantors (non-blocking)
+  for (const guarantorId of [guarantor1Id, guarantor2Id]) {
+    notifyGuarantorRequested(guarantorId, cooperativeId, session.user.name, amount).catch(() => {});
+  }
+
   revalidatePath("/dashboard/loans");
   return { success: true };
 }
@@ -321,7 +327,7 @@ export async function reviewLoan(
 
   const loan = await prisma.loanApplication.findUnique({
     where: { id: loanId },
-    select: { status: true, cooperativeId: true, amountRequested: true },
+    select: { status: true, cooperativeId: true, amountRequested: true, userId: true },
   });
 
   if (!loan || loan.cooperativeId !== cooperativeId) {
@@ -332,28 +338,32 @@ export async function reviewLoan(
     return { error: "This loan is not awaiting admin review." };
   }
 
-  try {
-    // If approving, calculate interest-based totals from cooperative settings
-    let approvalData: Record<string, unknown> = {};
-    if (decision === "APPROVED") {
-      const cooperative = await prisma.cooperative.findUnique({
-        where: { id: cooperativeId },
-        select: { loanInterestRate: true, loanRepaymentMonths: true },
-      });
-      if (cooperative) {
-        const { totalDue } = calculateLoanTotals(
-          Number(loan.amountRequested),
-          Number(cooperative.loanInterestRate)
-        );
-        approvalData = {
-          interestRate: cooperative.loanInterestRate,
-          repaymentMonths: cooperative.loanRepaymentMonths,
-          totalAmountDue: totalDue,
-          approvedAt: new Date(),
-        };
-      }
+  // If approving, calculate interest-based totals from cooperative settings
+  let approvedTotalDue = 0;
+  let approvedMonths = 0;
+  let approvalData: Record<string, unknown> = {};
+  if (decision === "APPROVED") {
+    const cooperative = await prisma.cooperative.findUnique({
+      where: { id: cooperativeId },
+      select: { loanInterestRate: true, loanRepaymentMonths: true },
+    });
+    if (cooperative) {
+      const { totalDue } = calculateLoanTotals(
+        Number(loan.amountRequested),
+        Number(cooperative.loanInterestRate)
+      );
+      approvedTotalDue = totalDue;
+      approvedMonths = cooperative.loanRepaymentMonths;
+      approvalData = {
+        interestRate: cooperative.loanInterestRate,
+        repaymentMonths: cooperative.loanRepaymentMonths,
+        totalAmountDue: totalDue,
+        approvedAt: new Date(),
+      };
     }
+  }
 
+  try {
     await prisma.$transaction(async (tx) => {
       await tx.loanApplication.update({
         where: { id: loanId },
@@ -384,6 +394,18 @@ export async function reviewLoan(
     });
   } catch {
     return { error: "Failed to record decision. Please try again." };
+  }
+
+  // Notify member of decision (non-blocking)
+  if (decision === "APPROVED" && approvedTotalDue > 0) {
+    notifyLoanApproved(
+      loan.userId, cooperativeId,
+      Number(loan.amountRequested),
+      approvedTotalDue,
+      approvedMonths
+    ).catch(() => {});
+  } else if (decision === "REJECTED") {
+    notifyLoanRejected(loan.userId, cooperativeId, Number(loan.amountRequested), reason!).catch(() => {});
   }
 
   revalidatePath("/dashboard/loans");
