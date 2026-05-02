@@ -512,7 +512,7 @@ function Hero() {
                 Run your cooperative
                 <br />
                 <span className="text-emerald-600 dark:text-emerald-400">
-                  like a bank.
+                  Like a bank.
                 </span>
               </h1>
 

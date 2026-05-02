@@ -156,6 +156,7 @@
   }
   html {
     @apply font-sans;
+    overflow-x: hidden;
   }
 
   /* Accent-coloured text selection */

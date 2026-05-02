@@ -85,6 +85,7 @@ export default async function CooperativeDetailsPage() {
             </p>
           </div>
         ) : (
+          <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-zinc-100 dark:border-zinc-800">
@@ -125,6 +126,7 @@ export default async function CooperativeDetailsPage() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>

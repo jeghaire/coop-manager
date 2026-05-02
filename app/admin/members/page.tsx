@@ -7,7 +7,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { RoleChangeForm, RemoveMemberForm } from "./MemberActions";
-import { cn } from "@/lib/utils";
+import { cn } from "@/app/lib/utils";
 
 const ROLE_BADGE: Record<
   string,
@@ -72,6 +72,7 @@ export default async function AdminMembersPage() {
       </div>
 
       <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl overflow-hidden">
+        <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-zinc-100 dark:border-zinc-800">
@@ -134,6 +135,7 @@ export default async function AdminMembersPage() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

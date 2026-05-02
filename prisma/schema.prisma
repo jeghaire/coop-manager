@@ -64,13 +64,14 @@ model Cooperative {
   createdAt            DateTime          @default(now())
   updatedAt            DateTime          @updatedAt
 
-  users           User[]
-  contributions   Contribution[]
-  loans           LoanApplication[]
-  events          Event[]
-  bankAccounts    CooperativeBank[]
-  notifications   Notification[]
-  dividendPayouts DividendPayout[]
+  users              User[]
+  contributions      Contribution[]
+  loans              LoanApplication[]
+  events             Event[]
+  bankAccounts       CooperativeBank[]
+  notifications      Notification[]
+  dividendPayouts    DividendPayout[]
+  withdrawalRequests WithdrawalRequest[]
 }
 
 model Account {
@@ -147,13 +148,14 @@ model User {
   createdAt                 DateTime    @default(now())
   updatedAt                 DateTime    @updatedAt
 
-  accounts           Account[]
-  sessions           Session[]
-  loanApplications   LoanApplication[]
-  guarantorFor       LoanGuarantor[]   @relation("guarantor")
-  approvalsGiven     LoanApplication[] @relation("approvedBy")
-  verificationsGiven Contribution[]    @relation("verifiedBy")
-  contributions      Contribution[]
+  accounts            Account[]
+  sessions            Session[]
+  loanApplications    LoanApplication[]
+  guarantorFor        LoanGuarantor[]    @relation("guarantor")
+  approvalsGiven      LoanApplication[]  @relation("approvedBy")
+  verificationsGiven  Contribution[]     @relation("verifiedBy")
+  contributions       Contribution[]
+  withdrawalRequests  WithdrawalRequest[]
 
   @@map("user")
 }
@@ -337,4 +339,30 @@ model MemberDividend {
   @@index([payoutId])
   @@index([userId])
   @@index([cooperativeId])
+}
+
+model WithdrawalRequest {
+  id            String      @id @default(cuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cooperativeId String
+  cooperative   Cooperative @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
+
+  amount          Decimal
+  reason          String
+  notes           String?
+  status          String    @default("REQUESTED")
+  rejectionReason String?
+
+  approvedAt DateTime?
+  approvedBy String?
+  paidAt     DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([userId])
+  @@index([cooperativeId])
+  @@index([status])
 }

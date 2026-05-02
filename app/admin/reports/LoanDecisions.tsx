@@ -67,6 +67,7 @@ export async function LoanDecisions({
               Decisions by Admin
             </p>
           </div>
+          <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-zinc-100 dark:border-zinc-800">
@@ -108,6 +109,7 @@ export async function LoanDecisions({
               })}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 
@@ -142,6 +144,7 @@ export async function LoanDecisions({
             Decision Log
           </p>
         </div>
+        <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-zinc-100 dark:border-zinc-800">
@@ -171,7 +174,7 @@ export async function LoanDecisions({
                 <td className="px-5 py-3 font-medium text-zinc-900 dark:text-zinc-100">
                   {loan.applicant.name}
                   {loan.status === "REJECTED" && loan.rejectionReason && (
-                    <p className="text-xs text-zinc-400 dark:text-zinc-600 font-normal truncate max-w-[200px]">
+                    <p className="text-xs text-zinc-400 dark:text-zinc-600 font-normal truncate max-w-50">
                       {loan.rejectionReason}
                     </p>
                   )}
@@ -202,6 +205,7 @@ export async function LoanDecisions({
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

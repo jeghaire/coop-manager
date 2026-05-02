@@ -6,7 +6,7 @@ import prisma from "@/app/lib/prisma";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn } from "@/app/lib/utils";
 
 export default async function AdminNotificationsPage() {
   const session = await getSession();

@@ -50,6 +50,7 @@ export default async function UnverifiedMembersPage() {
         </div>
       ) : (
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl overflow-hidden">
+          <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-zinc-100 dark:border-zinc-800">
@@ -85,6 +86,7 @@ export default async function UnverifiedMembersPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>

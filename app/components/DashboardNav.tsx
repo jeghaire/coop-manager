@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { cn } from "@/app/lib/utils";
 
 type NavItem = { href: string; label: string; badge?: number };
 
@@ -11,6 +11,7 @@ const memberLinks: NavItem[] = [
   { href: "/dashboard/financial-summary", label: "Financial Summary" },
   { href: "/dashboard/loans", label: "My Loans" },
   { href: "/dashboard/contributions", label: "Contributions" },
+  { href: "/dashboard/withdrawals", label: "Withdrawals" },
   { href: "/dashboard/transactions", label: "Transactions" },
   { href: "/dashboard/profile", label: "Profile" },
   { href: "/dashboard/cooperative-details", label: "Cooperative" },
@@ -24,6 +25,7 @@ function adminLinks(pendingLoans: number): NavItem[] {
     { href: "/admin/loans", label: "Pending Loans" },
     { href: "/admin/notifications", label: "Notifications", badge: pendingLoans || undefined },
     { href: "/admin/contributions", label: "Contributions" },
+    { href: "/admin/withdrawals", label: "Withdrawals" },
     { href: "/admin/treasurer", label: "Manual Entry" },
     { href: "/admin/dividends", label: "Dividends" },
     { href: "/admin/settings", label: "Settings" },
@@ -49,8 +51,14 @@ export function DashboardNav({
   const isTreasurer = role === "TREASURER";
   const isOwner = role === "OWNER";
 
-  const isActive = (href: string) =>
-    href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(href);
+  const allLinks = [...memberLinks, ...adminLinks(pendingLoans), ...treasurerLinks];
+  const isActive = (href: string) => {
+    if (href === "/dashboard") return pathname === href;
+    if (!pathname.startsWith(href)) return false;
+    return !allLinks.some(
+      (l) => l.href !== href && l.href.startsWith(href + "/") && pathname.startsWith(l.href)
+    );
+  };
 
   const navLinkClass = (href: string) =>
     cn(

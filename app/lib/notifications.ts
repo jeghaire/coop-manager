@@ -280,3 +280,87 @@ export async function notifyDividendPaid(
     });
   }
 }
+
+export async function notifyWithdrawalApproved(
+  userId: string, cooperativeId: string, amount: number
+) {
+  const { user, cooperative } = await getUserAndCoop(userId, cooperativeId);
+  if (!user || !cooperative) return;
+
+  const sym = cooperative.currencySymbol;
+
+  if (user.emailNotifications) {
+    await sendEmail({
+      cooperativeId, userId, type: "WITHDRAWAL_APPROVED",
+      to: user.email,
+      subject: "Your withdrawal request has been approved",
+      html: `<p>Hi ${user.name},</p>
+<p>Your withdrawal request has been approved.</p>
+<p><strong>Amount: ${sym}${amount.toLocaleString()}</strong></p>
+<p>Funds will be transferred to you shortly. Log in to track the status.</p>`,
+    });
+  }
+  if (user.smsNotifications && user.phoneNumber) {
+    await sendSMS({
+      cooperativeId, userId, type: "WITHDRAWAL_APPROVED",
+      to: user.phoneNumber,
+      body: `${cooperative.name}: Withdrawal of ${sym}${amount.toLocaleString()} approved. Funds will be transferred shortly.`,
+    });
+  }
+}
+
+export async function notifyWithdrawalRejected(
+  userId: string, cooperativeId: string, amount: number, reason: string
+) {
+  const { user, cooperative } = await getUserAndCoop(userId, cooperativeId);
+  if (!user || !cooperative) return;
+
+  const sym = cooperative.currencySymbol;
+
+  if (user.emailNotifications) {
+    await sendEmail({
+      cooperativeId, userId, type: "WITHDRAWAL_REJECTED",
+      to: user.email,
+      subject: "Your withdrawal request was not approved",
+      html: `<p>Hi ${user.name},</p>
+<p>Your withdrawal request for ${sym}${amount.toLocaleString()} was not approved.</p>
+<p><strong>Reason:</strong> ${reason}</p>
+<p>Please contact your cooperative administrator for more information.</p>`,
+    });
+  }
+  if (user.smsNotifications && user.phoneNumber) {
+    await sendSMS({
+      cooperativeId, userId, type: "WITHDRAWAL_REJECTED",
+      to: user.phoneNumber,
+      body: `${cooperative.name}: Withdrawal request not approved. ${reason.slice(0, 100)}`,
+    });
+  }
+}
+
+export async function notifyWithdrawalPaid(
+  userId: string, cooperativeId: string, amount: number
+) {
+  const { user, cooperative } = await getUserAndCoop(userId, cooperativeId);
+  if (!user || !cooperative) return;
+
+  const sym = cooperative.currencySymbol;
+
+  if (user.emailNotifications) {
+    await sendEmail({
+      cooperativeId, userId, type: "WITHDRAWAL_PAID",
+      to: user.email,
+      subject: "Your withdrawal has been processed",
+      html: `<p>Hi ${user.name},</p>
+<p>Your withdrawal has been processed and transferred.</p>
+<p><strong>Amount: ${sym}${amount.toLocaleString()}</strong></p>
+<p>Please check your account for the transfer. Thank you for your membership!</p>`,
+    });
+  }
+  if (user.smsNotifications && user.phoneNumber) {
+    await sendSMS({
+      cooperativeId, userId, type: "WITHDRAWAL_PAID",
+      to: user.phoneNumber,
+      body: `${cooperative.name}: Withdrawal of ${sym}${amount.toLocaleString()} processed. Check your account.`,
+    });
+  }
+}

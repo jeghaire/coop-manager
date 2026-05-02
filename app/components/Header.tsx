@@ -3,26 +3,34 @@ import { Building2, ArrowRightToLine } from "lucide-react";
 import Link from "next/link";
 import { ThemeToggle } from "./ThemeToggle";
 import { UserMenu } from "./UserMenu";
+import { MobileNavDrawer } from "./MobileNavDrawer";
 
-export async function Header() {
+export async function Header({
+  pendingLoans = 0,
+}: {
+  pendingLoans?: number;
+}) {
   const session = await getSession();
   const user = session?.user;
   const role = (user?.role as string) ?? "MEMBER";
 
   return (
     <header className="sticky top-0 z-50 bg-white/90 dark:bg-[#0c0c0c]/90 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800/60">
-      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-        <Link
-          href={user ? "/dashboard" : "/"}
-          className="flex items-center gap-2.5 group shrink-0"
-        >
-          <div className="w-7 h-7 bg-emerald-600 dark:bg-emerald-500 rounded-md flex items-center justify-center shadow-sm group-hover:bg-emerald-700 dark:group-hover:bg-emerald-400 transition-colors">
-            <Building2 className="w-4 h-4 text-white" strokeWidth={1.75} />
-          </div>
-          <span className="font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight text-base">
-            Cooperative Manager
-          </span>
-        </Link>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+        <div className="flex items-center gap-3 shrink-0">
+          {user && <MobileNavDrawer role={role} pendingLoans={pendingLoans} />}
+          <Link
+            href={user ? "/dashboard" : "/"}
+            className="flex items-center gap-2.5 group shrink-0"
+          >
+            <div className="w-7 h-7 bg-emerald-600 dark:bg-emerald-500 rounded-md flex items-center justify-center shadow-sm group-hover:bg-emerald-700 dark:group-hover:bg-emerald-400 transition-colors">
+              <Building2 className="w-4 h-4 text-white" strokeWidth={1.75} />
+            </div>
+            <span className="font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight text-base">
+              Cooperative Manager
+            </span>
+          </Link>
+        </div>
 
         <div className="flex items-center gap-2">
           <ThemeToggle />

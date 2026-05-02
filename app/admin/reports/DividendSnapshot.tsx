@@ -31,7 +31,7 @@ export async function DividendSnapshot({
   return (
     <div className="space-y-5">
       <div className="flex items-start gap-4 flex-wrap">
-        <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-xl p-4 flex-1 min-w-[200px]">
+        <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-xl p-4 flex-1 min-w-50">
           <p className="text-xs font-mono font-semibold uppercase tracking-widest text-emerald-600 dark:text-emerald-500 mb-1">
             Total Fund
           </p>
@@ -44,7 +44,7 @@ export async function DividendSnapshot({
         </div>
 
         {distributionAmount > 0 && (
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-4 flex-1 min-w-[200px]">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-4 flex-1 min-w-50">
             <p className="text-xs font-mono font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-600 mb-1">
               Distribution Amount
             </p>
@@ -67,6 +67,7 @@ export async function DividendSnapshot({
       )}
 
       <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl overflow-hidden">
+        <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-zinc-100 dark:border-zinc-800">
@@ -159,6 +160,7 @@ export async function DividendSnapshot({
             </tfoot>
           )}
         </table>
+        </div>
       </div>
     </div>
   );
