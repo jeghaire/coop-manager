@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useRef, useState, startTransition } from "react";
 import {
   submitContribution,
   type ContributionActionState,
@@ -16,7 +16,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 const PAYMENT_METHODS = [
@@ -25,13 +24,19 @@ const PAYMENT_METHODS = [
   { value: "CASH", label: "Cash" },
 ] as const;
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+
 export function ContributionSubmitForm() {
   const router = useRouter();
-  const [state, action, pending] = useActionState<
-    ContributionActionState,
-    FormData
-  >(submitContribution, {});
+  const [state, formAction] = useActionState<ContributionActionState, FormData>(
+    submitContribution,
+    {}
+  );
   const [paymentMethod, setPaymentMethod] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [fileError, setFileError] = useState<string | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     if (state.success) {
@@ -39,8 +44,72 @@ export function ContributionSubmitForm() {
     }
   }, [state.success, router]);
 
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const selected = e.target.files?.[0] ?? null;
+    setFileError(null);
+    if (selected && selected.size > MAX_FILE_SIZE) {
+      setFileError("File must be 10 MB or smaller.");
+      e.target.value = "";
+      setFile(null);
+      return;
+    }
+    setFile(selected);
+  }
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!formRef.current) return;
+
+    const rawFormData = new FormData(formRef.current);
+
+    if (file) {
+      setUploading(true);
+      setFileError(null);
+      try {
+        const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
+        const res = await fetch(
+          `/api/receipts/presign?ext=${encodeURIComponent(ext)}&type=${encodeURIComponent(file.type)}`
+        );
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          setFileError(body.error ?? "Failed to get upload URL.");
+          setUploading(false);
+          return;
+        }
+        const { url, key } = await res.json();
+
+        const putRes = await fetch(url, {
+          method: "PUT",
+          body: file,
+          headers: { "Content-Type": file.type },
+        });
+        if (!putRes.ok) {
+          setFileError("Upload failed. Please try again.");
+          setUploading(false);
+          return;
+        }
+
+        rawFormData.set("receiptKey", key);
+        rawFormData.set("receiptFileName", file.name);
+        rawFormData.set("receiptFileSize", String(file.size));
+        rawFormData.set("receiptFileType", file.type);
+      } catch {
+        setFileError("Upload failed. Please try again.");
+        setUploading(false);
+        return;
+      }
+      setUploading(false);
+    }
+
+    startTransition(() => {
+      formAction(rawFormData);
+    });
+  }
+
+  const pending = uploading;
+
   return (
-    <form action={action} className="space-y-5">
+    <form ref={formRef} onSubmit={handleSubmit} className="space-y-5">
       {state.error && (
         <Alert variant="destructive">
           <AlertDescription>{state.error}</AlertDescription>
@@ -81,22 +150,32 @@ export function ContributionSubmitForm() {
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="receiptUrl">
-          Receipt URL{" "}
+        <Label htmlFor="receipt">
+          Receipt{" "}
           <span className="text-zinc-400 dark:text-zinc-600 font-normal">
             (optional)
           </span>
         </Label>
         <Input
-          id="receiptUrl"
-          name="receiptUrl"
-          type="url"
-          placeholder="https://drive.google.com/…"
+          id="receipt"
+          type="file"
+          accept="image/jpeg,image/png,image/gif,image/webp,application/pdf,.heic,.heif"
+          onChange={handleFileChange}
+          className="cursor-pointer file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:font-medium file:bg-zinc-100 file:text-zinc-700 dark:file:bg-zinc-800 dark:file:text-zinc-300"
         />
-        <p className="text-xs text-zinc-500 dark:text-zinc-400">
-          Upload your receipt to Google Drive, Dropbox, or similar and paste the
-          link here.
-        </p>
+        {file && !fileError && (
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            {file.name}
+          </p>
+        )}
+        {fileError && (
+          <p className="text-xs text-red-600 dark:text-red-400">{fileError}</p>
+        )}
+        {!fileError && !file && (
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            Accepted: images, PDF, HEIC. Max 10 MB.
+          </p>
+        )}
       </div>
 
       <Button
@@ -104,7 +183,7 @@ export function ContributionSubmitForm() {
         className="w-full"
         disabled={pending || !paymentMethod}
       >
-        {pending ? "Submitting…" : "Submit Contribution"}
+        {uploading ? "Uploading…" : "Submit Contribution"}
       </Button>
     </form>
   );

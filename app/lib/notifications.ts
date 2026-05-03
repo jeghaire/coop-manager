@@ -1,9 +1,10 @@
 import prisma from "./prisma";
 import { Resend } from "resend";
+import { UserRole } from "@prisma/client";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const FROM = "Cooperative Manager <onboarding@resend.dev>";
+const FROM = process.env.EMAIL_FROM ?? "Cooperative Admin <admin@jomavi.co.uk>";
 
 async function logNotification(data: {
   cooperativeId: string;
@@ -337,6 +338,29 @@ export async function notifyWithdrawalRejected(
   }
 }
 
+export async function notifyMemberVerified(userId: string, cooperativeId: string) {
+  const { user, cooperative } = await getUserAndCoop(userId, cooperativeId);
+  if (!user || !cooperative) return;
+
+  if (user.emailNotifications) {
+    await sendEmail({
+      cooperativeId, userId, type: "MEMBER_VERIFIED",
+      to: user.email,
+      subject: `Your ${cooperative.name} account is verified`,
+      html: `<p>Hi ${user.name},</p>
+<p>Your account with <strong>${cooperative.name}</strong> has been verified. You now have full access.</p>
+<p>You can now submit contributions, apply for loans, view dividends, and request withdrawals.</p>`,
+    });
+  }
+  if (user.smsNotifications && user.phoneNumber) {
+    await sendSMS({
+      cooperativeId, userId, type: "MEMBER_VERIFIED",
+      to: user.phoneNumber,
+      body: `${cooperative.name}: Your account has been verified. You now have full access.`,
+    });
+  }
+}
+
 export async function notifyWithdrawalPaid(
   userId: string, cooperativeId: string, amount: number
 ) {
@@ -362,5 +386,82 @@ export async function notifyWithdrawalPaid(
       to: user.phoneNumber,
       body: `${cooperative.name}: Withdrawal of ${sym}${amount.toLocaleString()} processed. Check your account.`,
     });
+  }
+}
+
+export async function notifyAnnouncement(announcementId: string, cooperativeId: string) {
+  try {
+    const announcement = await prisma.announcement.findUnique({
+      where: { id: announcementId },
+    });
+    if (!announcement) return;
+
+    const cooperative = await prisma.cooperative.findUnique({
+      where: { id: cooperativeId },
+      select: { name: true, currencySymbol: true },
+    });
+    if (!cooperative) return;
+
+    const roleFilter: UserRole[] | undefined =
+      announcement.recipientType === "MEMBERS_ONLY"
+        ? [UserRole.MEMBER]
+        : announcement.recipientType === "ADMINS_ONLY"
+        ? [UserRole.OWNER, UserRole.ADMIN]
+        : undefined;
+
+    const recipients = await prisma.user.findMany({
+      where: {
+        cooperativeId,
+        deletedAt: null,
+        ...(roleFilter ? { role: { in: roleFilter } } : {}),
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phoneNumber: true,
+        emailNotifications: true,
+        smsNotifications: true,
+      },
+    });
+
+    const agmExtra =
+      announcement.type === "AGM" && announcement.agmDate
+        ? `<p><strong>Date:</strong> ${new Date(announcement.agmDate).toLocaleString()}</p>${
+            announcement.agmLocation
+              ? `<p><strong>Location:</strong> ${announcement.agmLocation}</p>`
+              : ""
+          }`
+        : "";
+
+    const rsvpExtra = announcement.allowRsvp
+      ? `<p>Please <a href="${process.env.NEXTAUTH_URL ?? ""}/dashboard/announcements/${announcementId}">log in to RSVP</a>.</p>`
+      : "";
+
+    for (const recipient of recipients) {
+      if (recipient.emailNotifications) {
+        await sendEmail({
+          cooperativeId,
+          userId: recipient.id,
+          type: "ANNOUNCEMENT",
+          to: recipient.email,
+          subject: announcement.title,
+          html: `<p>Hi ${recipient.name},</p>
+<p>${announcement.message.replace(/\n/g, "<br>")}</p>
+${agmExtra}${rsvpExtra}`,
+        });
+      }
+      if (recipient.smsNotifications && recipient.phoneNumber) {
+        await sendSMS({
+          cooperativeId,
+          userId: recipient.id,
+          type: "ANNOUNCEMENT",
+          to: recipient.phoneNumber,
+          body: `${cooperative.name}: ${announcement.message.slice(0, 120)}`,
+        });
+      }
+    }
+  } catch {
+    // never throw
   }
 }

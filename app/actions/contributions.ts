@@ -3,6 +3,7 @@
 import prisma from "@/app/lib/prisma";
 import { requireAuth } from "@/app/lib/auth-helpers";
 import { notifyContributionVerified, notifyContributionRejected } from "@/app/lib/notifications";
+import { getPublicUrl } from "@/app/lib/s3";
 import { revalidatePath } from "next/cache";
 
 export type ContributionActionState = {
@@ -22,7 +23,11 @@ export async function submitContribution(
 
   const amountStr = (formData.get("amount") as string)?.trim();
   const paymentMethod = (formData.get("paymentMethod") as string)?.trim();
-  const receiptUrl = (formData.get("receiptUrl") as string)?.trim() || null;
+  const receiptKey = (formData.get("receiptKey") as string)?.trim() || null;
+  const receiptFileName = (formData.get("receiptFileName") as string)?.trim() || null;
+  const receiptFileSizeStr = (formData.get("receiptFileSize") as string)?.trim();
+  const receiptFileType = (formData.get("receiptFileType") as string)?.trim() || null;
+  const legacyReceiptUrl = (formData.get("receiptUrl") as string)?.trim() || null;
 
   if (!amountStr || !paymentMethod) {
     return { error: "Amount and payment method are required." };
@@ -37,6 +42,10 @@ export async function submitContribution(
     return { error: "Invalid payment method." };
   }
 
+  const receiptUrl = receiptKey ? getPublicUrl(receiptKey) : legacyReceiptUrl;
+  const receiptFileSize = receiptFileSizeStr ? parseInt(receiptFileSizeStr, 10) || null : null;
+  const receiptUploadedAt = receiptKey ? new Date() : null;
+
   try {
     await prisma.$transaction(async (tx) => {
       const contribution = await tx.contribution.create({
@@ -46,6 +55,11 @@ export async function submitContribution(
           amount,
           paymentMethod: paymentMethod as (typeof VALID_PAYMENT_METHODS)[number],
           receiptUrl,
+          receiptKey,
+          receiptFileName,
+          receiptFileSize,
+          receiptFileType,
+          receiptUploadedAt,
           status: "PENDING_VERIFICATION",
           submittedAt: new Date(),
         },
@@ -93,6 +107,10 @@ export async function recordContributionForMember(
 
   if (!memberId || !amountStr) {
     return { error: "Member and amount are required." };
+  }
+
+  if (memberId === session.user.id) {
+    return { error: "You cannot record a contribution for yourself. Submit it as a member instead." };
   }
 
   const amount = parseFloat(amountStr);

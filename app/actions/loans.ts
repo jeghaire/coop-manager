@@ -338,6 +338,10 @@ export async function reviewLoan(
     return { error: "This loan is not awaiting admin review." };
   }
 
+  if (loan.userId === session.user.id) {
+    return { error: "You cannot approve your own loan application." };
+  }
+
   // If approving, calculate interest-based totals from cooperative settings
   let approvedTotalDue = 0;
   let approvedMonths = 0;
@@ -555,6 +559,10 @@ export async function recordRepaymentForMember(
 
   if (loan.status !== "APPROVED") {
     return { error: "This loan is not currently active." };
+  }
+
+  if (loan.userId === session.user.id) {
+    return { error: "You cannot record a repayment for your own loan. Use the member repayment form instead." };
   }
 
   const totalDue = Number(loan.totalAmountDue ?? loan.amountRequested);

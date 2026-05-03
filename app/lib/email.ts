@@ -12,7 +12,7 @@ export async function sendVerificationEmail({
   html: string;
 }) {
   void resend.emails.send({
-    from: "Cooperative Manager <onboarding@resend.dev>", // works in dev
+    from: process.env.EMAIL_FROM ?? "Cooperative Admin <admin@jomavi.co.uk>",
     to,
     subject,
     html

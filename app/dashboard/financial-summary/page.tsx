@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import prisma from "@/app/lib/prisma";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
+import { DownloadStatementButton } from "./DownloadStatementButton";
 
 export default async function FinancialSummaryPage() {
   const session = await getSession();
@@ -17,7 +18,7 @@ export default async function FinancialSummaryPage() {
     getTotalContributed(userId),
     prisma.cooperative.findUnique({
       where: { id: cooperativeId },
-      select: { borrowingMultiplier: true, currencySymbol: true },
+      select: { name: true, borrowingMultiplier: true, currencySymbol: true },
     }),
     prisma.loanApplication.findMany({
       where: { userId, cooperativeId, deletedAt: null },
@@ -177,6 +178,11 @@ export default async function FinancialSummaryPage() {
         >
           All transactions
         </Link>
+        <DownloadStatementButton
+          cooperativeId={cooperativeId}
+          userId={userId}
+          cooperativeName={cooperative.name}
+        />
       </div>
     </div>
   );

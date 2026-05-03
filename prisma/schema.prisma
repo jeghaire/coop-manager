@@ -72,6 +72,7 @@ model Cooperative {
   notifications      Notification[]
   dividendPayouts    DividendPayout[]
   withdrawalRequests WithdrawalRequest[]
+  announcements      Announcement[]
 }
 
 model Account {
@@ -148,14 +149,16 @@ model User {
   createdAt                 DateTime    @default(now())
   updatedAt                 DateTime    @updatedAt
 
-  accounts            Account[]
-  sessions            Session[]
-  loanApplications    LoanApplication[]
-  guarantorFor        LoanGuarantor[]    @relation("guarantor")
-  approvalsGiven      LoanApplication[]  @relation("approvedBy")
-  verificationsGiven  Contribution[]     @relation("verifiedBy")
-  contributions       Contribution[]
-  withdrawalRequests  WithdrawalRequest[]
+  accounts              Account[]
+  sessions              Session[]
+  loanApplications      LoanApplication[]
+  guarantorFor          LoanGuarantor[]    @relation("guarantor")
+  approvalsGiven        LoanApplication[]  @relation("approvedBy")
+  verificationsGiven    Contribution[]     @relation("verifiedBy")
+  contributions         Contribution[]
+  withdrawalRequests    WithdrawalRequest[]
+  createdAnnouncements  Announcement[]     @relation("AnnouncementCreator")
+  announcementRsvps     AnnouncementRsvp[]
 
   @@map("user")
 }
@@ -217,8 +220,14 @@ model Contribution {
   amount           Decimal
   status           ContributionStatus @default(PENDING_VERIFICATION)
   paymentMethod    PaymentMethod
-  receiptUrl       String?
-  submittedAt      DateTime           @default(now())
+  receiptUrl          String?
+  receiptKey          String?   // S3 object key (set when file is uploaded)
+  receiptFileName     String?
+  receiptFileSize     Int?
+  receiptFileType     String?
+  receiptUploadedAt   DateTime?
+  rejectionCount      Int       @default(0)
+  submittedAt         DateTime  @default(now())
   verifiedByUserId String?
   verifiedBy       User?              @relation("verifiedBy", fields: [verifiedByUserId], references: [id], onDelete: SetNull)
   verifiedAt       DateTime?
@@ -365,4 +374,50 @@ model WithdrawalRequest {
   @@index([userId])
   @@index([cooperativeId])
   @@index([status])
+}
+
+model Announcement {
+  id            String      @id @default(cuid())
+  cooperativeId String
+  cooperative   Cooperative @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
+
+  title         String
+  message       String
+  type          String      // AGM | MAINTENANCE | RULE_CHANGE | GENERAL
+
+  recipientType String      @default("ALL") // ALL | MEMBERS_ONLY | ADMINS_ONLY | SPECIFIC_ROLE
+  recipientRole String?
+
+  agmDate       DateTime?
+  agmLocation   String?
+  allowRsvp     Boolean     @default(false)
+
+  isPinned      Boolean     @default(true)
+  isActive      Boolean     @default(true)
+  expiresAt     DateTime?
+
+  createdBy     String
+  creator       User        @relation("AnnouncementCreator", fields: [createdBy], references: [id])
+
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  rsvps         AnnouncementRsvp[]
+
+  @@index([cooperativeId])
+  @@index([isActive, isPinned])
+}
+
+model AnnouncementRsvp {
+  id             String       @id @default(cuid())
+  announcementId String
+  announcement   Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rsvpStatus     String       // ATTENDING | NOT_ATTENDING | MAYBE
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([announcementId, userId])
+  @@index([announcementId])
 }

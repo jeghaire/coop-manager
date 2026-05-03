@@ -39,21 +39,22 @@ Currently used for Nigerian savings & credit cooperatives.
 
 ## Tech Stack
 
-- **Frontend:** Next.js 15 (app router), React 19, TypeScript, shadcn/ui
+- **Frontend:** Next.js 16 (app router), React 19, TypeScript, shadcn/ui
 - **Backend:** Next.js Server Actions, TypeScript
 - **Database:** PostgreSQL + Prisma 7 ORM
 - **Auth:** Better-auth (email/password)
 - **Payments:** Stripe (£500/year per cooperative)
-- **File Storage:** TBD (S3 or local for contribution receipts)
-- **Email:** Resend (for transactional emails + notifications)
-- **SMS:** Twilio (for SMS notifications)
+- **File Storage:** AWS S3 (contribution receipt uploads — presigned PUT URLs)
+- **Email:** Resend (transactional emails + notifications); sender configured via `EMAIL_FROM` env var
+- **SMS:** Twilio (SMS notifications)
 - **Package Manager:** pnpm
 - **Styling:** Tailwind CSS + shadcn/ui components
-- **Icons:** lucide-react (for mobile nav)
+- **Icons:** lucide-react
+- **PDF Export:** jsPDF + jspdf-autotable (client-side, member statements + cooperative reports)
 
 ---
 
-## Current State (Phases 1-3 Complete)
+## Current State (Phases 1-4 Partially Complete)
 
 ### ✅ Completed
 
@@ -74,15 +75,36 @@ Currently used for Nigerian savings & credit cooperatives.
   - Payment overdue daily check (8 AM UTC cron)
   - Member notification preferences (email/SMS toggles, phone number)
 - **Phase 2.5 (Financial Dashboard):** 
-  - `/dashboard/financial-summary` (4 stat cards + breakdown)
+  - `/dashboard/financial-summary` (4 stat cards + breakdown + PDF statement download)
   - `/dashboard/transactions` (unified timeline)
 - **Phase 2.5 (Dividends):**
   - `/admin/dividends` (create payouts with live preview)
   - Status flow: PENDING → APPROVED → PAID
   - Member share calculation by contribution %
   - Notifications on payment + dashboard visibility
+- **Phase 4 (Security Guards):**
+  - Self-approval prevention: admins cannot approve their own loans or record their own contributions
+  - Self-repayment prevention: admins cannot record repayments against their own loans
+  - Member verified notification: email + SMS sent on account verification
+- **Phase 4 (Receipt Uploads):**
+  - AWS S3 presigned PUT URL flow for direct browser-to-S3 uploads
+  - Contribution submit form accepts images (JPEG/PNG/WEBP) and PDFs
+  - Admin contributions page shows image thumbnails and PDF icons
+  - Filter tabs: ALL / PENDING / VERIFIED / REJECTED with counts
+- **Phase 4 (Announcements System):**
+  - `/admin/announcements` — list with type badges, RSVP counts, deactivate
+  - `/admin/announcements/new` — create form with conditional AGM fields
+  - `/dashboard/announcements/[id]` — member view + RSVP
+  - Pinned announcement banners on all dashboard pages (dismissable)
+  - Types: GENERAL, AGM, URGENT; recipient types: ALL, MEMBERS_ONLY, ADMINS_ONLY
+  - Bulk email + SMS notification on announcement creation
+- **Phase 4 (Advanced Reporting):**
+  - `/admin/reports` — overview, loan portfolio, contributions, member breakdown, audit trail
+  - Audit trail with event type filter + colour-coded badges
+  - PDF export for cooperative-level reports (landscape A4)
+  - Member financial statement PDF download (portrait A4)
 
-### ❌ Not Started (Phase 4 - Pre-Launch Features)
+### ❌ Not Started (Phase 4 - Remaining Pre-Launch Features)
 
 - Forgot password / password reset
 - CSV member import
@@ -205,11 +227,13 @@ Currently used for Nigerian savings & credit cooperatives.
 - **LoanApplication** — Request (status, interestRate, repaymentMonths, totalAmountDue, approvedAt, repaidAt, rejectionReason)
 - **LoanRepayment** — Tracking (loanId, amount, paymentType, paidAt, receiptUrl, recordedBy)
 - **LoanGuarantor** — Link (guarantorId, status)
-- **Contribution** — Payment (status, receiptUrl, verifiedBy, recordedBy, isManualEntry)
+- **Contribution** — Payment (status, receiptUrl, receiptKey, receiptFileName, receiptFileSize, receiptFileType, receiptUploadedAt, rejectionCount, verifiedBy, recordedBy, isManualEntry)
 - **DividendPayout** — Payout record (quarter, year, totalProfit, dividendPool, status)
 - **MemberDividend** — Per-member share (dividendPayoutId, userId, amount, status)
 - **Notification** — Audit log (cooperativeId, userId, type, channel, recipient, status)
 - **WithdrawalRequest** — Request (userId, amount, reason, status, approvedBy, rejectionReason)
+- **Announcement** — Cooperative announcement (type, recipientType, agmDate, agmLocation, allowRsvp, isPinned, isActive, expiresAt, createdBy)
+- **AnnouncementRsvp** — RSVP response (announcementId, userId, response) — unique per (announcement, user)
 - **Event** — Audit log (immutable)
 
 ### Key Fields
@@ -220,6 +244,15 @@ Currently used for Nigerian savings & credit cooperatives.
 - User.resetToken: String (unique, password recovery)
 - User.resetTokenExpiresAt: DateTime (24-hour expiry)
 - WithdrawalRequest: (amount, reason, status, rejectionReason, approvedAt, paidAt)
+- Contribution.receiptKey: String? (S3 object key)
+- Contribution.receiptFileName: String? (original filename)
+- Contribution.receiptFileSize: Int? (bytes)
+- Contribution.receiptFileType: String? (MIME type)
+- Contribution.receiptUploadedAt: DateTime? (S3 upload timestamp)
+- Contribution.rejectionCount: Int (default 0, incremented on each rejection)
+- Announcement.type: Enum (GENERAL | AGM | URGENT)
+- Announcement.recipientType: Enum (ALL | MEMBERS_ONLY | ADMINS_ONLY)
+- AnnouncementRsvp.response: Enum (ATTENDING | MAYBE | NOT_ATTENDING)
 
 ---
 
@@ -243,7 +276,14 @@ Currently used for Nigerian savings & credit cooperatives.
 - **Dividends:** Owner-configurable quarterly/annual distribution
 - **Settings:** Loan config, bank accounts, currency
 
-### Phase 4: Pre-Launch Features (IN PROGRESS)
+### Phase 4a: Security + Uploads + Announcements + Reporting ✅ Complete
+- **Security Guards:** Self-approval / self-repayment / self-contribution-entry prevention
+- **Receipt Uploads:** AWS S3 presigned PUT URL flow; images + PDFs; admin thumbnail preview
+- **Announcements System:** Create/deactivate, pinned banners, RSVP, bulk notifications
+- **Advanced Reporting:** Audit trail with filters, PDF export, member statements
+- **Member Verified Notification:** Email + SMS triggered on account approval
+
+### Phase 4b: Pre-Launch Features (IN PROGRESS)
 1. **Forgot Password / Password Reset**
    - Email with reset link (24-hour token)
    - Page: `/auth/forgot-password`, `/auth/reset-password?token=ABC`
@@ -290,6 +330,8 @@ Currently used for Nigerian savings & credit cooperatives.
 - **Contribution Rejected** → Email to member (reason shown)
 - **Guarantor Requested** → Email + SMS to guarantor
 - **Dividend Paid** → Email + SMS to member
+- **Member Verified** → Email + SMS to member on account approval
+- **Announcement Created** → Bulk email + SMS to all matching recipients (based on recipientType)
 
 ### Channels
 - **Email** via Resend (already configured)
@@ -471,6 +513,9 @@ contribution_rejected
 contribution_recorded
 notification_sent
 notification_failed
+announcement_created
+announcement_deactivated
+announcement_rsvp_submitted
 dividend_payout_created
 dividend_payout_approved
 dividend_payout_completed
@@ -672,15 +717,16 @@ html, body {
 
 ## Implementation Timeline
 
-### ✅ Completed (Phases 1-3)
+### ✅ Completed (Phases 1-4a)
 - Week 1-2: Auth + member verification
 - Week 2-3: Loan system + guarantors
 - Week 3-4: Notifications + financial dashboard
 - Week 4-5: Dividends + settings + bank accounts
+- Week 5: Security guards + S3 receipt uploads + announcements + advanced reporting
 
-### 🔄 In Progress (Phase 4)
-- Week 5-6: Password reset + CSV import + account settings
-- Week 6-7: Withdrawals + refactoring + mobile fix
+### 🔄 In Progress (Phase 4b)
+- Week 6: Password reset + CSV import + account settings
+- Week 7: Withdrawals + refactoring + mobile fix
 
 ### ✅ Ready for Test Users
 - All Phase 4 features complete
@@ -695,6 +741,12 @@ html, body {
 
 **Full Workflows:**
 - [ ] Signup → verify → contribute → borrow → repay → withdraw
+- [x] Receipt upload → S3 presign → file stored → admin sees thumbnail/PDF icon
+- [x] Announcement created → pinned banner visible → member RSVPs
+- [x] Admin cannot approve own loan / record own contribution / record own repayment
+- [x] Member verified → email + SMS notification sent
+- [x] Audit trail shows all events with type filter
+- [x] PDF export generates cooperative report + member statement
 - [ ] CSV import → 10 members created + emails sent
 - [ ] Password reset → new password works
 - [ ] Account settings → name, phone, password changes
@@ -728,14 +780,17 @@ html, body {
 2. Member verification (two-tier)
 3. Loan application + guarantors
 4. Loan repayment + schedule
-5. Contributions + verification
-6. Notifications (email + SMS)
-7. Financial dashboard
+5. Contributions + receipt upload (S3) + verification ✅
+6. Notifications (email + SMS) ✅
+7. Financial dashboard + PDF statement download ✅
 8. Dividend distribution
-9. **Password reset** (NEW)
-10. **CSV member import** (NEW)
-11. **Account settings** (NEW)
-12. **Withdrawal requests** (NEW)
+9. Announcements + RSVP + pinned banners ✅
+10. Advanced reporting + audit trail + PDF export ✅
+11. Security guards (self-approval/entry prevention) ✅
+12. **Password reset** (TODO)
+13. **CSV member import** (TODO)
+14. **Account settings** (TODO)
+15. **Withdrawal requests** (TODO)
 
 ✅ **Refactoring:**
 13. Mobile responsive (verified)
@@ -800,18 +855,25 @@ app/
 ├── auth/
 │   ├── signin/page.tsx
 │   ├── signup/page.tsx
-│   ├── forgot-password/page.tsx (NEW)
-│   └── reset-password/page.tsx (NEW)
+│   ├── forgot-password/page.tsx (TODO)
+│   └── reset-password/page.tsx (TODO)
 ├── dashboard/
 │   ├── page.tsx
+│   ├── layout.tsx (PinnedAnnouncementsBanner)
 │   ├── profile/page.tsx
 │   ├── settings/
 │   │   ├── notifications/page.tsx
-│   │   └── account/page.tsx (NEW)
+│   │   └── account/page.tsx (TODO)
 │   ├── verify-pending/page.tsx
-│   ├── financial-summary/page.tsx
+│   ├── financial-summary/
+│   │   ├── page.tsx
+│   │   └── DownloadStatementButton.tsx
 │   ├── transactions/page.tsx
-│   ├── withdraw/page.tsx (NEW)
+│   ├── withdraw/page.tsx (TODO)
+│   ├── announcements/
+│   │   └── [id]/
+│   │       ├── page.tsx
+│   │       └── RsvpForm.tsx
 │   ├── loans/
 │   │   ├── page.tsx
 │   │   ├── apply/page.tsx
@@ -821,7 +883,9 @@ app/
 │   │       └── rejected/page.tsx
 │   └── contributions/
 │       ├── page.tsx
-│       └── submit/page.tsx
+│       └── submit/
+│           ├── page.tsx
+│           └── ContributionSubmitForm.tsx
 ├── admin/
 │   ├── dashboard/page.tsx
 │   ├── settings/page.tsx
@@ -830,19 +894,32 @@ app/
 │   ├── members/
 │   │   ├── page.tsx
 │   │   ├── unverified/page.tsx
-│   │   ├── import/page.tsx (NEW)
+│   │   ├── import/page.tsx (TODO)
 │   │   └── [id]/contribution-history/page.tsx
 │   ├── loans/
 │   │   ├── pending/page.tsx
 │   │   └── [id]/record-repayment/page.tsx
 │   ├── contributions/
-│   │   ├── pending/page.tsx
+│   │   ├── page.tsx (filter tabs + receipt preview)
+│   │   ├── ContributionReviewForm.tsx
 │   │   ├── record/page.tsx
 │   │   └── history/page.tsx
+│   ├── announcements/
+│   │   ├── page.tsx
+│   │   ├── DeactivateButton.tsx
+│   │   └── new/
+│   │       ├── page.tsx
+│   │       └── NewAnnouncementForm.tsx
+│   ├── reports/
+│   │   ├── page.tsx
+│   │   ├── TabNav.tsx
+│   │   ├── AuditTrail.tsx
+│   │   └── ExportPdfButton.tsx
 │   └── withdrawals/
-│       ├── page.tsx (NEW)
-│       └── [id]/approve/page.tsx (NEW)
+│       ├── page.tsx (TODO)
+│       └── [id]/approve/page.tsx (TODO)
 ├── components/
+│   ├── PinnedAnnouncementsBanner.tsx
 │   ├── layout/
 │   │   ├── BottomNav.tsx
 │   │   ├── Navbar.tsx
@@ -864,18 +941,20 @@ app/
 │       ├── NotificationBadge.tsx
 │       └── SettingsForm.tsx
 ├── actions/
-│   ├── auth.ts (+ forgot/reset password)
-│   ├── verification.ts
-│   ├── loans.ts
+│   ├── auth.ts (+ forgot/reset password TODO)
+│   ├── verification.ts (+ notifyMemberVerified)
+│   ├── loans.ts (+ self-approval guard)
 │   ├── repayments.ts
-│   ├── contributions.ts
+│   ├── contributions.ts (+ S3 receipt fields, self-entry guard)
 │   ├── dividends.ts
-│   ├── account.ts (NEW - name, phone, password)
-│   ├── withdrawals.ts (NEW)
-│   ├── admin.ts (+ CSV import)
+│   ├── announcements.ts
+│   ├── account.ts (TODO - name, phone, password)
+│   ├── withdrawals.ts
+│   ├── admin.ts (+ CSV import TODO)
 │   └── reports.ts
 ├── api/
 │   ├── auth/[...auth]/route.ts
+│   ├── receipts/presign/route.ts (GET — returns presigned S3 PUT URL)
 │   ├── cooperative/bank-accounts/route.ts
 │   ├── admin/bank-accounts/route.ts
 │   ├── cron/check-overdue-loans/route.ts
@@ -885,8 +964,11 @@ app/
 │   ├── middleware.ts
 │   ├── server-actions.ts
 │   ├── loan-helpers.ts
-│   ├── notifications.ts
-│   ├── csv-parser.ts (NEW)
+│   ├── notifications.ts (+ notifyMemberVerified, notifyAnnouncement)
+│   ├── s3.ts (generatePresignUrl, getPublicUrl, buildReceiptKey)
+│   ├── pdf-export.ts (exportMemberStatementPdf, exportCooperativeReportPdf)
+│   ├── email.ts (EMAIL_FROM env var)
+│   ├── csv-parser.ts (TODO)
 │   ├── prisma.ts
 │   └── auth.ts
 ├── middleware.ts

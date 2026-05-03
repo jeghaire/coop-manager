@@ -2,6 +2,7 @@
 
 import prisma from "@/app/lib/prisma";
 import { requireAuth } from "@/app/lib/auth-helpers";
+import { notifyMemberVerified } from "@/app/lib/notifications";
 import { revalidatePath } from "next/cache";
 
 export type VerificationActionState = {
@@ -56,6 +57,9 @@ export async function verifyMember(
       data: { memberId, memberName: member.name },
     },
   });
+
+  // Notify member (non-blocking)
+  notifyMemberVerified(memberId, cooperativeId).catch(() => {});
 
   revalidatePath("/admin/members/unverified");
   revalidatePath("/admin/members");

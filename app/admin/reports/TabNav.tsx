@@ -8,6 +8,7 @@ const TABS = [
   { id: "financial", label: "Financial Summary" },
   { id: "loans", label: "Loan Decisions" },
   { id: "dividends", label: "Dividend Snapshot" },
+  { id: "audit", label: "Audit Trail" },
 ];
 
 export function TabNav() {
