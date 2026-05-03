@@ -10,6 +10,7 @@ export const auth = betterAuth({
 
   emailAndPassword: {
     enabled: true,
+    requireEmailVerification: true,
     minPasswordLength: 8,
     sendResetPassword: async ({ user, url }) => {
       const { sendVerificationEmail } = await import("./email");
@@ -21,9 +22,9 @@ export const auth = betterAuth({
           <p>Click the link below to reset your password. This link expires in 1 hour.</p>
           <p><a href="${url}">${url}</a></p>
           <p>If you didn't request this, ignore this email.</p>
-        `,
+        `
       });
-    },
+    }
   },
 
   emailVerification: {
