@@ -28,24 +28,24 @@ This guide covers everything needed to deploy, configure, maintain, and troubles
 
 ### Runtime
 
-| Component | Minimum Version | Notes |
-|---|---|---|
-| Node.js | 20.x LTS | 22.x LTS also supported |
-| pnpm | 9.x | Used as the package manager; npm/yarn are not supported |
-| PostgreSQL | 15+ | Neon serverless recommended for production |
+| Component  | Minimum Version | Notes                                                   |
+| ---------- | --------------- | ------------------------------------------------------- |
+| Node.js    | 20.x LTS        | 22.x LTS also supported                                 |
+| pnpm       | 9.x             | Used as the package manager; npm/yarn are not supported |
+| PostgreSQL | 15+             | Neon serverless recommended for production              |
 
 ### External Service Accounts Required
 
-| Service | Purpose | Required? |
-|---|---|---|
-| [Vercel](https://vercel.com) | Hosting and CI/CD | Yes (for production) |
-| [Neon](https://neon.tech) | Serverless PostgreSQL | Yes |
-| [AWS](https://aws.amazon.com) | S3 storage for receipt uploads | Yes |
-| [Resend](https://resend.com) | Transactional email | Yes |
-| [Stripe](https://stripe.com) | SaaS billing/subscriptions | Optional* |
-| [Twilio](https://twilio.com) | SMS notifications | Optional |
+| Service                       | Purpose                        | Required?            |
+| ----------------------------- | ------------------------------ | -------------------- |
+| [Vercel](https://vercel.com)  | Hosting and CI/CD              | Yes (for production) |
+| [Neon](https://neon.tech)     | Serverless PostgreSQL          | Yes                  |
+| [AWS](https://aws.amazon.com) | S3 storage for receipt uploads | Yes                  |
+| [Resend](https://resend.com)  | Transactional email            | Yes                  |
+| [Stripe](https://stripe.com)  | SaaS billing/subscriptions     | Optional\*           |
+| [Twilio](https://twilio.com)  | SMS notifications              | Optional             |
 
-*Stripe is required only if you are running the multi-tenant SaaS billing features. Single-cooperative deployments without billing can leave Stripe variables unset.
+\*Stripe is required only if you are running the multi-tenant SaaS billing features. Single-cooperative deployments without billing can leave Stripe variables unset.
 
 ### Local Development Tools
 
@@ -121,6 +121,7 @@ Create a `.env` file in the project root. All variables listed below must be pre
 ### Database
 
 #### `DATABASE_URL`
+
 - **Purpose:** PostgreSQL connection string used by Prisma for all database operations
 - **Format:** `postgresql://USER:PASSWORD@HOST:PORT/DBNAME?sslmode=require`
 - **Where to get it:** Neon dashboard → your project → Connection Details → Connection string (select "Pooled connection" for production)
@@ -129,12 +130,14 @@ Create a `.env` file in the project root. All variables listed below must be pre
 ### Authentication
 
 #### `BETTER_AUTH_SECRET`
+
 - **Purpose:** Signs and verifies session tokens. Must be kept secret and consistent across deployments. Rotating this value invalidates all existing sessions.
 - **Format:** Minimum 32 characters, random string
 - **Where to get it:** Generate with `openssl rand -base64 32` or `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`
 - **Example:** `K9mXnPqR2sT5vW8yA1bC4dF7hJ0kL3mN6pQ9rS2u`
 
 #### `BETTER_AUTH_URL`
+
 - **Purpose:** The canonical base URL of the application, used to construct auth callback URLs
 - **Format:** Full URL with protocol, no trailing slash
 - **Where to get it:** Your domain or Vercel deployment URL
@@ -143,6 +146,7 @@ Create a `.env` file in the project root. All variables listed below must be pre
 ### Application
 
 #### `NEXT_PUBLIC_APP_URL`
+
 - **Purpose:** Client-side base URL used for generating links in emails and other user-facing contexts. The `NEXT_PUBLIC_` prefix makes it available in browser-side code.
 - **Format:** Full URL with protocol, no trailing slash
 - **Where to get it:** Same as `BETTER_AUTH_URL`
@@ -151,12 +155,14 @@ Create a `.env` file in the project root. All variables listed below must be pre
 ### Billing (Stripe)
 
 #### `STRIPE_SECRET_KEY`
+
 - **Purpose:** Authenticates server-side Stripe API calls (creating checkout sessions, billing portal sessions, handling webhooks)
 - **Format:** Starts with `sk_live_` (production) or `sk_test_` (test mode)
 - **Where to get it:** Stripe Dashboard → Developers → API keys → Secret key
 - **Example:** `sk_live_51AbcDefGhiJklMno...`
 
 #### `STRIPE_WEBHOOK_SECRET`
+
 - **Purpose:** Verifies that incoming webhook events genuinely originate from Stripe
 - **Format:** Starts with `whsec_`
 - **Where to get it:** Stripe Dashboard → Developers → Webhooks → Select your endpoint → Signing secret
@@ -167,12 +173,14 @@ Create a `.env` file in the project root. All variables listed below must be pre
 ### Email (Resend)
 
 #### `RESEND_API_KEY`
+
 - **Purpose:** Authenticates email send requests to the Resend API
 - **Format:** Starts with `re_`
 - **Where to get it:** Resend Dashboard → API Keys → Create API Key
 - **Example:** `re_AbcDef12_GhiJklMnoPqrStuVwxYZ`
 
 #### `EMAIL_FROM`
+
 - **Purpose:** The sender address and display name for all outgoing emails
 - **Format:** `"Display Name <email@yourdomain.com>"` — quotes are required if the name contains spaces
 - **Where to get it:** Use a verified domain in your Resend account; see [Section 6](#6-email-configuration-resend)
@@ -181,46 +189,50 @@ Create a `.env` file in the project root. All variables listed below must be pre
 ### SMS (Twilio — optional)
 
 #### `TWILIO_ACCOUNT_SID`
+
 - **Purpose:** Identifies your Twilio account for API authentication
 - **Format:** Starts with `AC`, 34 characters
 - **Where to get it:** Twilio Console → Account Info
-<!-- - **Example:** `ACabcdef1234567890abcdef1234567890` -->
 
 #### `TWILIO_AUTH_TOKEN`
+
 - **Purpose:** Authenticates API requests to Twilio
 - **Format:** 32-character hex string
 - **Where to get it:** Twilio Console → Account Info → Auth Token (click to reveal)
-- **Example:** `a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4`
 
 #### `TWILIO_PHONE_NUMBER`
+
 - **Purpose:** The "from" number for outgoing SMS messages
 - **Format:** E.164 format (e.g., `+12345678901`)
 - **Where to get it:** Twilio Console → Phone Numbers → Active Numbers
-- **Example:** `+12015555555`
 
 > All three Twilio variables must be set for SMS to work. If any are missing, the SMS notification function silently skips sending — email notifications continue normally.
 
 ### AWS S3
 
 #### `AWS_ACCESS_KEY_ID`
+
 - **Purpose:** Identifies the IAM user making S3 API requests
 - **Format:** 20-character alphanumeric string
 - **Where to get it:** AWS Console → IAM → Users → your user → Security credentials → Create access key
 - **Example:** `AKIAIOSFODNN7EXAMPLE`
 
 #### `AWS_SECRET_ACCESS_KEY`
+
 - **Purpose:** Authenticates the IAM user's API requests
 - **Format:** 40-character base64 string
 - **Where to get it:** Shown only once at IAM key creation; store securely immediately
 - **Example:** `wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY`
 
 #### `AWS_REGION`
+
 - **Purpose:** AWS region where the S3 bucket is located
 - **Format:** AWS region code
 - **Where to get it:** The region you selected when creating the bucket
 - **Example:** `eu-west-2`
 
 #### `AWS_S3_BUCKET`
+
 - **Purpose:** The name of the S3 bucket used for storing contribution receipt files
 - **Format:** Lowercase letters, numbers, hyphens; globally unique
 - **Where to get it:** AWS Console → S3 → your bucket name
@@ -229,6 +241,7 @@ Create a `.env` file in the project root. All variables listed below must be pre
 ### Cron Jobs
 
 #### `CRON_SECRET`
+
 - **Purpose:** Bearer token that authorises calls to the `/api/cron/check-overdue` endpoint. Vercel Cron sends this token automatically; without it, the endpoint returns 401.
 - **Format:** Any strong random string (minimum 32 characters recommended)
 - **Where to get it:** Generate with `openssl rand -base64 32`
@@ -236,24 +249,24 @@ Create a `.env` file in the project root. All variables listed below must be pre
 
 ### Summary Table
 
-| Variable | Required | Service |
-|---|---|---|
-| `DATABASE_URL` | Yes | Neon/PostgreSQL |
-| `BETTER_AUTH_SECRET` | Yes | Better-auth |
-| `BETTER_AUTH_URL` | Yes | Better-auth |
-| `NEXT_PUBLIC_APP_URL` | Yes | App |
-| `STRIPE_SECRET_KEY` | Optional | Stripe |
-| `STRIPE_WEBHOOK_SECRET` | Optional | Stripe |
-| `RESEND_API_KEY` | Yes | Resend |
-| `EMAIL_FROM` | Yes | Resend |
-| `TWILIO_ACCOUNT_SID` | Optional | Twilio |
-| `TWILIO_AUTH_TOKEN` | Optional | Twilio |
-| `TWILIO_PHONE_NUMBER` | Optional | Twilio |
-| `AWS_ACCESS_KEY_ID` | Yes | AWS S3 |
-| `AWS_SECRET_ACCESS_KEY` | Yes | AWS S3 |
-| `AWS_REGION` | Yes | AWS S3 |
-| `AWS_S3_BUCKET` | Yes | AWS S3 |
-| `CRON_SECRET` | Yes | Cron job |
+| Variable                | Required | Service         |
+| ----------------------- | -------- | --------------- |
+| `DATABASE_URL`          | Yes      | Neon/PostgreSQL |
+| `BETTER_AUTH_SECRET`    | Yes      | Better-auth     |
+| `BETTER_AUTH_URL`       | Yes      | Better-auth     |
+| `NEXT_PUBLIC_APP_URL`   | Yes      | App             |
+| `STRIPE_SECRET_KEY`     | Optional | Stripe          |
+| `STRIPE_WEBHOOK_SECRET` | Optional | Stripe          |
+| `RESEND_API_KEY`        | Yes      | Resend          |
+| `EMAIL_FROM`            | Yes      | Resend          |
+| `TWILIO_ACCOUNT_SID`    | Optional | Twilio          |
+| `TWILIO_AUTH_TOKEN`     | Optional | Twilio          |
+| `TWILIO_PHONE_NUMBER`   | Optional | Twilio          |
+| `AWS_ACCESS_KEY_ID`     | Yes      | AWS S3          |
+| `AWS_SECRET_ACCESS_KEY` | Yes      | AWS S3          |
+| `AWS_REGION`            | Yes      | AWS S3          |
+| `AWS_S3_BUCKET`         | Yes      | AWS S3          |
+| `CRON_SECRET`           | Yes      | Cron job        |
 
 ---
 
@@ -277,6 +290,7 @@ Neon provides two connection strings:
 The application uses the `@prisma/adapter-pg` driver with a standard `pg.Pool`. For Vercel serverless deployments, use the **pooled connection string** as `DATABASE_URL`.
 
 Connection string format:
+
 ```
 postgresql://USER:PASSWORD@ep-ENDPOINT-ID.REGION.aws.neon.tech/DBNAME?sslmode=require
 ```
@@ -284,11 +298,13 @@ postgresql://USER:PASSWORD@ep-ENDPOINT-ID.REGION.aws.neon.tech/DBNAME?sslmode=re
 ### 4.3 Running Migrations
 
 **Development (creates migration files):**
+
 ```bash
 pnpm dlx prisma@latest migrate dev --name <description>
 ```
 
 **Production (applies existing migration files):**
+
 ```bash
 pnpm dlx prisma@latest migrate deploy
 ```
@@ -297,14 +313,14 @@ The `build` script in `package.json` runs `prisma migrate deploy && prisma gener
 
 ### 4.4 Useful Prisma Commands
 
-| Command | Purpose |
-|---|---|
-| `pnpm dlx prisma@latest studio` | Launch a browser-based database explorer on port 5555 |
-| `pnpm dlx prisma@latest db push` | Sync schema to the database without creating a migration file (useful for prototyping) |
-| `pnpm dlx prisma@latest migrate deploy` | Apply all pending migrations (production-safe) |
-| `pnpm dlx prisma@latest migrate status` | Show which migrations are applied and which are pending |
-| `pnpm dlx prisma@latest generate` | Regenerate the Prisma client after a schema change |
-| `pnpm dlx prisma@latest db seed` | Equivalent to `pnpm db:seed` |
+| Command                                 | Purpose                                                                                |
+| --------------------------------------- | -------------------------------------------------------------------------------------- |
+| `pnpm dlx prisma@latest studio`         | Launch a browser-based database explorer on port 5555                                  |
+| `pnpm dlx prisma@latest db push`        | Sync schema to the database without creating a migration file (useful for prototyping) |
+| `pnpm dlx prisma@latest migrate deploy` | Apply all pending migrations (production-safe)                                         |
+| `pnpm dlx prisma@latest migrate status` | Show which migrations are applied and which are pending                                |
+| `pnpm dlx prisma@latest generate`       | Regenerate the Prisma client after a schema change                                     |
+| `pnpm dlx prisma@latest db seed`        | Equivalent to `pnpm db:seed`                                                           |
 
 > **Warning:** Never run `prisma migrate dev` against a production database. Use `prisma migrate deploy` in production.
 
@@ -356,10 +372,7 @@ AWS Console → IAM → Policies → **Create policy** → JSON tab → paste:
     {
       "Sid": "CoopManagerS3Access",
       "Effect": "Allow",
-      "Action": [
-        "s3:PutObject",
-        "s3:GetObject"
-      ],
+      "Action": ["s3:PutObject", "s3:GetObject"],
       "Resource": "arn:aws:s3:::coop-manager-receipts-prod/*"
     }
   ]
@@ -438,6 +451,7 @@ The display name is what recipients see in their email client. The address must 
 ### 6.4 Testing Email Delivery
 
 After setting up, trigger a test email by inviting a member through the Admin panel. Check:
+
 1. The invite email arrives in the recipient's inbox (not spam)
 2. The from name and address match your configuration
 3. Links in the email point to your `NEXT_PUBLIC_APP_URL`
@@ -506,6 +520,7 @@ The `build` script in `package.json`:
 ```
 
 This ensures every Vercel deployment:
+
 1. Applies any pending Prisma migrations to the production database
 2. Regenerates the Prisma client
 3. Builds the Next.js application
@@ -536,6 +551,7 @@ Authorization: Bearer <CRON_SECRET>
 ```
 
 The endpoint:
+
 1. Fetches all APPROVED loans that have not been marked as repaid
 2. Calculates the health of each loan using the `calculateLoanHealth` function
 3. For loans that are BEHIND or DEFAULTED, sends an overdue notification to the borrower
@@ -560,6 +576,7 @@ Vercel Cron jobs are configured in `vercel.json`. The file already exists in the
 This schedules the job to run at **08:00 UTC daily**. Vercel sends an authenticated GET request to the endpoint with the `Authorization: Bearer <CRON_SECRET>` header automatically.
 
 **Prerequisites:**
+
 - Your Vercel project must be on the **Pro plan or above** — cron jobs are not available on the Hobby plan
 - `CRON_SECRET` must be set in Vercel environment variables
 
@@ -575,6 +592,7 @@ if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
 ```
 
 Generate a strong secret:
+
 ```bash
 openssl rand -base64 32
 ```
@@ -589,6 +607,7 @@ curl -H "Authorization: Bearer YOUR_CRON_SECRET" \
 ```
 
 Expected response:
+
 ```json
 { "success": true, "loansChecked": 12, "notified": 2 }
 ```
@@ -602,10 +621,12 @@ Expected response:
 Neon automatically creates daily backups on all paid plans and retains them for 7–30 days depending on the plan tier. These are managed by Neon and require no configuration.
 
 To verify backup retention:
+
 1. Neon Dashboard → your project → **Branches**
 2. Neon uses branch-based snapshots; the `main` branch history represents your backup
 
 To restore a specific point in time:
+
 1. Neon Dashboard → your project → **Branches** → **Restore**
 2. Select date and time
 3. Neon creates a restore branch; you can point a staging environment at it to verify before promoting
@@ -613,11 +634,13 @@ To restore a specific point in time:
 ### 10.2 S3 Versioning for Receipts
 
 Enable versioning on the S3 bucket (recommended at creation time; see Section 5.1). With versioning enabled:
+
 - Deleted objects are retained as delete markers (recoverable)
 - Overwritten objects retain previous versions
 - You can restore any previous version from the AWS Console or CLI
 
 Configure a lifecycle rule to expire older versions after 365 days to manage storage costs:
+
 1. S3 → your bucket → **Management** → **Lifecycle rules** → **Create rule**
 2. Rule name: `expire-old-versions`
 3. Scope: apply to all objects
@@ -626,6 +649,7 @@ Configure a lifecycle rule to expire older versions after 365 days to manage sto
 ### 10.3 Manual Export Procedures
 
 **Database export (full dump):**
+
 ```bash
 pg_dump "postgresql://USER:PASSWORD@HOST/DBNAME?sslmode=require" \
   --no-owner \
@@ -658,6 +682,7 @@ Vercel retains logs for 1 hour (Hobby) or up to 30 days (Pro+). For longer reten
 ### 11.2 Vercel Log Drains
 
 To retain logs beyond Vercel's default retention:
+
 1. Vercel Dashboard → Project → **Settings** → **Log Drains**
 2. Add a drain destination (Datadog, Logtail, Axiom, or a custom HTTP endpoint)
 3. Select log sources: **Function Logs** and **Edge Logs**
@@ -676,6 +701,7 @@ Without Sentry, monitor the Vercel function logs for `Error:` and `Unhandled` st
 ### 11.4 Performance Monitoring
 
 Vercel provides built-in performance metrics:
+
 - Vercel Dashboard → Project → **Analytics** — Core Web Vitals, page load times
 - Vercel Dashboard → Project → **Speed Insights** — per-route performance breakdown
 
@@ -746,9 +772,7 @@ Neon's serverless driver handles connection multiplexing via its pooler endpoint
 The Prisma client singleton pattern in `app/lib/prisma.ts` reuses the client instance in development to prevent hot-reload connection exhaustion:
 
 ```typescript
-const prisma =
-  globalForPrisma.prisma ||
-  new PrismaClient({ adapter });
+const prisma = globalForPrisma.prisma || new PrismaClient({ adapter });
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 ```
@@ -770,6 +794,7 @@ The public marketing page (`/`) and auth pages (`/auth/*`) do not use force-dyna
 **Symptom:** Application fails to start; error log shows `can't reach database server` or `SSL connection error`
 
 **Steps:**
+
 1. Verify `DATABASE_URL` is set correctly in Vercel environment variables
 2. Ensure the connection string uses the **pooled** endpoint (contains `pooler.neon.tech`) for Vercel deployments
 3. Confirm `?sslmode=require` is appended to the connection string
@@ -781,6 +806,7 @@ The public marketing page (`/`) and auth pages (`/auth/*`) do not use force-dyna
 **Symptom:** Application starts but database schema is out of date; 500 errors on pages that use new models
 
 **Steps:**
+
 1. Check the Vercel build logs for the output of `prisma migrate deploy`
 2. If migrations show as failed, check if the migration SQL is valid: `pnpm dlx prisma@latest migrate status`
 3. Verify the `DATABASE_URL` in the build environment matches the production database (not a stale preview database)
@@ -791,6 +817,7 @@ The public marketing page (`/`) and auth pages (`/auth/*`) do not use force-dyna
 **Symptom:** Receipt upload fails in browser; console shows `CORS policy` error or `Access to fetch blocked`
 
 **Steps:**
+
 1. Open the S3 Console → your bucket → Permissions → CORS configuration
 2. Verify `AllowedOrigins` includes your production domain exactly as it appears in the browser URL bar (include `https://`, no trailing slash)
 3. Verify `AllowedMethods` includes `PUT`
@@ -803,6 +830,7 @@ The public marketing page (`/`) and auth pages (`/auth/*`) do not use force-dyna
 **Symptom:** Members are not receiving invitation emails or notification emails
 
 **Steps:**
+
 1. Verify `RESEND_API_KEY` starts with `re_` and is not expired in the Resend dashboard
 2. Verify the domain in `EMAIL_FROM` is verified in Resend (green status in Resend → Domains)
 3. Check Resend dashboard → Logs for delivery status — look for bounce or spam filter rejections
@@ -822,6 +850,7 @@ The public marketing page (`/`) and auth pages (`/auth/*`) do not use force-dyna
 **Symptom:** Overdue loan notifications are not being sent; manual test of the endpoint returns 401
 
 **Steps:**
+
 1. Verify `CRON_SECRET` is set in Vercel environment variables for Production
 2. Verify the Vercel project is on a paid plan (cron is not available on Hobby)
 3. Check `vercel.json` contains the cron configuration (see Section 9.2)
@@ -856,12 +885,14 @@ This applies any new migration files in `prisma/migrations/`. If migration fails
 ### 15.3 Zero-Downtime Deploys on Vercel
 
 Vercel deployments are zero-downtime by default:
+
 1. The new build is compiled in an isolated environment
 2. Migrations run during the build phase (before the deployment is promoted)
 3. Once the build succeeds, Vercel atomically promotes the new deployment
 4. The previous deployment remains available as a fallback (Vercel → Project → Deployments → Previous deployment → **Promote**)
 
 **Important for schema changes:** Migrations run before the new code goes live. This means the database schema changes while the old code is still serving traffic. Write migrations that are backward-compatible:
+
 - Adding a column: always provide a default value or make it nullable
 - Renaming a column: use a two-phase migration (add new → deploy code that handles both → remove old)
 - Removing a column: remove code references first → deploy → then run the DROP COLUMN migration
@@ -885,6 +916,7 @@ pnpm update --interactive
 ```
 
 After updating, run the full test suite (if available) and test critical paths manually:
+
 - Member login and contribution submission
 - Loan application and approval flow
 - Dividend creation and processing
