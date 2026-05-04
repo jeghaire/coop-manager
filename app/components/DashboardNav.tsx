@@ -22,10 +22,12 @@ function adminLinks(pendingLoans: number): NavItem[] {
   return [
     { href: "/admin/members", label: "Members" },
     { href: "/admin/members/unverified", label: "Unverified" },
+    { href: "/admin/members/import", label: "Import Members" },
     { href: "/admin/loans", label: "Pending Loans" },
     { href: "/admin/notifications", label: "Notifications", badge: pendingLoans || undefined },
     { href: "/admin/contributions", label: "Contributions" },
     { href: "/admin/withdrawals", label: "Withdrawals" },
+    { href: "/admin/announcements", label: "Announcements" },
     { href: "/admin/treasurer", label: "Manual Entry" },
     { href: "/admin/dividends", label: "Dividends" },
     { href: "/admin/settings", label: "Settings" },
