@@ -184,7 +184,7 @@ Create a `.env` file in the project root. All variables listed below must be pre
 - **Purpose:** Identifies your Twilio account for API authentication
 - **Format:** Starts with `AC`, 34 characters
 - **Where to get it:** Twilio Console → Account Info
-- **Example:** `ACabcdef1234567890abcdef1234567890`
+<!-- - **Example:** `ACabcdef1234567890abcdef1234567890` -->
 
 #### `TWILIO_AUTH_TOKEN`
 - **Purpose:** Authenticates API requests to Twilio
