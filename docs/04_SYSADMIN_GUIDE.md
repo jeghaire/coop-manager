@@ -125,7 +125,6 @@ Create a `.env` file in the project root. All variables listed below must be pre
 - **Purpose:** PostgreSQL connection string used by Prisma for all database operations
 - **Format:** `postgresql://USER:PASSWORD@HOST:PORT/DBNAME?sslmode=require`
 - **Where to get it:** Neon dashboard → your project → Connection Details → Connection string (select "Pooled connection" for production)
-- **Example:** `postgresql://neondb_owner:abc123xyz@ep-cool-fog-123456.eu-west-2.aws.neon.tech/neondb?sslmode=require`
 
 ### Authentication
 
@@ -134,14 +133,12 @@ Create a `.env` file in the project root. All variables listed below must be pre
 - **Purpose:** Signs and verifies session tokens. Must be kept secret and consistent across deployments. Rotating this value invalidates all existing sessions.
 - **Format:** Minimum 32 characters, random string
 - **Where to get it:** Generate with `openssl rand -base64 32` or `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`
-- **Example:** `K9mXnPqR2sT5vW8yA1bC4dF7hJ0kL3mN6pQ9rS2u`
 
 #### `BETTER_AUTH_URL`
 
 - **Purpose:** The canonical base URL of the application, used to construct auth callback URLs
 - **Format:** Full URL with protocol, no trailing slash
 - **Where to get it:** Your domain or Vercel deployment URL
-- **Example:** `https://coop.yourdomain.com`
 
 ### Application
 
@@ -150,7 +147,6 @@ Create a `.env` file in the project root. All variables listed below must be pre
 - **Purpose:** Client-side base URL used for generating links in emails and other user-facing contexts. The `NEXT_PUBLIC_` prefix makes it available in browser-side code.
 - **Format:** Full URL with protocol, no trailing slash
 - **Where to get it:** Same as `BETTER_AUTH_URL`
-- **Example:** `https://coop.yourdomain.com`
 
 ### Billing (Stripe)
 
@@ -159,14 +155,12 @@ Create a `.env` file in the project root. All variables listed below must be pre
 - **Purpose:** Authenticates server-side Stripe API calls (creating checkout sessions, billing portal sessions, handling webhooks)
 - **Format:** Starts with `sk_live_` (production) or `sk_test_` (test mode)
 - **Where to get it:** Stripe Dashboard → Developers → API keys → Secret key
-- **Example:** `sk_live_51AbcDefGhiJklMno...`
 
 #### `STRIPE_WEBHOOK_SECRET`
 
 - **Purpose:** Verifies that incoming webhook events genuinely originate from Stripe
 - **Format:** Starts with `whsec_`
 - **Where to get it:** Stripe Dashboard → Developers → Webhooks → Select your endpoint → Signing secret
-- **Example:** `whsec_abcdef1234567890abcdef1234567890abcdef12`
 
 > If not using Stripe billing, these variables can be omitted. The billing-related pages will error if accessed, but all cooperative management features function normally.
 
@@ -177,14 +171,12 @@ Create a `.env` file in the project root. All variables listed below must be pre
 - **Purpose:** Authenticates email send requests to the Resend API
 - **Format:** Starts with `re_`
 - **Where to get it:** Resend Dashboard → API Keys → Create API Key
-- **Example:** `re_AbcDef12_GhiJklMnoPqrStuVwxYZ`
 
 #### `EMAIL_FROM`
 
 - **Purpose:** The sender address and display name for all outgoing emails
 - **Format:** `"Display Name <email@yourdomain.com>"` — quotes are required if the name contains spaces
 - **Where to get it:** Use a verified domain in your Resend account; see [Section 6](#6-email-configuration-resend)
-- **Example:** `"Cooperative Manager <noreply@yourdomain.com>"`
 
 ### SMS (Twilio — optional)
 
@@ -215,28 +207,24 @@ Create a `.env` file in the project root. All variables listed below must be pre
 - **Purpose:** Identifies the IAM user making S3 API requests
 - **Format:** 20-character alphanumeric string
 - **Where to get it:** AWS Console → IAM → Users → your user → Security credentials → Create access key
-- **Example:** `AKIAIOSFODNN7EXAMPLE`
 
 #### `AWS_SECRET_ACCESS_KEY`
 
 - **Purpose:** Authenticates the IAM user's API requests
 - **Format:** 40-character base64 string
 - **Where to get it:** Shown only once at IAM key creation; store securely immediately
-- **Example:** `wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY`
 
 #### `AWS_REGION`
 
 - **Purpose:** AWS region where the S3 bucket is located
 - **Format:** AWS region code
 - **Where to get it:** The region you selected when creating the bucket
-- **Example:** `eu-west-2`
 
 #### `AWS_S3_BUCKET`
 
 - **Purpose:** The name of the S3 bucket used for storing contribution receipt files
 - **Format:** Lowercase letters, numbers, hyphens; globally unique
 - **Where to get it:** AWS Console → S3 → your bucket name
-- **Example:** `coop-manager-receipts-prod`
 
 ### Cron Jobs
 
@@ -245,7 +233,6 @@ Create a `.env` file in the project root. All variables listed below must be pre
 - **Purpose:** Bearer token that authorises calls to the `/api/cron/check-overdue` endpoint. Vercel Cron sends this token automatically; without it, the endpoint returns 401.
 - **Format:** Any strong random string (minimum 32 characters recommended)
 - **Where to get it:** Generate with `openssl rand -base64 32`
-- **Example:** `Fg3kLm9pQr2sTvWx5yZa8bCd1eGh4iJn`
 
 ### Summary Table
 
