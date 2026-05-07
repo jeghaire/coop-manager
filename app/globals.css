@@ -152,11 +152,18 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground text-[17px] leading-relaxed;
+    @apply bg-background text-foreground text-[17px] leading-relaxed min-w-[375px];
   }
   html {
     @apply font-sans;
     overflow-x: hidden;
+  }
+
+  /* iOS safe-area support for the bottom tab bar */
+  @supports (padding-bottom: env(safe-area-inset-bottom)) {
+    .safe-area-bottom {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
   }
 
   /* Accent-coloured text selection */

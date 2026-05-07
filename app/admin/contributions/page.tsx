@@ -6,26 +6,32 @@ import prisma from "@/app/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { ContributionReviewForm } from "./ContributionReviewForm";
 import Link from "next/link";
+import { PageHeader } from "@/app/components/PageHeader";
 
 const PAYMENT_METHOD_LABEL: Record<string, string> = {
   BANK_TRANSFER: "Bank Transfer",
   MOBILE_MONEY: "Mobile Money",
   CASH: "Cash",
-  DIRECT_PAYMENT: "Direct Payment",
+  DIRECT_PAYMENT: "Direct Payment"
 };
 
-const STATUS_FILTER = ["ALL", "PENDING_VERIFICATION", "VERIFIED", "REJECTED"] as const;
+const STATUS_FILTER = [
+  "ALL",
+  "PENDING_VERIFICATION",
+  "VERIFIED",
+  "REJECTED"
+] as const;
 type StatusFilter = (typeof STATUS_FILTER)[number];
 
 const STATUS_LABEL: Record<StatusFilter, string> = {
   ALL: "All",
   PENDING_VERIFICATION: "Pending",
   VERIFIED: "Verified",
-  REJECTED: "Rejected",
+  REJECTED: "Rejected"
 };
 
 export default async function AdminContributionsPage({
-  searchParams,
+  searchParams
 }: {
   searchParams: Promise<{ status?: string }>;
 }) {
@@ -39,27 +45,28 @@ export default async function AdminContributionsPage({
 
   const cooperativeId = session.user.cooperativeId as string;
   const { status: rawStatus } = await searchParams;
-  const activeFilter: StatusFilter =
-    STATUS_FILTER.includes(rawStatus as StatusFilter)
-      ? (rawStatus as StatusFilter)
-      : "PENDING_VERIFICATION";
+  const activeFilter: StatusFilter = STATUS_FILTER.includes(
+    rawStatus as StatusFilter
+  )
+    ? (rawStatus as StatusFilter)
+    : "PENDING_VERIFICATION";
 
   const contributions = await prisma.contribution.findMany({
     where: {
       cooperativeId,
       deletedAt: null,
-      ...(activeFilter !== "ALL" && { status: activeFilter }),
+      ...(activeFilter !== "ALL" && { status: activeFilter })
     },
     include: {
-      user: { select: { name: true, email: true } },
+      user: { select: { name: true, email: true } }
     },
-    orderBy: { submittedAt: "desc" },
+    orderBy: { submittedAt: "desc" }
   });
 
   const counts = await prisma.contribution.groupBy({
     by: ["status"],
     where: { cooperativeId, deletedAt: null },
-    _count: true,
+    _count: true
   });
 
   const countMap: Record<string, number> = { ALL: 0 };
@@ -70,14 +77,10 @@ export default async function AdminContributionsPage({
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight">
-          Member Contributions
-        </h1>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
-          Review and verify member payment receipts
-        </p>
-      </div>
+      <PageHeader
+        title="Member Contributions"
+        description="Review and verify member payment receipts"
+      />
 
       {/* Filter tabs */}
       <div className="flex gap-1 flex-wrap">
@@ -93,9 +96,7 @@ export default async function AdminContributionsPage({
           >
             {STATUS_LABEL[s]}
             {countMap[s] != null && (
-              <span className="ml-1.5 text-xs opacity-70">
-                {countMap[s]}
-              </span>
+              <span className="ml-1.5 text-xs opacity-70">{countMap[s]}</span>
             )}
           </Link>
         ))}
@@ -106,7 +107,9 @@ export default async function AdminContributionsPage({
           <p className="text-zinc-500 dark:text-zinc-400 text-sm">
             {activeFilter === "PENDING_VERIFICATION"
               ? "No contributions pending verification. All caught up!"
-              : `No ${STATUS_LABEL[activeFilter].toLowerCase()} contributions.`}
+              : activeFilter === "ALL"
+                ? "No contributions."
+                : `No ${STATUS_LABEL[activeFilter].toLowerCase()} contributions.`}
           </p>
         </div>
       ) : (
@@ -148,7 +151,7 @@ export default async function AdminContributionsPage({
                       {new Date(c.submittedAt).toLocaleDateString("en-GB", {
                         day: "numeric",
                         month: "short",
-                        year: "numeric",
+                        year: "numeric"
                       })}
                     </p>
                   </div>
@@ -199,7 +202,7 @@ export default async function AdminContributionsPage({
                       {new Date(c.verifiedAt).toLocaleDateString("en-GB", {
                         day: "numeric",
                         month: "short",
-                        year: "numeric",
+                        year: "numeric"
                       })}
                     </p>
                   )}

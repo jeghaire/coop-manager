@@ -3,24 +3,31 @@ export const dynamic = "force-dynamic";
 import { getSession } from "@/app/lib/auth-helpers";
 import { redirect } from "next/navigation";
 import prisma from "@/app/lib/prisma";
-import { getAvailableWithdrawal, getMemberWithdrawals } from "@/app/actions/withdrawals";
+import {
+  getAvailableWithdrawal,
+  getMemberWithdrawals
+} from "@/app/actions/withdrawals";
 import { WithdrawalForm } from "./WithdrawalForm";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import { PageHeader } from "@/app/components/PageHeader";
 
-const STATUS_BADGE: Record<string, "secondary" | "success" | "destructive" | "outline"> = {
+const STATUS_BADGE: Record<
+  string,
+  "secondary" | "success" | "destructive" | "outline"
+> = {
   REQUESTED: "secondary",
   APPROVED: "success",
   REJECTED: "destructive",
-  PAID: "outline",
+  PAID: "outline"
 };
 
 const REASON_LABEL: Record<string, string> = {
   PERSONAL: "Personal Use",
   EMERGENCY: "Emergency",
   LEAVING: "Leaving Cooperative",
-  OTHER: "Other",
+  OTHER: "Other"
 };
 
 export default async function WithdrawalsPage() {
@@ -34,8 +41,8 @@ export default async function WithdrawalsPage() {
     getAvailableWithdrawal(session.user.id, cooperativeId),
     prisma.cooperative.findUnique({
       where: { id: cooperativeId },
-      select: { currencySymbol: true },
-    }),
+      select: { currencySymbol: true }
+    })
   ]);
 
   const sym = cooperative?.currencySymbol ?? "₦";
@@ -43,14 +50,10 @@ export default async function WithdrawalsPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight">
-          Withdrawals
-        </h1>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
-          Request a withdrawal from your contributions balance
-        </p>
-      </div>
+      <PageHeader
+        title="Withdrawals"
+        description="  Request a withdrawal from your contributions balance"
+      />
 
       <div className="grid gap-6 md:grid-cols-2">
         <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6">
@@ -58,7 +61,8 @@ export default async function WithdrawalsPage() {
             Available to Withdraw
           </p>
           <p className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
-            {sym}{available.toLocaleString()}
+            {sym}
+            {available.toLocaleString()}
           </p>
           <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
             Total contributions minus active loan balance
@@ -73,14 +77,16 @@ export default async function WithdrawalsPage() {
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                No available balance. You may have an active loan or no verified contributions.
+                No available balance. You may have an active loan or no verified
+                contributions.
               </AlertDescription>
             </Alert>
           ) : hasPending ? (
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                You have a pending withdrawal request. Wait for it to be reviewed before submitting another.
+                You have a pending withdrawal request. Wait for it to be
+                reviewed before submitting another.
               </AlertDescription>
             </Alert>
           ) : (
@@ -117,14 +123,17 @@ export default async function WithdrawalsPage() {
                   {withdrawals.map((w) => (
                     <tr key={w.id}>
                       <td className="px-4 py-3 font-medium text-zinc-900 dark:text-zinc-100">
-                        {sym}{Number(w.amount).toLocaleString()}
+                        {sym}
+                        {Number(w.amount).toLocaleString()}
                       </td>
                       <td className="px-4 py-3 text-zinc-600 dark:text-zinc-400">
                         {REASON_LABEL[w.reason] ?? w.reason}
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex flex-col gap-1">
-                          <Badge variant={STATUS_BADGE[w.status] ?? "secondary"}>
+                          <Badge
+                            variant={STATUS_BADGE[w.status] ?? "secondary"}
+                          >
                             {w.status}
                           </Badge>
                           {w.status === "REJECTED" && w.rejectionReason && (

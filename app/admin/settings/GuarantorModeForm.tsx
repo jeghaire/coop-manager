@@ -1,27 +1,38 @@
 "use client";
 
 import { useActionState } from "react";
-import { updateGuarantorCoverageMode, type SettingsActionState } from "@/app/actions/settings";
+import {
+  updateGuarantorCoverageMode,
+  type SettingsActionState
+} from "@/app/actions/settings";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const MODE_OPTIONS = [
   { value: "OFF", label: "OFF", description: "No coverage check" },
-  { value: "COMBINED", label: "COMBINED", description: "Combined contributions must cover loan" },
-  { value: "INDIVIDUAL", label: "INDIVIDUAL", description: "Each guarantor must individually cover loan" },
+  {
+    value: "COMBINED",
+    label: "COMBINED",
+    description: "Combined contributions must cover loan"
+  },
+  {
+    value: "INDIVIDUAL",
+    label: "INDIVIDUAL",
+    description: "Each guarantor must individually cover loan"
+  }
 ];
 
 export function GuarantorModeForm({
   cooperativeId,
-  currentMode,
+  currentMode
 }: {
   cooperativeId: string;
   currentMode: string;
 }) {
-  const [state, action, pending] = useActionState<SettingsActionState, FormData>(
-    updateGuarantorCoverageMode,
-    {}
-  );
+  const [state, action, pending] = useActionState<
+    SettingsActionState,
+    FormData
+  >(updateGuarantorCoverageMode, {});
 
   return (
     <form action={action} className="space-y-3 mt-2">
@@ -49,7 +60,7 @@ export function GuarantorModeForm({
               name="guarantorCoverageMode"
               value={opt.value}
               defaultChecked={currentMode === opt.value}
-              className="mt-0.5"
+              className="my-auto"
             />
             <span>
               <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">

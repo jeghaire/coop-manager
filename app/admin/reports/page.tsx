@@ -11,9 +11,10 @@ import { AuditTrail } from "./AuditTrail";
 import Link from "next/link";
 import { ExportPdfButton } from "./ExportPdfButton";
 import prisma from "@/app/lib/prisma";
+import { PageHeader } from "@/app/components/PageHeader";
 
 export default async function ReportsPage({
-  searchParams,
+  searchParams
 }: {
   searchParams: Promise<{
     tab?: string;
@@ -35,13 +36,36 @@ export default async function ReportsPage({
 
   const cooperative = await prisma.cooperative.findUnique({
     where: { id: cooperativeId },
-    select: { name: true },
+    select: { name: true }
   });
   const cooperativeName = cooperative?.name ?? "Cooperative";
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4 flex-wrap">
+      <PageHeader
+        title="Reports"
+        description="Financial overview, loan history, dividend calculations, and audit"
+        action={
+          <div className="flex items-center gap-2 flex-wrap">
+            {tab === "financial" && (
+              <ExportPdfButton
+                cooperativeId={cooperativeId}
+                cooperativeName={cooperativeName}
+              />
+            )}
+            {tab !== "audit" && (
+              <Link
+                href={`/api/reports/csv?type=${tab === "dividends" ? "dividends" : tab === "loans" ? "loans" : "financial"}${distributionAmount > 0 ? `&distribute=${distributionAmount}` : ""}`}
+                className="text-xs font-medium text-zinc-500 dark:text-zinc-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-1.5 hover:border-emerald-300 dark:hover:border-emerald-500/40"
+              >
+                ↓ Export CSV
+              </Link>
+            )}
+          </div>
+        }
+      />
+
+      {/* <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight">
             Reports
@@ -67,7 +91,25 @@ export default async function ReportsPage({
             </Link>
           )}
         </div>
-      </div>
+      </div> */}
+
+      {/* <div className="flex items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight">
+            Announcements
+          </h1>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
+            {announcements.filter((a) => a.isActive).length} active ·{" "}
+            {announcements.length} total
+          </p>
+        </div>
+        <Link
+          href="/admin/announcements/new"
+          className={buttonVariants({ size: "sm" })}
+        >
+          New Announcement
+        </Link>
+      </div> */}
 
       <TabNav />
 
@@ -90,10 +132,7 @@ export default async function ReportsPage({
           />
         )}
         {tab === "audit" && (
-          <AuditTrail
-            cooperativeId={cooperativeId}
-            eventType={eventType}
-          />
+          <AuditTrail cooperativeId={cooperativeId} eventType={eventType} />
         )}
       </Suspense>
     </div>

@@ -4,7 +4,7 @@ function Stat({
   label,
   value,
   sub,
-  accent,
+  accent
 }: {
   label: string;
   value: string;
@@ -39,7 +39,7 @@ function Stat({
 }
 
 export async function FinancialReport({
-  cooperativeId,
+  cooperativeId
 }: {
   cooperativeId: string;
 }) {
@@ -117,7 +117,7 @@ function FundBar({
   label,
   amount,
   total,
-  color,
+  color
 }: {
   label: string;
   amount: number;
@@ -129,13 +129,13 @@ function FundBar({
   const trackColor = {
     emerald: "bg-emerald-100 dark:bg-emerald-500/20",
     amber: "bg-amber-100 dark:bg-amber-500/20",
-    sky: "bg-sky-100 dark:bg-sky-500/20",
+    sky: "bg-sky-100 dark:bg-sky-500/20"
   }[color];
 
   const barColor = {
     emerald: "bg-emerald-500",
     amber: "bg-amber-500",
-    sky: "bg-sky-500",
+    sky: "bg-sky-500"
   }[color];
 
   return (

@@ -6,15 +6,16 @@ import prisma from "@/app/lib/prisma";
 import { billingEnabled } from "@/app/lib/stripe";
 import { BillingActions } from "./BillingActions";
 import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/app/components/PageHeader";
 
 const STATUS_BADGE = {
   ACTIVE: "success",
   PAST_DUE: "warning",
-  CANCELED: "destructive",
+  CANCELED: "destructive"
 } as const;
 
 export default async function BillingPage({
-  searchParams,
+  searchParams
 }: {
   searchParams: Promise<{ success?: string; canceled?: string }>;
 }) {
@@ -31,8 +32,8 @@ export default async function BillingPage({
       name: true,
       subscriptionStatus: true,
       billingCycleEnd: true,
-      stripeSubscriptionId: true,
-    },
+      stripeSubscriptionId: true
+    }
   });
 
   const { success, canceled } = await searchParams;
@@ -40,14 +41,10 @@ export default async function BillingPage({
 
   return (
     <div className="max-w-lg space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight">
-          Billing
-        </h1>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
-          Manage your cooperative&apos;s subscription
-        </p>
-      </div>
+      <PageHeader
+        title="Billing"
+        description="Manage your cooperative's subscription"
+      />
 
       {success === "1" && (
         <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-xl p-4 text-sm text-emerald-700 dark:text-emerald-300">
@@ -82,20 +79,21 @@ export default async function BillingPage({
 
         {cooperative?.billingCycleEnd && (
           <p className="text-xs text-zinc-500 dark:text-zinc-400">
-            {cooperative.subscriptionStatus === "ACTIVE"
-              ? "Renews"
-              : "Expires"}{" "}
+            {cooperative.subscriptionStatus === "ACTIVE" ? "Renews" : "Expires"}{" "}
             {new Date(cooperative.billingCycleEnd).toLocaleDateString("en-GB", {
               day: "numeric",
               month: "long",
-              year: "numeric",
+              year: "numeric"
             })}
           </p>
         )}
 
         {!enabled && (
           <p className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-lg px-3 py-2">
-            Stripe is not configured. Set <code className="font-mono">STRIPE_SECRET_KEY</code> and <code className="font-mono">STRIPE_PRICE_ID</code> to enable billing.
+            Stripe is not configured. Set{" "}
+            <code className="font-mono">STRIPE_SECRET_KEY</code> and{" "}
+            <code className="font-mono">STRIPE_PRICE_ID</code> to enable
+            billing.
           </p>
         )}
 

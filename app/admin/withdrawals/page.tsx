@@ -6,19 +6,23 @@ import { getAllWithdrawals } from "@/app/actions/withdrawals";
 import { Badge } from "@/components/ui/badge";
 import { ApproveForm, RejectForm, MarkPaidForm } from "./WithdrawalActions";
 import prisma from "@/app/lib/prisma";
+import { PageHeader } from "@/app/components/PageHeader";
 
-const STATUS_BADGE: Record<string, "secondary" | "success" | "destructive" | "outline"> = {
+const STATUS_BADGE: Record<
+  string,
+  "secondary" | "success" | "destructive" | "outline"
+> = {
   REQUESTED: "secondary",
   APPROVED: "success",
   REJECTED: "destructive",
-  PAID: "outline",
+  PAID: "outline"
 };
 
 const REASON_LABEL: Record<string, string> = {
   PERSONAL: "Personal Use",
   EMERGENCY: "Emergency",
   LEAVING: "Leaving Cooperative",
-  OTHER: "Other",
+  OTHER: "Other"
 };
 
 export default async function AdminWithdrawalsPage() {
@@ -34,8 +38,8 @@ export default async function AdminWithdrawalsPage() {
     getAllWithdrawals(cooperativeId),
     prisma.cooperative.findUnique({
       where: { id: cooperativeId },
-      select: { currencySymbol: true },
-    }),
+      select: { currencySymbol: true }
+    })
   ]);
 
   const sym = cooperative?.currencySymbol ?? "₦";
@@ -45,14 +49,10 @@ export default async function AdminWithdrawalsPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight">
-          Withdrawal Requests
-        </h1>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
-          {pending.length} pending · {withdrawals.length} total
-        </p>
-      </div>
+      <PageHeader
+        title="Withdrawal Requests"
+        description={`${pending.length} pending · ${withdrawals.length} total`}
+      />
 
       {withdrawals.length === 0 && (
         <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-12 text-center">
@@ -77,7 +77,8 @@ export default async function AdminWithdrawalsPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="font-semibold text-lg text-zinc-900 dark:text-zinc-100">
-                        {sym}{Number(w.amount).toLocaleString()}
+                        {sym}
+                        {Number(w.amount).toLocaleString()}
                       </span>
                       <Badge variant="secondary">REQUESTED</Badge>
                     </div>
@@ -99,7 +100,7 @@ export default async function AdminWithdrawalsPage() {
                       Requested {new Date(w.createdAt).toLocaleDateString()}
                     </p>
                   </div>
-                  <div className="flex flex-col gap-2 shrink-0 min-w-[120px]">
+                  <div className="flex flex-col gap-2 shrink-0 min-w-30">
                     <ApproveForm withdrawalId={w.id} />
                     <RejectForm withdrawalId={w.id} />
                   </div>
@@ -150,14 +151,17 @@ export default async function AdminWithdrawalsPage() {
                         </p>
                       </td>
                       <td className="px-4 py-3 font-medium text-zinc-900 dark:text-zinc-100">
-                        {sym}{Number(w.amount).toLocaleString()}
+                        {sym}
+                        {Number(w.amount).toLocaleString()}
                       </td>
                       <td className="px-4 py-3 text-zinc-600 dark:text-zinc-400">
                         {REASON_LABEL[w.reason] ?? w.reason}
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex flex-col gap-1">
-                          <Badge variant={STATUS_BADGE[w.status] ?? "secondary"}>
+                          <Badge
+                            variant={STATUS_BADGE[w.status] ?? "secondary"}
+                          >
                             {w.status}
                           </Badge>
                           {w.status === "REJECTED" && w.rejectionReason && (

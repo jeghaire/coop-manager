@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import prisma from "@/app/lib/prisma";
 import { RecordContributionForm } from "./RecordContributionForm";
 import { RecordRepaymentForm } from "./RecordRepaymentForm";
+import { PageHeader } from "@/app/components/PageHeader";
 
 export default async function TreasurerPage() {
   const session = await getSession();
@@ -21,20 +22,20 @@ export default async function TreasurerPage() {
     prisma.user.findMany({
       where: { cooperativeId, deletedAt: null },
       select: { id: true, name: true, email: true },
-      orderBy: { name: "asc" },
+      orderBy: { name: "asc" }
     }),
     prisma.loanApplication.findMany({
       where: { cooperativeId, status: "APPROVED", deletedAt: null },
       include: {
         applicant: { select: { name: true } },
-        repayments: { select: { amount: true } },
+        repayments: { select: { amount: true } }
       },
-      orderBy: { approvedAt: "desc" },
+      orderBy: { approvedAt: "desc" }
     }),
     prisma.cooperative.findUnique({
       where: { id: cooperativeId },
-      select: { currencySymbol: true },
-    }),
+      select: { currencySymbol: true }
+    })
   ]);
 
   const sym = cooperative?.currencySymbol ?? "₦";
@@ -48,14 +49,10 @@ export default async function TreasurerPage() {
 
   return (
     <div className="space-y-10 max-w-2xl">
-      <div>
-        <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight">
-          Manual Entry
-        </h1>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
-          Record contributions and loan repayments on behalf of members
-        </p>
-      </div>
+      <PageHeader
+        title="Manual Entry"
+        description="Record contributions and loan repayments on behalf of members"
+      />
 
       {/* Record Contribution */}
       <section className="space-y-4">
@@ -80,7 +77,10 @@ export default async function TreasurerPage() {
           </div>
         ) : (
           <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-6">
-            <RecordRepaymentForm loans={loansWithBalance} currencySymbol={sym} />
+            <RecordRepaymentForm
+              loans={loansWithBalance}
+              currencySymbol={sym}
+            />
           </div>
         )}
       </section>

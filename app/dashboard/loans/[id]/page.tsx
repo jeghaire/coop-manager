@@ -148,7 +148,7 @@ export default async function LoanDetailsPage({
       <div>
         <Link
           href="/dashboard/loans"
-          className="text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors"
+          className="hidden md:inline text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors"
         >
           ← Back to Loans
         </Link>

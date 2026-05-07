@@ -6,6 +6,7 @@ import prisma from "@/app/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { NewDividendForm } from "./NewDividendForm";
 import { ApproveButton, ProcessButton } from "./DividendActions";
+import { PageHeader } from "@/app/components/PageHeader";
 
 export default async function DividendsPage() {
   const session = await getSession();
@@ -19,15 +20,15 @@ export default async function DividendsPage() {
   const [cooperative, payouts] = await Promise.all([
     prisma.cooperative.findUnique({
       where: { id: cooperativeId },
-      select: { currencySymbol: true },
+      select: { currencySymbol: true }
     }),
     prisma.dividendPayout.findMany({
       where: { cooperativeId },
       orderBy: { createdAt: "desc" },
       include: {
-        memberDividends: { select: { id: true, amount: true, status: true } },
-      },
-    }),
+        memberDividends: { select: { id: true, amount: true, status: true } }
+      }
+    })
   ]);
 
   if (!cooperative) redirect("/dashboard");
@@ -35,18 +36,13 @@ export default async function DividendsPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight">
-            Dividend Management
-          </h1>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
-            Distribute cooperative profits to members based on contribution share
-          </p>
-        </div>
-      </div>
-
-      <NewDividendForm cooperativeId={cooperativeId} currencySymbol={sym} />
+      <PageHeader
+        title="Dividend Management"
+        description="Distribute cooperative profits to members based on contribution share"
+        action={
+          <NewDividendForm cooperativeId={cooperativeId} currencySymbol={sym} />
+        }
+      />
 
       {payouts.length === 0 ? (
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-8 text-center">
@@ -65,12 +61,24 @@ export default async function DividendsPage() {
             <table className="w-full text-sm">
               <thead className="bg-zinc-50 dark:bg-zinc-800/50 border-b border-zinc-200 dark:border-zinc-800">
                 <tr>
-                  <th className="px-4 py-3 text-left font-medium text-zinc-500 dark:text-zinc-400">Period</th>
-                  <th className="px-4 py-3 text-right font-medium text-zinc-500 dark:text-zinc-400">Total Profit</th>
-                  <th className="px-4 py-3 text-right font-medium text-zinc-500 dark:text-zinc-400">Pool</th>
-                  <th className="px-4 py-3 text-center font-medium text-zinc-500 dark:text-zinc-400">Members</th>
-                  <th className="px-4 py-3 text-left font-medium text-zinc-500 dark:text-zinc-400">Status</th>
-                  <th className="px-4 py-3 text-left font-medium text-zinc-500 dark:text-zinc-400">Action</th>
+                  <th className="px-4 py-3 text-left font-medium text-zinc-500 dark:text-zinc-400">
+                    Period
+                  </th>
+                  <th className="px-4 py-3 text-right font-medium text-zinc-500 dark:text-zinc-400">
+                    Total Profit
+                  </th>
+                  <th className="px-4 py-3 text-right font-medium text-zinc-500 dark:text-zinc-400">
+                    Pool
+                  </th>
+                  <th className="px-4 py-3 text-center font-medium text-zinc-500 dark:text-zinc-400">
+                    Members
+                  </th>
+                  <th className="px-4 py-3 text-left font-medium text-zinc-500 dark:text-zinc-400">
+                    Status
+                  </th>
+                  <th className="px-4 py-3 text-left font-medium text-zinc-500 dark:text-zinc-400">
+                    Action
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
@@ -83,10 +91,12 @@ export default async function DividendsPage() {
                       {payout.period} {payout.year}
                     </td>
                     <td className="px-4 py-3 text-right text-zinc-600 dark:text-zinc-400">
-                      {sym}{Number(payout.totalProfit).toLocaleString()}
+                      {sym}
+                      {Number(payout.totalProfit).toLocaleString()}
                     </td>
                     <td className="px-4 py-3 text-right font-semibold text-emerald-600 dark:text-emerald-400">
-                      {sym}{Number(payout.dividendPool).toLocaleString()}
+                      {sym}
+                      {Number(payout.dividendPool).toLocaleString()}
                     </td>
                     <td className="px-4 py-3 text-center text-zinc-600 dark:text-zinc-400">
                       {payout.totalMembers}

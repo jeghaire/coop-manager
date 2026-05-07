@@ -5,8 +5,9 @@ import { redirect } from "next/navigation";
 import prisma from "@/app/lib/prisma";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
 import { GuarantorResponseForm } from "./GuarantorResponseForm";
+import { PageHeader } from "@/app/components/PageHeader";
+import { LoanApplySheet } from "@/app/components/LoanApplySheet";
 
 function loanStatusBadge(status: string) {
   switch (status) {
@@ -43,29 +44,58 @@ export default async function LoansPage() {
   const userId = session.user.id;
   const cooperativeId = session.user.cooperativeId as string;
 
-  const [myLoans, guarantorRequests] = await Promise.all([
-    prisma.loanApplication.findMany({
-      where: { userId, cooperativeId, deletedAt: null },
-      include: {
-        guarantors: {
-          where: { deletedAt: null },
-          include: { guarantor: { select: { name: true } } },
-        },
-      },
-      orderBy: { appliedAt: "desc" },
-    }),
-    prisma.loanGuarantor.findMany({
-      where: { guarantorId: userId, deletedAt: null },
-      include: {
-        loan: {
-          include: {
-            applicant: { select: { name: true } },
+  const [myLoans, guarantorRequests, cooperative, eligibleMembers, verifiedContributions] =
+    await Promise.all([
+      prisma.loanApplication.findMany({
+        where: { userId, cooperativeId, deletedAt: null },
+        include: {
+          guarantors: {
+            where: { deletedAt: null },
+            include: { guarantor: { select: { name: true } } },
           },
         },
-      },
-      orderBy: { createdAt: "desc" },
-    }),
-  ]);
+        orderBy: { appliedAt: "desc" },
+      }),
+      prisma.loanGuarantor.findMany({
+        where: { guarantorId: userId, deletedAt: null },
+        include: {
+          loan: {
+            include: {
+              applicant: { select: { name: true } },
+            },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.cooperative.findUnique({
+        where: { id: cooperativeId },
+        select: { borrowingMultiplier: true, guarantorCoverageMode: true },
+      }),
+      prisma.user.findMany({
+        where: {
+          cooperativeId,
+          deletedAt: null,
+          id: { not: userId },
+          role: { notIn: ["ADMIN", "OWNER"] },
+          verifiedAt: { not: null },
+        },
+        select: { id: true, name: true },
+        orderBy: { name: "asc" },
+      }),
+      prisma.contribution.findMany({
+        where: { userId, cooperativeId, status: "VERIFIED", deletedAt: null },
+        select: { amount: true },
+      }),
+    ]);
+
+  const totalContributed = verifiedContributions.reduce(
+    (sum, c) => sum + Number(c.amount),
+    0
+  );
+  const borrowingCapacity = cooperative
+    ? totalContributed * cooperative.borrowingMultiplier
+    : 0;
+  const canApply = totalContributed > 0 && eligibleMembers.length >= 2;
 
   const pendingGuarantorRequests = guarantorRequests.filter(
     (g) => g.status === "PENDING" && g.loan.status === "PENDING_GUARANTORS"
@@ -76,19 +106,18 @@ export default async function LoansPage() {
 
   return (
     <div className="space-y-10">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight">
-            Loans
-          </h1>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
-            Manage your loan applications and guarantor requests
-          </p>
-        </div>
-        <Link href="/dashboard/loans/apply" className={buttonVariants({ size: "sm" })}>
-          Apply for Loan
-        </Link>
-      </div>
+      <PageHeader
+        title="Loans"
+        description="Manage your loan applications and guarantor requests"
+        action={
+          <LoanApplySheet
+            members={eligibleMembers}
+            borrowingCapacity={borrowingCapacity}
+            guarantorCoverageMode={cooperative?.guarantorCoverageMode ?? "COMBINED"}
+            canApply={canApply}
+          />
+        }
+      />
 
       {/* Guarantor Requests */}
       {pendingGuarantorRequests.length > 0 && (
@@ -103,7 +132,7 @@ export default async function LoansPage() {
             {pendingGuarantorRequests.map((g) => (
               <div
                 key={g.id}
-                className="bg-white dark:bg-zinc-900 border border-amber-200 dark:border-amber-500/20 rounded-xl p-5"
+                className="bg-white dark:bg-zinc-900 border border-amber-200 dark:border-amber-500/20 rounded-2xl p-5"
               >
                 <div className="flex items-start justify-between gap-4 mb-4">
                   <div>
@@ -140,20 +169,17 @@ export default async function LoansPage() {
           My Applications
         </h2>
         {myLoans.length === 0 ? (
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-8 text-center">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-2xl p-8 text-center">
             <p className="text-zinc-500 dark:text-zinc-400 text-sm">
               No loan applications yet.
             </p>
-            <Link href="/dashboard/loans/apply" className={buttonVariants({ size: "sm" }) + " mt-4"}>
-              Apply for your first loan
-            </Link>
           </div>
         ) : (
           <div className="space-y-3">
             {myLoans.map((loan) => (
               <div
                 key={loan.id}
-                className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-5"
+                className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-2xl p-5"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
@@ -172,14 +198,10 @@ export default async function LoansPage() {
                       })}
                     </p>
 
-                    {/* Guarantor status */}
                     {loan.guarantors.length > 0 && (
                       <div className="mt-3 flex flex-wrap gap-2">
                         {loan.guarantors.map((g) => (
-                          <div
-                            key={g.id}
-                            className="flex items-center gap-1.5 text-xs"
-                          >
+                          <div key={g.id} className="flex items-center gap-1.5 text-xs">
                             <span className="text-zinc-500 dark:text-zinc-400">
                               {g.guarantor.name}:
                             </span>
@@ -232,7 +254,7 @@ export default async function LoansPage() {
             {pastGuarantorRequests.map((g) => (
               <div
                 key={g.id}
-                className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-4"
+                className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-2xl p-4"
               >
                 <div className="flex items-center justify-between gap-4">
                   <div>

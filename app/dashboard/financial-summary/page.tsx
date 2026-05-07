@@ -6,6 +6,7 @@ import prisma from "@/app/lib/prisma";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { DownloadStatementButton } from "./DownloadStatementButton";
+import { PageHeader } from "@/app/components/PageHeader";
 
 export default async function FinancialSummaryPage() {
   const session = await getSession();
@@ -67,14 +68,7 @@ export default async function FinancialSummaryPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight">
-          Financial Summary
-        </h1>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
-          Your complete financial position
-        </p>
-      </div>
+      <PageHeader title="Finance" description="Your complete financial position" />
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

@@ -1,11 +1,13 @@
 import { getSession } from "@/app/lib/auth-helpers";
 import { redirect } from "next/navigation";
 import { Header } from "@/app/components/Header";
+import { MobileTopBar } from "@/app/components/MobileTopBar";
 import { DashboardNav } from "@/app/components/DashboardNav";
+import { BottomTabBar } from "@/app/components/BottomTabBar";
 import prisma from "@/app/lib/prisma";
 
 export default async function AdminLayout({
-  children,
+  children
 }: {
   children: React.ReactNode;
 }) {
@@ -26,19 +28,33 @@ export default async function AdminLayout({
   const pendingLoans =
     role === "ADMIN" || role === "OWNER"
       ? await prisma.loanApplication.count({
-          where: { cooperativeId, status: "PENDING_ADMIN_REVIEW", deletedAt: null },
+          where: {
+            cooperativeId,
+            status: "PENDING_ADMIN_REVIEW",
+            deletedAt: null
+          }
         })
       : 0;
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-[#0c0c0c]">
+      {/* Desktop header */}
+      {/* <div className="hidden md:block"> */}
       <Header pendingLoans={pendingLoans} />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex gap-8">
+      {/* </div> */}
+
+      {/* Mobile top bar */}
+      {/* <MobileTopBar /> */}
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 pb-28 md:py-8 flex gap-8">
         <aside className="hidden md:block w-48 shrink-0">
           <DashboardNav role={role} pendingLoans={pendingLoans} />
         </aside>
         <main className="flex-1 min-w-0">{children}</main>
       </div>
+
+      {/* Mobile bottom tab bar */}
+      {/* <BottomTabBar role={role} /> */}
     </div>
   );
 }

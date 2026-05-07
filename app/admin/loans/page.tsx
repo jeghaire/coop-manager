@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import prisma from "@/app/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { LoanReviewForm } from "./LoanReviewForm";
+import { PageHeader } from "@/app/components/PageHeader";
 
 function guarantorStatusBadge(status: string) {
   switch (status) {
@@ -33,21 +34,21 @@ export default async function AdminLoansPage() {
       where: {
         cooperativeId,
         status: "PENDING_ADMIN_REVIEW",
-        deletedAt: null,
+        deletedAt: null
       },
       include: {
         applicant: { select: { id: true, name: true, email: true } },
         guarantors: {
           where: { deletedAt: null },
-          include: { guarantor: { select: { id: true, name: true } } },
-        },
+          include: { guarantor: { select: { id: true, name: true } } }
+        }
       },
-      orderBy: { appliedAt: "asc" },
+      orderBy: { appliedAt: "asc" }
     }),
     prisma.cooperative.findUnique({
       where: { id: cooperativeId },
-      select: { borrowingMultiplier: true, guarantorCoverageMode: true },
-    }),
+      select: { borrowingMultiplier: true, guarantorCoverageMode: true }
+    })
   ]);
 
   // Fetch contribution totals for all involved users
@@ -62,7 +63,7 @@ export default async function AdminLoansPage() {
     pendingLoans.map(async (loan) => {
       const [applicantTotal, ...guarantorTotals] = await Promise.all([
         getTotalContributed(loan.applicant.id),
-        ...loan.guarantors.map((g) => getTotalContributed(g.guarantor.id)),
+        ...loan.guarantors.map((g) => getTotalContributed(g.guarantor.id))
       ]);
 
       const capacity = applicantTotal * (cooperative?.borrowingMultiplier ?? 3);
@@ -72,12 +73,15 @@ export default async function AdminLoansPage() {
       const guarantorContributions = loan.guarantors.map((g, i) => ({
         id: g.guarantor.id,
         name: g.guarantor.name,
-        total: guarantorTotals[i],
+        total: guarantorTotals[i]
       }));
 
       let covered = true;
       if (mode === "COMBINED") {
-        const combined = guarantorContributions.reduce((s, g) => s + g.total, 0);
+        const combined = guarantorContributions.reduce(
+          (s, g) => s + g.total,
+          0
+        );
         covered = combined >= amount;
       } else if (mode === "INDIVIDUAL") {
         covered = guarantorContributions.every((g) => g.total >= amount);
@@ -88,21 +92,17 @@ export default async function AdminLoansPage() {
         applicantContribution: applicantTotal,
         borrowingCapacity: capacity,
         guarantorContributions,
-        covered,
+        covered
       };
     })
   );
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight">
-          Pending Loan Reviews
-        </h1>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
-          Loans approved by both guarantors and awaiting your decision
-        </p>
-      </div>
+      <PageHeader
+        title="Pending Loan Reviews"
+        description="Loans approved by both guarantors and awaiting your decision"
+      />
 
       {enrichedLoans.length === 0 ? (
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-10 text-center">
@@ -127,9 +127,13 @@ export default async function AdminLoansPage() {
                       </span>
                       <Badge variant="sky">Pending Review</Badge>
                       {loan.covered ? (
-                        <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">✓ Covered</span>
+                        <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                          ✓ Covered
+                        </span>
                       ) : (
-                        <span className="text-xs text-red-600 dark:text-red-400 font-medium">✗ Under-covered</span>
+                        <span className="text-xs text-red-600 dark:text-red-400 font-medium">
+                          ✗ Under-covered
+                        </span>
                       )}
                     </div>
 
@@ -141,14 +145,16 @@ export default async function AdminLoansPage() {
                         </span>
                       </p>
                       <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                        Contributed: ₦{loan.applicantContribution.toLocaleString()} · Capacity: ₦{loan.borrowingCapacity.toLocaleString()}
+                        Contributed: ₦
+                        {loan.applicantContribution.toLocaleString()} ·
+                        Capacity: ₦{loan.borrowingCapacity.toLocaleString()}
                       </p>
                       <p className="text-xs text-zinc-400 dark:text-zinc-600">
                         Applied{" "}
                         {new Date(loan.appliedAt).toLocaleDateString("en-GB", {
                           day: "numeric",
                           month: "short",
-                          year: "numeric",
+                          year: "numeric"
                         })}
                       </p>
                     </div>
@@ -160,7 +166,10 @@ export default async function AdminLoansPage() {
                           (gc) => gc.id === g.guarantor.id
                         );
                         return (
-                          <div key={g.id} className="flex items-center gap-2 text-xs flex-wrap">
+                          <div
+                            key={g.id}
+                            className="flex items-center gap-2 text-xs flex-wrap"
+                          >
                             <span className="text-zinc-500 dark:text-zinc-400">
                               {g.guarantor.name}:
                             </span>

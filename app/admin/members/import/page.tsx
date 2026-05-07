@@ -2,6 +2,7 @@ import { getSession } from "@/app/lib/auth-helpers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { CSVImportForm } from "./CSVImportForm";
+import { PageHeader } from "@/app/components/PageHeader";
 
 export default async function ImportMembersPage() {
   const session = await getSession();
@@ -19,14 +20,13 @@ export default async function ImportMembersPage() {
         >
           ← Back to Members
         </Link>
-        <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight mt-3">
-          Import Members via CSV
-        </h1>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-          Bulk-create member accounts. Each member will receive an invite email
-          with a temporary password.
-        </p>
       </div>
+
+      <PageHeader
+        title=" Import Members via CSV"
+        description="Bulk-create member accounts. Each member will receive an invite email
+          with a temporary password."
+      />
 
       {/* Format guide */}
       <div className="mb-6 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl p-4">
@@ -38,9 +38,14 @@ export default async function ImportMembersPage() {
         </pre>
         <ul className="mt-3 space-y-1 text-xs text-zinc-500 dark:text-zinc-400">
           <li>• Header row is optional</li>
-          <li>• <code className="font-mono">monthly_amount</code> is optional, defaults to 0</li>
+          <li>
+            • <code className="font-mono">monthly_amount</code> is optional,
+            defaults to 0
+          </li>
           <li>• Existing emails are skipped, not overwritten</li>
-          <li>• All imported members get the <strong>Member</strong> role</li>
+          <li>
+            • All imported members get the <strong>Member</strong> role
+          </li>
         </ul>
       </div>
 

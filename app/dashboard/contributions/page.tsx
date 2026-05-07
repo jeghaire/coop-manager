@@ -3,9 +3,9 @@ export const dynamic = "force-dynamic";
 import { getSession } from "@/app/lib/auth-helpers";
 import { redirect } from "next/navigation";
 import prisma from "@/app/lib/prisma";
-import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
+import { PageHeader } from "@/app/components/PageHeader";
+import { ContributionSubmitSheet } from "@/app/components/ContributionSubmitSheet";
 
 const PAYMENT_METHOD_LABEL: Record<string, string> = {
   BANK_TRANSFER: "Bank Transfer",
@@ -44,25 +44,14 @@ export default async function ContributionsPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight">
-            Contributions
-          </h1>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
-            Track your monthly contribution history
-          </p>
-        </div>
-        <Link
-          href="/dashboard/contributions/submit"
-          className={buttonVariants({ size: "sm" })}
-        >
-          Submit Contribution
-        </Link>
-      </div>
+      <PageHeader
+        title="Contributions"
+        description="Track your monthly contribution history"
+        action={<ContributionSubmitSheet />}
+      />
 
       {/* Verified total */}
-      <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-xl p-5">
+      <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-2xl p-5">
         <p className="text-xs font-mono font-medium text-emerald-600 dark:text-emerald-500 uppercase tracking-widest mb-1">
           Total Verified
         </p>
@@ -73,23 +62,17 @@ export default async function ContributionsPage() {
 
       {/* Contribution list */}
       {contributions.length === 0 ? (
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-8 text-center">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-2xl p-8 text-center">
           <p className="text-zinc-500 dark:text-zinc-400 text-sm">
             No contributions yet.
           </p>
-          <Link
-            href="/dashboard/contributions/submit"
-            className={buttonVariants({ size: "sm" }) + " mt-4"}
-          >
-            Submit your first contribution
-          </Link>
         </div>
       ) : (
         <div className="space-y-3">
           {contributions.map((c) => (
             <div
               key={c.id}
-              className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-5"
+              className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-2xl p-5"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">

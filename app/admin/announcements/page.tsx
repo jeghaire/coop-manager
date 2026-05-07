@@ -7,12 +7,16 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { DeactivateButton } from "./DeactivateButton";
+import { PageHeader } from "@/app/components/PageHeader";
 
-const TYPE_BADGE: Record<string, "sky" | "warning" | "destructive" | "secondary"> = {
+const TYPE_BADGE: Record<
+  string,
+  "sky" | "warning" | "destructive" | "secondary"
+> = {
   AGM: "sky",
   MAINTENANCE: "warning",
   RULE_CHANGE: "destructive",
-  GENERAL: "secondary",
+  GENERAL: "secondary"
 };
 
 export default async function AdminAnnouncementsPage() {
@@ -27,28 +31,23 @@ export default async function AdminAnnouncementsPage() {
   const announcements = await prisma.announcement.findMany({
     where: { cooperativeId },
     orderBy: { createdAt: "desc" },
-    include: { _count: { select: { rsvps: true } } },
+    include: { _count: { select: { rsvps: true } } }
   });
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight">
-            Announcements
-          </h1>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
-            {announcements.filter((a) => a.isActive).length} active ·{" "}
-            {announcements.length} total
-          </p>
-        </div>
-        <Link
-          href="/admin/announcements/new"
-          className={buttonVariants({ size: "sm" })}
-        >
-          New Announcement
-        </Link>
-      </div>
+      <PageHeader
+        title="Announcements"
+        description={`Manage and view announcements for your cooperative\n${announcements.filter((a) => a.isActive).length} active · ${announcements.length} total`}
+        action={
+          <Link
+            href="/admin/announcements/new"
+            className={buttonVariants({ size: "sm" })}
+          >
+            New Announcement
+          </Link>
+        }
+      />
 
       {announcements.length === 0 && (
         <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-12 text-center">
@@ -73,9 +72,7 @@ export default async function AdminAnnouncementsPage() {
                   <Badge variant={TYPE_BADGE[ann.type] ?? "secondary"}>
                     {ann.type}
                   </Badge>
-                  {ann.isPinned && (
-                    <Badge variant="outline">Pinned</Badge>
-                  )}
+                  {ann.isPinned && <Badge variant="outline">Pinned</Badge>}
                   {!ann.isActive && (
                     <Badge variant="destructive">Inactive</Badge>
                   )}

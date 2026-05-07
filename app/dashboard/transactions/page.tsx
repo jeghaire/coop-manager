@@ -6,6 +6,8 @@ import prisma from "@/app/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
+import { PageHeader } from "@/app/components/PageHeader";
+import { cn } from "@/app/lib/utils";
 
 export default async function TransactionsPage() {
   const session = await getSession();
@@ -17,16 +19,16 @@ export default async function TransactionsPage() {
   const [cooperative, contributions, loans] = await Promise.all([
     prisma.cooperative.findUnique({
       where: { id: cooperativeId },
-      select: { currencySymbol: true },
+      select: { currencySymbol: true }
     }),
     prisma.contribution.findMany({
       where: { userId, cooperativeId, deletedAt: null },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: "desc" }
     }),
     prisma.loanApplication.findMany({
       where: { userId, cooperativeId, deletedAt: null },
-      include: { repayments: { orderBy: { paidAt: "desc" } } },
-    }),
+      include: { repayments: { orderBy: { paidAt: "desc" } } }
+    })
   ]);
 
   if (!cooperative) redirect("/dashboard");
@@ -49,7 +51,7 @@ export default async function TransactionsPage() {
       kind: "contribution",
       amount: Number(c.amount),
       status: c.status,
-      ref: c.id.slice(-8),
+      ref: c.id.slice(-8)
     });
   }
 
@@ -60,7 +62,7 @@ export default async function TransactionsPage() {
         kind: "repayment",
         amount: Number(r.amount),
         status: "RECORDED",
-        ref: loan.id.slice(-8),
+        ref: loan.id.slice(-8)
       });
     }
   }
@@ -69,26 +71,27 @@ export default async function TransactionsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight">
-            All Transactions
-          </h1>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
-            {rows.length} transaction{rows.length !== 1 ? "s" : ""}
-          </p>
-        </div>
-        <Link
-          href="/dashboard/financial-summary"
-          className={buttonVariants({ variant: "outline", size: "sm" })}
-        >
-          ← Summary
-        </Link>
-      </div>
+      <PageHeader
+        title={"Transactions"}
+        description={`${rows.length} transaction${rows.length !== 1 ? "s" : ""}`}
+        action={
+          <Link
+            href="/dashboard/financial-summary"
+            className={cn(
+              buttonVariants({ variant: "outline", size: "sm" }),
+              "hidden md:inline-flex"
+            )}
+          >
+            ← Summary
+          </Link>
+        }
+      />
 
       <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl overflow-hidden">
         {rows.length === 0 ? (
-          <p className="p-6 text-sm text-zinc-500 dark:text-zinc-400">No transactions yet.</p>
+          <p className="p-6 text-sm text-zinc-500 dark:text-zinc-400">
+            No transactions yet.
+          </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -121,12 +124,19 @@ export default async function TransactionsPage() {
                       {tx.date.toLocaleDateString()}
                     </td>
                     <td className="px-4 py-3">
-                      <Badge variant={tx.kind === "contribution" ? "default" : "secondary"}>
-                        {tx.kind === "contribution" ? "Contribution" : "Repayment"}
+                      <Badge
+                        variant={
+                          tx.kind === "contribution" ? "default" : "secondary"
+                        }
+                      >
+                        {tx.kind === "contribution"
+                          ? "Contribution"
+                          : "Repayment"}
                       </Badge>
                     </td>
                     <td className="px-4 py-3 text-right font-semibold text-zinc-900 dark:text-zinc-100 whitespace-nowrap">
-                      {sym}{tx.amount.toLocaleString()}
+                      {sym}
+                      {tx.amount.toLocaleString()}
                     </td>
                     <td className="px-4 py-3">
                       <StatusBadge status={tx.status} />

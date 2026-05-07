@@ -74,14 +74,14 @@ export function UserMenu({
         <div className="absolute right-0 top-[calc(100%+6px)] w-60 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700/60 rounded-xl shadow-xl shadow-black/10 dark:shadow-black/40 overflow-hidden z-50">
           {/* Account info */}
           <div className="px-4 py-3.5 border-b border-zinc-100 dark:border-zinc-800">
-            <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate leading-snug">
+            <p className="text-base font-semibold text-zinc-900 dark:text-zinc-100 truncate leading-snug">
               {name}
             </p>
-            <p className="text-xs text-zinc-500 dark:text-zinc-500 truncate mt-0.5">
+            <p className="text-sm text-zinc-500 dark:text-zinc-500 truncate mt-0.5">
               {email}
             </p>
             <span
-              className={`text-[11px] font-mono font-semibold mt-1.5 inline-block ${roleColor[role] ?? roleColor.MEMBER}`}
+              className={`text-[11px] font-semibold mt-0 inline-block ${roleColor[role] ?? roleColor.MEMBER}`}
             >
               {role}
             </span>
@@ -101,7 +101,10 @@ export function UserMenu({
               onClick={handleSignOut}
               className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors text-left"
             >
-              <ArrowLeftToLine className="w-4 h-4 shrink-0" strokeWidth={1.75} />
+              <ArrowLeftToLine
+                className="w-4 h-4 shrink-0"
+                strokeWidth={1.75}
+              />
               Sign out
             </button>
           </div>

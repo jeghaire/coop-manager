@@ -26,7 +26,7 @@ const PAYMENT_METHODS = [
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
-export function ContributionSubmitForm() {
+export function ContributionSubmitForm({ onSuccess }: { onSuccess?: () => void }) {
   const router = useRouter();
   const [state, formAction] = useActionState<ContributionActionState, FormData>(
     submitContribution,
@@ -40,9 +40,10 @@ export function ContributionSubmitForm() {
 
   useEffect(() => {
     if (state.success) {
+      onSuccess?.();
       router.push("/dashboard/contributions");
     }
-  }, [state.success, router]);
+  }, [state.success, router, onSuccess]);
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const selected = e.target.files?.[0] ?? null;

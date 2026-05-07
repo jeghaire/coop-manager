@@ -24,11 +24,13 @@ export function LoanApplicationForm({
   borrowingCapacity,
   guarantorCoverageMode,
   defaultValues,
+  onSuccess,
 }: {
   members: Member[];
   borrowingCapacity: number;
   guarantorCoverageMode: string;
   defaultValues?: { amount: string; guarantor1Id: string; guarantor2Id: string };
+  onSuccess?: () => void;
 }) {
   const router = useRouter();
   const [state, action, pending] = useActionState<LoanActionState, FormData>(
@@ -40,9 +42,10 @@ export function LoanApplicationForm({
 
   useEffect(() => {
     if (state.success) {
+      onSuccess?.();
       router.push("/dashboard/loans");
     }
-  }, [state.success, router]);
+  }, [state.success, router, onSuccess]);
 
   const availableFor1 = members.filter((m) => m.id !== guarantor2Id);
   const availableFor2 = members.filter((m) => m.id !== guarantor1Id);

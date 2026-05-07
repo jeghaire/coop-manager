@@ -6,6 +6,8 @@ import prisma from "@/app/lib/prisma";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
+import { PageHeader } from "@/app/components/PageHeader";
+import { Users } from "lucide-react";
 
 export default async function DashboardPage() {
   const session = await getSession();
@@ -25,21 +27,26 @@ export default async function DashboardPage() {
           userId: user.id,
           cooperativeId,
           status: { in: ["PENDING_GUARANTORS", "PENDING_ADMIN_REVIEW"] },
-          deletedAt: null,
-        },
+          deletedAt: null
+        }
       }),
       prisma.loanGuarantor.count({
         where: {
           guarantorId: user.id,
           status: "PENDING",
           deletedAt: null,
-          loan: { status: "PENDING_GUARANTORS" },
-        },
+          loan: { status: "PENDING_GUARANTORS" }
+        }
       }),
       prisma.contribution.findMany({
-        where: { userId: user.id, cooperativeId, status: "VERIFIED", deletedAt: null },
-        select: { amount: true },
-      }),
+        where: {
+          userId: user.id,
+          cooperativeId,
+          status: "VERIFIED",
+          deletedAt: null
+        },
+        select: { amount: true }
+      })
     ]);
 
   const verifiedTotal = verifiedContributions.reduce(
@@ -62,16 +69,10 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight">
-          Welcome back, {user.name.split(" ")[0]}
-        </h1>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5 flex items-center gap-2">
-          {roleBadge(user.role as string)}
-          <span>·</span>
-          <span>{user.email}</span>
-        </p>
-      </div>
+      <PageHeader
+        title={`Welcome back, ${user.name.split(" ")[0]}`}
+        description={`Here's a summary of your activity and quick links to get you going`}
+      />
 
       {/* Alerts */}
       {myPendingGuarantorRequests > 0 && (
@@ -81,7 +82,10 @@ export default async function DashboardPage() {
             {myPendingGuarantorRequests === 1 ? "request" : "requests"} waiting
             for your response.
           </p>
-          <Link href="/dashboard/loans" className={buttonVariants({ size: "sm", variant: "outline" })}>
+          <Link
+            href="/dashboard/loans"
+            className={buttonVariants({ size: "sm", variant: "outline" })}
+          >
             Review
           </Link>
         </div>
@@ -96,7 +100,13 @@ export default async function DashboardPage() {
           <p className="text-3xl font-semibold text-zinc-900 dark:text-zinc-100">
             ₦{verifiedTotal.toLocaleString()}
           </p>
-          <Link href="/dashboard/contributions" className={buttonVariants({ size: "sm", variant: "ghost" }) + " mt-3 -ml-2 text-emerald-600 dark:text-emerald-400"}>
+          <Link
+            href="/dashboard/contributions"
+            className={
+              buttonVariants({ size: "sm", variant: "ghost" }) +
+              " mt-3 -ml-2 text-emerald-600 dark:text-emerald-400"
+            }
+          >
             View history →
           </Link>
         </div>
@@ -108,7 +118,13 @@ export default async function DashboardPage() {
           <p className="text-3xl font-semibold text-zinc-900 dark:text-zinc-100">
             {myActiveLoans}
           </p>
-          <Link href="/dashboard/loans" className={buttonVariants({ size: "sm", variant: "ghost" }) + " mt-3 -ml-2 text-emerald-600 dark:text-emerald-400"}>
+          <Link
+            href="/dashboard/loans"
+            className={
+              buttonVariants({ size: "sm", variant: "ghost" }) +
+              " mt-3 -ml-2 text-emerald-600 dark:text-emerald-400"
+            }
+          >
             View loans →
           </Link>
         </div>
@@ -120,7 +136,13 @@ export default async function DashboardPage() {
           <p className="text-3xl font-semibold text-zinc-900 dark:text-zinc-100">
             {myPendingGuarantorRequests}
           </p>
-          <Link href="/dashboard/loans" className={buttonVariants({ size: "sm", variant: "ghost" }) + " mt-3 -ml-2 text-emerald-600 dark:text-emerald-400"}>
+          <Link
+            href="/dashboard/loans"
+            className={
+              buttonVariants({ size: "sm", variant: "ghost" }) +
+              " mt-3 -ml-2 text-emerald-600 dark:text-emerald-400"
+            }
+          >
             Respond →
           </Link>
         </div>
@@ -128,7 +150,7 @@ export default async function DashboardPage() {
 
       {/* Quick actions */}
       <div>
-        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest mb-3">
+        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-3">
           Quick Actions
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
