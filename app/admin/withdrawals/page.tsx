@@ -15,14 +15,14 @@ const STATUS_BADGE: Record<
   REQUESTED: "secondary",
   APPROVED: "success",
   REJECTED: "destructive",
-  PAID: "outline"
+  PAID: "outline",
 };
 
 const REASON_LABEL: Record<string, string> = {
   PERSONAL: "Personal Use",
   EMERGENCY: "Emergency",
   LEAVING: "Leaving Cooperative",
-  OTHER: "Other"
+  OTHER: "Other",
 };
 
 export default async function AdminWithdrawalsPage() {
@@ -38,8 +38,8 @@ export default async function AdminWithdrawalsPage() {
     getAllWithdrawals(cooperativeId),
     prisma.cooperative.findUnique({
       where: { id: cooperativeId },
-      select: { currencySymbol: true }
-    })
+      select: { currencySymbol: true },
+    }),
   ]);
 
   const sym = cooperative?.currencySymbol ?? "₦";
@@ -64,7 +64,7 @@ export default async function AdminWithdrawalsPage() {
 
       {pending.length > 0 && (
         <section className="space-y-3">
-          <h2 className="text-sm font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-600">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-600">
             Pending Review
           </h2>
           <div className="space-y-3">
@@ -113,7 +113,7 @@ export default async function AdminWithdrawalsPage() {
 
       {others.length > 0 && (
         <section className="space-y-3">
-          <h2 className="text-sm font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-600">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-600">
             History
           </h2>
           <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">

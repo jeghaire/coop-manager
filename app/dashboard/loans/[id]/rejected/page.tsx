@@ -70,7 +70,7 @@ export default async function RejectedLoanPage({
       </Alert>
 
       <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-6 space-y-4">
-        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
+        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
           Original Guarantors
         </h2>
         <ul className="space-y-2">

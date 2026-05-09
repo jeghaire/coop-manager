@@ -15,13 +15,13 @@ export default async function CooperativeDetailsPage() {
     prisma.cooperative.findUnique({
       where: { id: cooperativeId },
       include: {
-        bankAccounts: { orderBy: { isPreferred: "desc" } }
-      }
+        bankAccounts: { orderBy: { isPreferred: "desc" } },
+      },
     }),
     prisma.user.findMany({
       where: { cooperativeId, deletedAt: null },
-      select: { verifiedAt: true }
-    })
+      select: { verifiedAt: true },
+    }),
   ]);
 
   if (!cooperative) redirect("/dashboard");
@@ -31,7 +31,7 @@ export default async function CooperativeDetailsPage() {
 
   const totalContributions = await prisma.contribution.aggregate({
     where: { cooperativeId, status: "VERIFIED", deletedAt: null },
-    _sum: { amount: true }
+    _sum: { amount: true },
   });
   const contributionTotal = Number(totalContributions._sum.amount ?? 0);
 
@@ -45,7 +45,7 @@ export default async function CooperativeDetailsPage() {
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-5">
-          <p className="text-xs font-mono font-medium text-zinc-400 dark:text-zinc-600 uppercase tracking-widest mb-2">
+          <p className="text-xs font-mono font-medium text-zinc-400 dark:text-zinc-600 uppercase tracking-wider mb-2">
             Total Members
           </p>
           <p className="text-3xl font-semibold text-zinc-900 dark:text-zinc-100">
@@ -53,7 +53,7 @@ export default async function CooperativeDetailsPage() {
           </p>
         </div>
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-5">
-          <p className="text-xs font-mono font-medium text-zinc-400 dark:text-zinc-600 uppercase tracking-widest mb-2">
+          <p className="text-xs font-mono font-medium text-zinc-400 dark:text-zinc-600 uppercase tracking-wider mb-2">
             Verified Members
           </p>
           <p className="text-3xl font-semibold text-zinc-900 dark:text-zinc-100">
@@ -61,7 +61,7 @@ export default async function CooperativeDetailsPage() {
           </p>
         </div>
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-5">
-          <p className="text-xs font-mono font-medium text-zinc-400 dark:text-zinc-600 uppercase tracking-widest mb-2">
+          <p className="text-xs font-mono font-medium text-zinc-400 dark:text-zinc-600 uppercase tracking-wider mb-2">
             Total Contributions
           </p>
           <p className="text-3xl font-semibold text-zinc-900 dark:text-zinc-100">

@@ -41,10 +41,14 @@ export function LoanApplySheet({
         Apply for Loan
       </Link>
 
-      <BottomSheet open={open} onClose={() => setOpen(false)} title="Apply for Loan">
+      <BottomSheet
+        open={open}
+        onClose={() => setOpen(false)}
+        title="Apply for Loan"
+      >
         <div className="space-y-4">
           <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-xl p-4">
-            <p className="text-xs font-mono font-medium text-emerald-600 dark:text-emerald-500 uppercase tracking-widest mb-1">
+            <p className="text-xs font-mono font-medium text-emerald-600 dark:text-emerald-500 uppercase tracking-wider mb-1">
               Your Borrowing Capacity
             </p>
             <p className="text-2xl font-semibold text-emerald-800 dark:text-emerald-300">

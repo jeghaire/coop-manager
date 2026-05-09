@@ -16,8 +16,8 @@ export default async function VerificationPendingPage() {
       name: true,
       email: true,
       verifiedAt: true,
-      cooperative: { select: { name: true } }
-    }
+      cooperative: { select: { name: true } },
+    },
   });
 
   if (!user) redirect("/auth/signin");
@@ -40,7 +40,7 @@ export default async function VerificationPendingPage() {
       </Alert>
 
       <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-6 space-y-4">
-        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
+        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
           Your Details
         </h2>
         <dl className="space-y-3">

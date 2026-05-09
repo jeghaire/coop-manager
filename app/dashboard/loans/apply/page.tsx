@@ -103,7 +103,7 @@ export default async function ApplyForLoanPage({
 
       {/* Borrowing capacity */}
       <div className="mb-4 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-xl p-4 space-y-1">
-        <p className="text-xs font-mono font-medium text-emerald-600 dark:text-emerald-500 uppercase tracking-widest">
+        <p className="text-xs font-mono font-medium text-emerald-600 dark:text-emerald-500 uppercase tracking-wider">
           Your Borrowing Capacity
         </p>
         <p className="text-2xl font-semibold text-emerald-800 dark:text-emerald-300">

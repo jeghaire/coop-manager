@@ -4,7 +4,7 @@ function Stat({
   label,
   value,
   sub,
-  accent
+  accent,
 }: {
   label: string;
   value: string;
@@ -19,7 +19,7 @@ function Stat({
           : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800/60"
       }`}
     >
-      <p className="text-xs font-mono font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-600 mb-2">
+      <p className="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-600 mb-2">
         {label}
       </p>
       <p
@@ -39,7 +39,7 @@ function Stat({
 }
 
 export async function FinancialReport({
-  cooperativeId
+  cooperativeId,
 }: {
   cooperativeId: string;
 }) {
@@ -85,7 +85,7 @@ export async function FinancialReport({
       </div>
 
       <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-5">
-        <p className="text-xs font-mono font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-600 mb-4">
+        <p className="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-600 mb-4">
           Fund Health
         </p>
         <div className="space-y-3">
@@ -117,7 +117,7 @@ function FundBar({
   label,
   amount,
   total,
-  color
+  color,
 }: {
   label: string;
   amount: number;
@@ -129,13 +129,13 @@ function FundBar({
   const trackColor = {
     emerald: "bg-emerald-100 dark:bg-emerald-500/20",
     amber: "bg-amber-100 dark:bg-amber-500/20",
-    sky: "bg-sky-100 dark:bg-sky-500/20"
+    sky: "bg-sky-100 dark:bg-sky-500/20",
   }[color];
 
   const barColor = {
     emerald: "bg-emerald-500",
     amber: "bg-amber-500",
-    sky: "bg-sky-500"
+    sky: "bg-sky-500",
   }[color];
 
   return (

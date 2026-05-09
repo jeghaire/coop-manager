@@ -47,12 +47,12 @@ enum PaymentMethod {
 }
 
 model Cooperative {
-  id                   String            @id @default(cuid())
-  name                 String
-  stripeCustomerId     String?           @unique
-  stripeSubscriptionId String?
-  subscriptionStatus   CooperativeStatus @default(ACTIVE)
-  billingCycleEnd      DateTime?
+  id                     String            @id @default(cuid())
+  name                   String
+  stripeCustomerId       String?           @unique
+  stripeSubscriptionId   String?
+  subscriptionStatus     CooperativeStatus @default(ACTIVE)
+  billingCycleEnd        DateTime?
   borrowingMultiplier    Int               @default(3)
   guarantorCoverageMode  String            @default("COMBINED")
   loanInterestRate       Decimal           @default(10)
@@ -61,8 +61,8 @@ model Cooperative {
   currency               String            @default("NGN")
   currencySymbol         String            @default("₦")
   deletedAt              DateTime?
-  createdAt            DateTime          @default(now())
-  updatedAt            DateTime          @updatedAt
+  createdAt              DateTime          @default(now())
+  updatedAt              DateTime          @updatedAt
 
   users              User[]
   contributions      Contribution[]
@@ -149,16 +149,16 @@ model User {
   createdAt                 DateTime    @default(now())
   updatedAt                 DateTime    @updatedAt
 
-  accounts              Account[]
-  sessions              Session[]
-  loanApplications      LoanApplication[]
-  guarantorFor          LoanGuarantor[]    @relation("guarantor")
-  approvalsGiven        LoanApplication[]  @relation("approvedBy")
-  verificationsGiven    Contribution[]     @relation("verifiedBy")
-  contributions         Contribution[]
-  withdrawalRequests    WithdrawalRequest[]
-  createdAnnouncements  Announcement[]     @relation("AnnouncementCreator")
-  announcementRsvps     AnnouncementRsvp[]
+  accounts             Account[]
+  sessions             Session[]
+  loanApplications     LoanApplication[]
+  guarantorFor         LoanGuarantor[]     @relation("guarantor")
+  approvalsGiven       LoanApplication[]   @relation("approvedBy")
+  verificationsGiven   Contribution[]      @relation("verifiedBy")
+  contributions        Contribution[]
+  withdrawalRequests   WithdrawalRequest[]
+  createdAnnouncements Announcement[]      @relation("AnnouncementCreator")
+  announcementRsvps    AnnouncementRsvp[]
 
   @@map("user")
 }
@@ -212,29 +212,29 @@ model LoanGuarantor {
 }
 
 model Contribution {
-  id               String             @id @default(cuid())
-  cooperativeId    String
-  cooperative      Cooperative        @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
-  userId           String
-  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  amount           Decimal
-  status           ContributionStatus @default(PENDING_VERIFICATION)
-  paymentMethod    PaymentMethod
-  receiptUrl          String?
-  receiptKey          String?   // S3 object key (set when file is uploaded)
-  receiptFileName     String?
-  receiptFileSize     Int?
-  receiptFileType     String?
-  receiptUploadedAt   DateTime?
-  rejectionCount      Int       @default(0)
-  submittedAt         DateTime  @default(now())
-  verifiedByUserId String?
-  verifiedBy       User?              @relation("verifiedBy", fields: [verifiedByUserId], references: [id], onDelete: SetNull)
-  verifiedAt       DateTime?
-  rejectionReason  String?
-  deletedAt        DateTime?
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
+  id                String             @id @default(cuid())
+  cooperativeId     String
+  cooperative       Cooperative        @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
+  userId            String
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount            Decimal
+  status            ContributionStatus @default(PENDING_VERIFICATION)
+  paymentMethod     PaymentMethod
+  receiptUrl        String?
+  receiptKey        String? // S3 object key (set when file is uploaded)
+  receiptFileName   String?
+  receiptFileSize   Int?
+  receiptFileType   String?
+  receiptUploadedAt DateTime?
+  rejectionCount    Int                @default(0)
+  submittedAt       DateTime           @default(now())
+  verifiedByUserId  String?
+  verifiedBy        User?              @relation("verifiedBy", fields: [verifiedByUserId], references: [id], onDelete: SetNull)
+  verifiedAt        DateTime?
+  rejectionReason   String?
+  deletedAt         DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
 
   @@index([cooperativeId])
   @@index([userId])
@@ -310,9 +310,9 @@ model Notification {
 }
 
 model DividendPayout {
-  id              String           @id @default(cuid())
+  id              String      @id @default(cuid())
   cooperativeId   String
-  cooperative     Cooperative      @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
+  cooperative     Cooperative @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
   period          String
   year            Int
   totalProfit     Decimal
@@ -320,12 +320,12 @@ model DividendPayout {
   loanLossReserve Decimal
   dividendPool    Decimal
   totalMembers    Int
-  status          String           @default("PENDING")
+  status          String      @default("PENDING")
   approvedAt      DateTime?
   approvedBy      String?
   paidAt          DateTime?
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
 
   memberDividends MemberDividend[]
 
@@ -360,7 +360,7 @@ model WithdrawalRequest {
   amount          Decimal
   reason          String
   notes           String?
-  status          String    @default("REQUESTED")
+  status          String  @default("REQUESTED")
   rejectionReason String?
 
   approvedAt DateTime?
@@ -381,28 +381,28 @@ model Announcement {
   cooperativeId String
   cooperative   Cooperative @relation(fields: [cooperativeId], references: [id], onDelete: Cascade)
 
-  title         String
-  message       String
-  type          String      // AGM | MAINTENANCE | RULE_CHANGE | GENERAL
+  title   String
+  message String
+  type    String // AGM | MAINTENANCE | RULE_CHANGE | GENERAL
 
-  recipientType String      @default("ALL") // ALL | MEMBERS_ONLY | ADMINS_ONLY | SPECIFIC_ROLE
+  recipientType String  @default("ALL") // ALL | MEMBERS_ONLY | ADMINS_ONLY | SPECIFIC_ROLE
   recipientRole String?
 
-  agmDate       DateTime?
-  agmLocation   String?
-  allowRsvp     Boolean     @default(false)
+  agmDate     DateTime?
+  agmLocation String?
+  allowRsvp   Boolean   @default(false)
 
-  isPinned      Boolean     @default(true)
-  isActive      Boolean     @default(true)
-  expiresAt     DateTime?
+  isPinned  Boolean   @default(true)
+  isActive  Boolean   @default(true)
+  expiresAt DateTime?
 
-  createdBy     String
-  creator       User        @relation("AnnouncementCreator", fields: [createdBy], references: [id])
+  createdBy String
+  creator   User   @relation("AnnouncementCreator", fields: [createdBy], references: [id])
 
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  rsvps         AnnouncementRsvp[]
+  rsvps AnnouncementRsvp[]
 
   @@index([cooperativeId])
   @@index([isActive, isPinned])
@@ -414,7 +414,7 @@ model AnnouncementRsvp {
   announcement   Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
   userId         String
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  rsvpStatus     String       // ATTENDING | NOT_ATTENDING | MAYBE
+  rsvpStatus     String // ATTENDING | NOT_ATTENDING | MAYBE
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 

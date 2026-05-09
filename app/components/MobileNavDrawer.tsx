@@ -27,7 +27,11 @@ function adminLinks(pendingLoans: number): NavItem[] {
     { href: "/admin/members/unverified", label: "Unverified" },
     { href: "/admin/members/import", label: "Import Members" },
     { href: "/admin/loans", label: "Pending Loans" },
-    { href: "/admin/notifications", label: "Notifications", badge: pendingLoans || undefined },
+    {
+      href: "/admin/notifications",
+      label: "Notifications",
+      badge: pendingLoans || undefined,
+    },
     { href: "/admin/contributions", label: "Contributions" },
     { href: "/admin/withdrawals", label: "Withdrawals" },
     { href: "/admin/announcements", label: "Announcements" },
@@ -57,12 +61,19 @@ export function MobileNavDrawer({
   const isTreasurer = role === "TREASURER";
   const isOwner = role === "OWNER";
 
-  const allLinks = [...memberLinks, ...adminLinks(pendingLoans), ...treasurerLinks];
+  const allLinks = [
+    ...memberLinks,
+    ...adminLinks(pendingLoans),
+    ...treasurerLinks,
+  ];
   const isActive = (href: string) => {
     if (href === "/dashboard") return pathname === href;
     if (!pathname.startsWith(href)) return false;
     return !allLinks.some(
-      (l) => l.href !== href && l.href.startsWith(href + "/") && pathname.startsWith(l.href)
+      (l) =>
+        l.href !== href &&
+        l.href.startsWith(href + "/") &&
+        pathname.startsWith(l.href),
     );
   };
 
@@ -71,7 +82,7 @@ export function MobileNavDrawer({
       "flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors w-full",
       isActive(href)
         ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
-        : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800/60 dark:hover:text-zinc-200"
+        : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800/60 dark:hover:text-zinc-200",
     );
 
   const close = () => setOpen(false);
@@ -100,11 +111,16 @@ export function MobileNavDrawer({
 
         <nav className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-5">
           <div className="flex flex-col gap-0.5">
-            <p className="px-3 mb-1 text-[11px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-600">
+            <p className="px-3 mb-1 text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-600">
               Member
             </p>
             {memberLinks.map(({ href, label }) => (
-              <Link key={href} href={href} className={linkClass(href)} onClick={close}>
+              <Link
+                key={href}
+                href={href}
+                className={linkClass(href)}
+                onClick={close}
+              >
                 {label}
               </Link>
             ))}
@@ -112,12 +128,17 @@ export function MobileNavDrawer({
 
           {(isAdmin || isTreasurer) && (
             <div className="flex flex-col gap-0.5">
-              <p className="px-3 mb-1 text-[11px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-600">
+              <p className="px-3 mb-1 text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-600">
                 {isTreasurer ? "Treasurer" : "Admin"}
               </p>
               {(isAdmin ? adminLinks(pendingLoans) : treasurerLinks).map(
                 ({ href, label, badge }) => (
-                  <Link key={href} href={href} className={linkClass(href)} onClick={close}>
+                  <Link
+                    key={href}
+                    href={href}
+                    className={linkClass(href)}
+                    onClick={close}
+                  >
                     <span>{label}</span>
                     {badge ? (
                       <span className="inline-flex items-center justify-center min-w-5 h-5 rounded-full bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400 text-xs font-bold px-1">
@@ -125,7 +146,7 @@ export function MobileNavDrawer({
                       </span>
                     ) : null}
                   </Link>
-                )
+                ),
               )}
             </div>
           )}

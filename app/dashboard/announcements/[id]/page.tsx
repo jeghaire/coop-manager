@@ -6,7 +6,10 @@ import prisma from "@/app/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { RsvpForm } from "./RsvpForm";
 
-const TYPE_BADGE: Record<string, "sky" | "warning" | "destructive" | "secondary"> = {
+const TYPE_BADGE: Record<
+  string,
+  "sky" | "warning" | "destructive" | "secondary"
+> = {
   AGM: "sky",
   MAINTENANCE: "warning",
   RULE_CHANGE: "destructive",
@@ -60,25 +63,26 @@ export default async function AnnouncementDetailPage({
           {announcement.message}
         </p>
 
-        {announcement.type === "AGM" && (announcement.agmDate || announcement.agmLocation) && (
-          <div className="border-t border-zinc-100 dark:border-zinc-800 pt-4 space-y-1">
-            <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 dark:text-zinc-600 mb-2">
-              AGM Details
-            </p>
-            {announcement.agmDate && (
-              <p className="text-sm text-zinc-700 dark:text-zinc-300">
-                <span className="font-medium">Date: </span>
-                {new Date(announcement.agmDate).toLocaleString()}
+        {announcement.type === "AGM" &&
+          (announcement.agmDate || announcement.agmLocation) && (
+            <div className="border-t border-zinc-100 dark:border-zinc-800 pt-4 space-y-1">
+              <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-600 mb-2">
+                AGM Details
               </p>
-            )}
-            {announcement.agmLocation && (
-              <p className="text-sm text-zinc-700 dark:text-zinc-300">
-                <span className="font-medium">Location: </span>
-                {announcement.agmLocation}
-              </p>
-            )}
-          </div>
-        )}
+              {announcement.agmDate && (
+                <p className="text-sm text-zinc-700 dark:text-zinc-300">
+                  <span className="font-medium">Date: </span>
+                  {new Date(announcement.agmDate).toLocaleString()}
+                </p>
+              )}
+              {announcement.agmLocation && (
+                <p className="text-sm text-zinc-700 dark:text-zinc-300">
+                  <span className="font-medium">Location: </span>
+                  {announcement.agmLocation}
+                </p>
+              )}
+            </div>
+          )}
       </div>
 
       {announcement.allowRsvp && (

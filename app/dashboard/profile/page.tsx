@@ -6,12 +6,13 @@ import prisma from "@/app/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/app/components/PageHeader";
 
-const ROLE_BADGE: Record<string, "success" | "sky" | "warning" | "secondary"> = {
-  OWNER: "success",
-  ADMIN: "sky",
-  TREASURER: "warning",
-  MEMBER: "secondary",
-};
+const ROLE_BADGE: Record<string, "success" | "sky" | "warning" | "secondary"> =
+  {
+    OWNER: "success",
+    ADMIN: "sky",
+    TREASURER: "warning",
+    MEMBER: "secondary",
+  };
 
 export default async function ProfilePage() {
   const session = await getSession();
@@ -39,24 +40,36 @@ export default async function ProfilePage() {
   const isVerified = !!user.verifiedAt;
   const totalContributed = user.contributions.reduce(
     (sum, c) => sum + Number(c.amount),
-    0
+    0,
   );
 
   return (
     <div className="max-w-lg space-y-6">
-      <PageHeader title="My Profile" description="Your membership information" />
+      <PageHeader
+        title="My Profile"
+        description="Your membership information"
+      />
 
       <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
+          <h2 className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
             Account
           </h2>
           <div className="flex items-center gap-2">
-            <Badge variant={ROLE_BADGE[user.role] ?? "secondary"}>{user.role}</Badge>
+            <Badge
+              variant={ROLE_BADGE[user.role] ?? "secondary"}
+              className="text-[11px]"
+            >
+              {user.role}
+            </Badge>
             {isVerified ? (
-              <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">✓ Verified</span>
+              <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                ✓ Verified
+              </span>
             ) : (
-              <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">Pending verification</span>
+              <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">
+                Pending verification
+              </span>
             )}
           </div>
         </div>
@@ -64,15 +77,21 @@ export default async function ProfilePage() {
         <dl className="space-y-3">
           <div className="flex justify-between text-sm">
             <dt className="text-zinc-500 dark:text-zinc-400">Name</dt>
-            <dd className="font-medium text-zinc-900 dark:text-zinc-100">{user.name}</dd>
+            <dd className="font-medium text-zinc-900 dark:text-zinc-100">
+              {user.name}
+            </dd>
           </div>
           <div className="flex justify-between text-sm">
             <dt className="text-zinc-500 dark:text-zinc-400">Email</dt>
-            <dd className="font-medium text-zinc-900 dark:text-zinc-100">{user.email}</dd>
+            <dd className="font-medium text-zinc-900 dark:text-zinc-100">
+              {user.email}
+            </dd>
           </div>
           <div className="flex justify-between text-sm">
             <dt className="text-zinc-500 dark:text-zinc-400">Cooperative</dt>
-            <dd className="font-medium text-zinc-900 dark:text-zinc-100">{user.cooperative.name}</dd>
+            <dd className="font-medium text-zinc-900 dark:text-zinc-100">
+              {user.cooperative.name}
+            </dd>
           </div>
           <div className="flex justify-between text-sm">
             <dt className="text-zinc-500 dark:text-zinc-400">Member since</dt>
@@ -88,7 +107,7 @@ export default async function ProfilePage() {
       </div>
 
       <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-6 space-y-4">
-        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
+        <h2 className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
           Contributions
         </h2>
         <dl className="space-y-3">

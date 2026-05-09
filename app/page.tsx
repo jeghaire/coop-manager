@@ -8,7 +8,7 @@ import {
   Building2,
   Lock,
   CreditCard,
-  ChevronRight
+  ChevronRight,
 } from "lucide-react";
 import { Header } from "./components/Header";
 import { ScrollReveal } from "./components/ScrollReveal";
@@ -37,7 +37,7 @@ export default function Home() {
 
 function AppWindow({
   children,
-  url
+  url,
 }: {
   children: React.ReactNode;
   url: string;
@@ -64,7 +64,7 @@ const rolePill: Record<string, string> = {
   OWNER: "bg-emerald-500/15 text-emerald-400",
   ADMIN: "bg-sky-500/15 text-sky-400",
   TREASURER: "bg-amber-500/15 text-amber-400",
-  MEMBER: "bg-zinc-700 text-zinc-400"
+  MEMBER: "bg-zinc-700 text-zinc-400",
 };
 
 // ─── Mockup: dashboard overview ───────────────────────────────────────────────
@@ -75,7 +75,7 @@ function DashboardMockup() {
     { name: "Emeka Nwosu", amount: "₦25,000", status: "PENDING" },
     { name: "Fatima Bello", amount: "₦25,000", status: "VERIFIED" },
     { name: "Chidi Obi", amount: "₦30,000", status: "VERIFIED" },
-    { name: "Ngozi Adeyemi", amount: "₦20,000", status: "PENDING" }
+    { name: "Ngozi Adeyemi", amount: "₦20,000", status: "PENDING" },
   ];
   return (
     <AppWindow url="cooperative-manager.app/dashboard">
@@ -102,7 +102,7 @@ function DashboardMockup() {
           {[
             { label: "Members", value: "47", color: "text-zinc-100" },
             { label: "Total Saved", value: "₦2.4M", color: "text-emerald-400" },
-            { label: "Active Loans", value: "12", color: "text-zinc-100" }
+            { label: "Active Loans", value: "12", color: "text-zinc-100" },
           ].map((s) => (
             <div key={s.label} className="bg-zinc-800 rounded-lg p-3">
               <p className="text-[9px] text-zinc-500 uppercase tracking-wide mb-1.5">
@@ -116,7 +116,7 @@ function DashboardMockup() {
             </div>
           ))}
         </div>
-        <p className="text-[9px] font-mono uppercase tracking-widest text-zinc-500 mb-2">
+        <p className="text-[9px] font-mono uppercase tracking-wider text-zinc-500 mb-2">
           Recent Contributions
         </p>
         <div className="space-y-1.5">
@@ -154,20 +154,20 @@ function VerificationMockup() {
       name: "Emeka Nwosu",
       amount: "₦25,000",
       method: "Bank Transfer",
-      date: "Apr 23"
+      date: "Apr 23",
     },
     {
       name: "Ngozi Adeyemi",
       amount: "₦20,000",
       method: "Mobile Money",
-      date: "Apr 22"
+      date: "Apr 22",
     },
     {
       name: "Taiwo Adeleke",
       amount: "₦25,000",
       method: "Bank Transfer",
-      date: "Apr 21"
-    }
+      date: "Apr 21",
+    },
   ];
   return (
     <AppWindow url="cooperative-manager.app/admin/contributions">
@@ -240,7 +240,7 @@ function LoanMockup() {
         <div className="bg-zinc-800 rounded-xl p-4 mb-3">
           <div className="flex justify-between items-start mb-4">
             <div>
-              <p className="text-[9px] uppercase tracking-widest text-zinc-500 mb-1 font-mono">
+              <p className="text-[9px] uppercase tracking-wider text-zinc-500 mb-1 font-mono">
                 Applicant
               </p>
               <p className="text-xs font-semibold text-zinc-200">
@@ -251,7 +251,7 @@ function LoanMockup() {
               </p>
             </div>
             <div className="text-right">
-              <p className="text-[9px] uppercase tracking-widest text-zinc-500 mb-1 font-mono">
+              <p className="text-[9px] uppercase tracking-wider text-zinc-500 mb-1 font-mono">
                 Requested
               </p>
               <p className="text-2xl font-semibold text-emerald-400 leading-none">
@@ -260,13 +260,13 @@ function LoanMockup() {
             </div>
           </div>
           <div className="h-px bg-zinc-700 mb-4" />
-          <p className="text-[9px] uppercase tracking-widest text-zinc-500 mb-2.5 font-mono">
+          <p className="text-[9px] uppercase tracking-wider text-zinc-500 mb-2.5 font-mono">
             Guarantors (2/2)
           </p>
           <div className="space-y-2">
             {[
               { name: "Ada Okonkwo", role: "OWNER" },
-              { name: "Emeka Nwosu", role: "ADMIN" }
+              { name: "Emeka Nwosu", role: "ADMIN" },
             ].map((g) => (
               <div
                 key={g.name}
@@ -311,32 +311,32 @@ function MembersMockup() {
       name: "Ada Okonkwo",
       role: "OWNER",
       contrib: "₦25,000/mo",
-      initials: "AO"
+      initials: "AO",
     },
     {
       name: "Emeka Nwosu",
       role: "ADMIN",
       contrib: "₦25,000/mo",
-      initials: "EN"
+      initials: "EN",
     },
     {
       name: "Fatima Bello",
       role: "MEMBER",
       contrib: "₦25,000/mo",
-      initials: "FB"
+      initials: "FB",
     },
     {
       name: "Chidi Obi",
       role: "TREASURER",
       contrib: "₦30,000/mo",
-      initials: "CO"
+      initials: "CO",
     },
     {
       name: "Ngozi Adeyemi",
       role: "MEMBER",
       contrib: "₦20,000/mo",
-      initials: "NA"
-    }
+      initials: "NA",
+    },
   ];
   return (
     <AppWindow url="cooperative-manager.app/admin/members">
@@ -399,38 +399,38 @@ function AuditLogMockup() {
       time: "09:42:11",
       actor: "ada.okonkwo",
       action: "contribution.verified",
-      ref: "contrib_k9x2"
+      ref: "contrib_k9x2",
     },
     {
       time: "09:38:05",
       actor: "fatima.bello",
       action: "loan.applied",
-      ref: "loan_m3p7"
+      ref: "loan_m3p7",
     },
     {
       time: "09:31:22",
       actor: "emeka.nwosu",
       action: "contribution.submitted",
-      ref: "contrib_j8w1"
+      ref: "contrib_j8w1",
     },
     {
       time: "09:17:44",
       actor: "ada.okonkwo",
       action: "loan.approved",
-      ref: "loan_n2q5"
+      ref: "loan_n2q5",
     },
     {
       time: "08:59:03",
       actor: "chidi.obi",
       action: "guarantor.accepted",
-      ref: "loan_n2q5"
+      ref: "loan_n2q5",
     },
     {
       time: "08:44:17",
       actor: "ngozi.adeyemi",
       action: "loan.applied",
-      ref: "loan_p4r8"
-    }
+      ref: "loan_p4r8",
+    },
   ];
   return (
     <AppWindow url="cooperative-manager.app/admin/audit-log">
@@ -495,7 +495,7 @@ function Hero() {
               <div
                 className="inline-flex items-center gap-2 text-xs font-mono font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 px-3 py-1.5 rounded-full mb-8"
                 style={{
-                  animation: "fadeIn 0.6s cubic-bezier(0.16,1,0.3,1) both"
+                  animation: "fadeIn 0.6s cubic-bezier(0.16,1,0.3,1) both",
                 }}
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400" />
@@ -503,10 +503,10 @@ function Hero() {
               </div>
 
               <h1
-                className="text-4xl md:text-5xl lg:text-[58px] font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight leading-[1.07] mb-6"
+                className="text-4xl md:text-5xl font-heading leading-[1.2] text-balance lg:text-6xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight mb-6"
                 style={{
                   animation:
-                    "fadeInUp 0.7s cubic-bezier(0.16,1,0.3,1) both 0.1s"
+                    "fadeInUp 0.7s cubic-bezier(0.16,1,0.3,1) both 0.1s",
                 }}
               >
                 Run your cooperative
@@ -520,7 +520,7 @@ function Hero() {
                 className="text-lg text-zinc-500 dark:text-zinc-400 leading-relaxed mb-10 max-w-lg"
                 style={{
                   animation:
-                    "fadeInUp 0.7s cubic-bezier(0.16,1,0.3,1) both 0.22s"
+                    "fadeInUp 0.7s cubic-bezier(0.16,1,0.3,1) both 0.22s",
                 }}
               >
                 Member contributions. Loan administration. Financial oversight.
@@ -532,7 +532,7 @@ function Hero() {
                 className="flex flex-col sm:flex-row gap-3 mb-12"
                 style={{
                   animation:
-                    "fadeInUp 0.7s cubic-bezier(0.16,1,0.3,1) both 0.32s"
+                    "fadeInUp 0.7s cubic-bezier(0.16,1,0.3,1) both 0.32s",
                 }}
               >
                 <Link
@@ -554,16 +554,16 @@ function Hero() {
                 className="grid grid-cols-3 gap-6 pt-8 border-t border-zinc-100 dark:border-zinc-800/60"
                 style={{
                   animation:
-                    "fadeInUp 0.7s cubic-bezier(0.16,1,0.3,1) both 0.42s"
+                    "fadeInUp 0.7s cubic-bezier(0.16,1,0.3,1) both 0.42s",
                 }}
               >
                 {[
                   {
                     value: "4 roles",
-                    label: "Owner · Admin · Treasurer · Member"
+                    label: "Owner · Admin · Treasurer · Member",
                   },
                   { value: "Multi-tenant", label: "Strict data isolation" },
-                  { value: "Audit trail", label: "Every action logged" }
+                  { value: "Audit trail", label: "Every action logged" },
                 ].map((s) => (
                   <div key={s.value}>
                     <p className="text-xs font-semibold font-mono text-emerald-700 dark:text-emerald-400 mb-1">
@@ -581,7 +581,7 @@ function Hero() {
             <div
               className="relative"
               style={{
-                animation: "scaleIn 0.9s cubic-bezier(0.16,1,0.3,1) both 0.18s"
+                animation: "scaleIn 0.9s cubic-bezier(0.16,1,0.3,1) both 0.18s",
               }}
             >
               <div className="absolute inset-0 bg-emerald-500/5 dark:bg-emerald-500/8 rounded-3xl blur-2xl scale-110" />
@@ -624,7 +624,7 @@ function ContributionsFeature() {
                 "Bank transfer, mobile money, or cash — all payment methods covered",
                 "Receipt attachments stored alongside every contribution",
                 "Instant status updates: pending, verified, or rejected",
-                "Full contribution history per member, exportable to CSV"
+                "Full contribution history per member, exportable to CSV",
               ].map((p, i) => (
                 <ScrollReveal key={p} direction="up" delay={i * 80}>
                   <li className="flex items-start gap-3">
@@ -692,7 +692,7 @@ function LoansFeature() {
                 "Multi-step workflow: apply → guarantors → admin review",
                 "Guarantors accept or reject with optional reasons",
                 "Admins approve or reject with documented decisions",
-                "Rejection reasons preserved for transparency and appeals"
+                "Rejection reasons preserved for transparency and appeals",
               ].map((p, i) => (
                 <ScrollReveal key={p} direction="up" delay={60 + i * 80}>
                   <li className="flex items-start gap-3">
@@ -742,7 +742,7 @@ function MembersFeature() {
                 "Owner, Admin, Treasurer, and Member roles built in",
                 "Per-member monthly contribution targets tracked individually",
                 "Invite members by email or let them join via cooperative code",
-                "Soft-delete preserves history when members leave"
+                "Soft-delete preserves history when members leave",
               ].map((p, i) => (
                 <ScrollReveal key={p} direction="up" delay={i * 80}>
                   <li className="flex items-start gap-3">
@@ -782,18 +782,18 @@ function HowItWorks() {
     {
       number: "01",
       title: "Administrator provisions the cooperative",
-      body: "An owner account is created for your cooperative. They set contribution targets, define roles, and invite the first wave of members. The platform is ready to run in minutes."
+      body: "An owner account is created for your cooperative. They set contribution targets, define roles, and invite the first wave of members. The platform is ready to run in minutes.",
     },
     {
       number: "02",
       title: "Members join and contribute monthly",
-      body: "Members sign up, select their cooperative, and begin submitting monthly payments with receipt uploads. Treasurers review each one and mark it verified — building a clean financial record over time."
+      body: "Members sign up, select their cooperative, and begin submitting monthly payments with receipt uploads. Treasurers review each one and mark it verified — building a clean financial record over time.",
     },
     {
       number: "03",
       title: "Loans are applied for, reviewed, and decided",
-      body: "Any member can apply for a loan. Guarantors accept or decline. Once the threshold is met, the application moves to admin review. Approved or rejected — with reasons, always on record."
-    }
+      body: "Any member can apply for a loan. Guarantors accept or decline. Once the threshold is met, the application moves to admin review. Approved or rejected — with reasons, always on record.",
+    },
   ];
 
   return (
@@ -803,7 +803,7 @@ function HowItWorks() {
     >
       <div className="max-w-7xl mx-auto px-6 w-full">
         <ScrollReveal direction="up" className="mb-16 max-w-xl">
-          <p className="text-xs font-mono uppercase tracking-widest text-zinc-400 dark:text-zinc-600 mb-4">
+          <p className="text-xs font-mono uppercase tracking-wider text-zinc-400 dark:text-zinc-600 mb-4">
             How it works
           </p>
           <h2 className="text-3xl md:text-4xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight leading-[1.1] mb-4">
@@ -853,7 +853,7 @@ const securityPoints = [
   "Passwords hashed with scrypt before storage",
   "Session tokens expire after 30 days with secure cookie flags",
   "Soft deletes preserve audit integrity — records are never truly lost",
-  "All financial mutations require authenticated, authorised sessions"
+  "All financial mutations require authenticated, authorised sessions",
 ];
 
 function Security() {

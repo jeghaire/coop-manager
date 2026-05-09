@@ -16,7 +16,7 @@ const ROLE_BADGE: Record<string, "success" | "sky" | "warning" | "secondary"> =
     OWNER: "success",
     ADMIN: "sky",
     TREASURER: "warning",
-    MEMBER: "secondary"
+    MEMBER: "secondary",
   };
 
 export default async function AdminMembersPage() {
@@ -40,8 +40,8 @@ export default async function AdminMembersPage() {
       monthlyContributionAmount: true,
       joinedAt: true,
       createdAt: true,
-      emailVerified: true
-    }
+      emailVerified: true,
+    },
   });
 
   return (

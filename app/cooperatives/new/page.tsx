@@ -1,7 +1,10 @@
 "use client";
 
 import { useActionState } from "react";
-import { createCooperative, type CreateCoopState } from "@/app/actions/cooperative";
+import {
+  createCooperative,
+  type CreateCoopState,
+} from "@/app/actions/cooperative";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,7 +14,7 @@ import Link from "next/link";
 export default function NewCooperativePage() {
   const [state, action, pending] = useActionState<CreateCoopState, FormData>(
     createCooperative,
-    {}
+    {},
   );
 
   return (
@@ -42,7 +45,7 @@ export default function NewCooperativePage() {
             )}
 
             <fieldset className="space-y-4">
-              <legend className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest mb-3">
+              <legend className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-3">
                 Cooperative
               </legend>
               <div className="space-y-1.5">
@@ -59,7 +62,7 @@ export default function NewCooperativePage() {
             <hr className="border-zinc-100 dark:border-zinc-800" />
 
             <fieldset className="space-y-4">
-              <legend className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest mb-3">
+              <legend className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-3">
                 Your Account (Owner)
               </legend>
               <div className="space-y-1.5">

@@ -27,31 +27,31 @@ export default async function DashboardPage() {
           userId: user.id,
           cooperativeId,
           status: { in: ["PENDING_GUARANTORS", "PENDING_ADMIN_REVIEW"] },
-          deletedAt: null
-        }
+          deletedAt: null,
+        },
       }),
       prisma.loanGuarantor.count({
         where: {
           guarantorId: user.id,
           status: "PENDING",
           deletedAt: null,
-          loan: { status: "PENDING_GUARANTORS" }
-        }
+          loan: { status: "PENDING_GUARANTORS" },
+        },
       }),
       prisma.contribution.findMany({
         where: {
           userId: user.id,
           cooperativeId,
           status: "VERIFIED",
-          deletedAt: null
+          deletedAt: null,
         },
-        select: { amount: true }
-      })
+        select: { amount: true },
+      }),
     ]);
 
   const verifiedTotal = verifiedContributions.reduce(
     (sum, c) => sum + Number(c.amount),
-    0
+    0,
   );
 
   function roleBadge(role: string) {
@@ -94,7 +94,7 @@ export default async function DashboardPage() {
       {/* Quick stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-5">
-          <p className="text-xs font-mono font-medium text-zinc-400 dark:text-zinc-600 uppercase tracking-widest mb-2">
+          <p className="text-xs font-mono font-medium text-zinc-400 dark:text-zinc-600 uppercase tracking-wider mb-2">
             Total Contributed
           </p>
           <p className="text-3xl font-semibold text-zinc-900 dark:text-zinc-100">
@@ -112,7 +112,7 @@ export default async function DashboardPage() {
         </div>
 
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-5">
-          <p className="text-xs font-mono font-medium text-zinc-400 dark:text-zinc-600 uppercase tracking-widest mb-2">
+          <p className="text-xs font-mono font-medium text-zinc-400 dark:text-zinc-600 uppercase tracking-wider mb-2">
             Active Loans
           </p>
           <p className="text-3xl font-semibold text-zinc-900 dark:text-zinc-100">
@@ -130,7 +130,7 @@ export default async function DashboardPage() {
         </div>
 
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-5">
-          <p className="text-xs font-mono font-medium text-zinc-400 dark:text-zinc-600 uppercase tracking-widest mb-2">
+          <p className="text-xs font-mono font-medium text-zinc-400 dark:text-zinc-600 uppercase tracking-wider mb-2">
             Guarantor Requests
           </p>
           <p className="text-3xl font-semibold text-zinc-900 dark:text-zinc-100">

@@ -1,11 +1,11 @@
 import { getSession } from "@/app/lib/auth-helpers";
 import { redirect } from "next/navigation";
 import { Header } from "@/app/components/Header";
-import { MobileTopBar } from "@/app/components/MobileTopBar";
+// import { MobileTopBar } from "@/app/components/MobileTopBar";
 import { DashboardNav } from "@/app/components/DashboardNav";
-import { BottomTabBar } from "@/app/components/BottomTabBar";
+// import { BottomTabBar } from "@/app/components/BottomTabBar";
 import prisma from "@/app/lib/prisma";
-import { PinnedAnnouncementsBanner } from "@/components/PinnedAnnouncementsBanner";
+import { PinnedAnnouncementsBanner } from "@/app/components/PinnedAnnouncementsBanner";
 
 export default async function DashboardLayout({
   children

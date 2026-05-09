@@ -52,7 +52,7 @@ export default async function ContributionsPage() {
 
       {/* Verified total */}
       <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-2xl p-5">
-        <p className="text-xs font-mono font-medium text-emerald-600 dark:text-emerald-500 uppercase tracking-widest mb-1">
+        <p className="text-xs font-mono font-medium text-emerald-600 dark:text-emerald-500 uppercase tracking-wider mb-1">
           Total Verified
         </p>
         <p className="text-3xl font-semibold text-emerald-800 dark:text-emerald-300">

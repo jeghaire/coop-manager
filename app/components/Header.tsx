@@ -1,15 +1,13 @@
 import { getSession } from "@/app/lib/auth-helpers";
-import { Building2, ArrowRightToLine } from "lucide-react";
+import { Building2, ArrowRightToLine, LogOutIcon } from "lucide-react";
 import Link from "next/link";
 import { ThemeToggle } from "./ThemeToggle";
-import { UserMenu } from "./UserMenu";
 import { MobileNavDrawer } from "./MobileNavDrawer";
-
-export async function Header({
-  pendingLoans = 0,
-}: {
-  pendingLoans?: number;
-}) {
+import { Separator } from "@/components/ui/separator";
+import UserMenu from "./UserMenu";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/app/lib/utils";
+export async function Header({ pendingLoans = 0 }: { pendingLoans?: number }) {
   const session = await getSession();
   const user = session?.user;
   const role = (user?.role as string) ?? "MEMBER";
@@ -26,7 +24,7 @@ export async function Header({
             <div className="w-7 h-7 bg-emerald-600 dark:bg-emerald-500 rounded-md flex items-center justify-center shadow-sm group-hover:bg-emerald-700 dark:group-hover:bg-emerald-400 transition-colors">
               <Building2 className="w-4 h-4 text-white" strokeWidth={1.75} />
             </div>
-            <span className="font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight text-base">
+            <span className="font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight">
               Cooperative Manager
             </span>
           </Link>
@@ -34,9 +32,20 @@ export async function Header({
 
         <div className="flex items-center gap-2">
           <ThemeToggle />
+          <Separator
+            orientation="vertical"
+            className="data-[orientation=vertical]:h-5 my-auto"
+          />
 
           {user ? (
-            <UserMenu name={user.name} email={user.email} role={role} />
+            <UserMenu
+              user={{
+                name: user.name,
+                email: user.email,
+                image: user.image ?? "",
+                role: user.role,
+              }}
+            />
           ) : (
             <>
               <Link
@@ -53,10 +62,13 @@ export async function Header({
               </Link>
               <Link
                 href="/auth/signin"
-                className="md:hidden p-1.5 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+                className={cn(
+                  buttonVariants({ variant: "ghost", size: "icon" }),
+                  "md:hidden text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors",
+                )}
                 aria-label="Sign in"
               >
-                <ArrowRightToLine className="w-5 h-5" strokeWidth={1.75} />
+                <LogOutIcon />
               </Link>
             </>
           )}
