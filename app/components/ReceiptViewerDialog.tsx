@@ -124,8 +124,8 @@ export function ReceiptViewerDialog({
       <Dialog.Root open={open} onOpenChange={setOpen}>
         <Dialog.Portal>
           <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm transition-opacity duration-200 data-ending-style:opacity-0 data-starting-style:opacity-0" />
-          <Dialog.Popup className="fixed inset-0 z-50 overflow-y-auto flex p-4 data-ending-style:opacity-0 data-starting-style:opacity-0 transition-opacity duration-200 outline-none">
-            <div className="relative flex flex-col bg-zinc-900 rounded-2xl shadow-2xl overflow-hidden w-full max-w-3xl max-h-[calc(100dvh-2rem)] my-auto mx-auto">
+          <Dialog.Popup className="fixed inset-0 z-50 flex items-center justify-center p-4 data-ending-style:opacity-0 data-starting-style:opacity-0 transition-opacity duration-200 outline-none">
+            <div className="relative flex flex-col bg-zinc-900 rounded-2xl shadow-2xl overflow-hidden w-full max-w-3xl max-h-[calc(100dvh-2rem)]">
 
               {/* Toolbar */}
               <div className="flex items-center justify-between gap-3 px-3 py-2.5 border-b border-white/10 shrink-0">
