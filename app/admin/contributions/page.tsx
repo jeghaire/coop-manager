@@ -3,6 +3,14 @@ export const dynamic = "force-dynamic";
 import { getSession } from "@/app/lib/auth-helpers";
 import { redirect } from "next/navigation";
 import prisma from "@/app/lib/prisma";
+import { getPublicUrl } from "@/app/lib/s3-upload";
+import { ReceiptViewerDialog } from "@/app/components/ReceiptViewerDialog";
+
+function isViewableImage(fileType: string | null): boolean {
+  return !!fileType?.startsWith("image/") &&
+    fileType !== "image/heic" &&
+    fileType !== "image/heif";
+}
 import { Badge } from "@/components/ui/badge";
 import { ContributionReviewForm } from "./ContributionReviewForm";
 import Link from "next/link";
@@ -51,7 +59,7 @@ export default async function AdminContributionsPage({
     ? (rawStatus as StatusFilter)
     : "PENDING_VERIFICATION";
 
-  const contributions = await prisma.contribution.findMany({
+  const raw = await prisma.contribution.findMany({
     where: {
       cooperativeId,
       deletedAt: null,
@@ -62,6 +70,11 @@ export default async function AdminContributionsPage({
     },
     orderBy: { submittedAt: "desc" }
   });
+
+  const contributions = raw.map((c) => ({
+    ...c,
+    receiptUrl: c.receiptKey ? getPublicUrl(c.receiptKey) : c.receiptUrl,
+  }));
 
   const counts = await prisma.contribution.groupBy({
     by: ["status"],
@@ -119,7 +132,7 @@ export default async function AdminContributionsPage({
               key={c.id}
               className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-5"
             >
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 flex-wrap">
                     <span className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
@@ -156,37 +169,21 @@ export default async function AdminContributionsPage({
                     </p>
                   </div>
 
-                  {c.receiptUrl && (
-                    <div className="mt-2">
-                      <a
-                        href={c.receiptUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400 hover:underline"
-                      >
-                        {c.receiptFileType === "application/pdf" ? (
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                            className="w-4 h-4 shrink-0"
-                          >
-                            <path d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0016.5 9h-1.875a1.875 1.875 0 01-1.875-1.875V5.25A3.75 3.75 0 009 1.5H5.625z" />
-                            <path d="M12.971 1.816A5.23 5.23 0 0114.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 013.434 1.279 9.768 9.768 0 00-6.963-6.963z" />
-                          </svg>
-                        ) : null}
-                        View receipt ↗
-                      </a>
-                      {c.receiptFileType?.startsWith("image/") && (
-                        <div className="mt-2">
-                          <img
-                            src={c.receiptUrl}
-                            alt="Receipt"
-                            className="max-h-30 rounded-lg border border-zinc-200 dark:border-zinc-700 object-contain"
-                          />
-                        </div>
+                  {c.receiptUrl && !isViewableImage(c.receiptFileType) && (
+                    <ReceiptViewerDialog
+                      url={c.receiptUrl}
+                      fileType={c.receiptFileType}
+                      fileName={c.receiptFileName}
+                      className="mt-2 inline-flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400 hover:underline"
+                    >
+                      {c.receiptFileType === "application/pdf" && (
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 shrink-0">
+                          <path d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0016.5 9h-1.875a1.875 1.875 0 01-1.875-1.875V5.25A3.75 3.75 0 009 1.5H5.625z" />
+                          <path d="M12.971 1.816A5.23 5.23 0 0114.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 013.434 1.279 9.768 9.768 0 00-6.963-6.963z" />
+                        </svg>
                       )}
-                    </div>
+                      View receipt
+                    </ReceiptViewerDialog>
                   )}
 
                   {c.status === "REJECTED" && c.rejectionReason && (
@@ -207,6 +204,21 @@ export default async function AdminContributionsPage({
                     </p>
                   )}
                 </div>
+
+                {c.receiptUrl && isViewableImage(c.receiptFileType) && (
+                  <ReceiptViewerDialog
+                    url={c.receiptUrl}
+                    fileType={c.receiptFileType}
+                    fileName={c.receiptFileName}
+                    className="shrink-0 rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700"
+                  >
+                    <img
+                      src={c.receiptUrl}
+                      alt="Receipt thumbnail"
+                      className="w-20 h-20 object-cover"
+                    />
+                  </ReceiptViewerDialog>
+                )}
               </div>
 
               {c.status === "PENDING_VERIFICATION" && (

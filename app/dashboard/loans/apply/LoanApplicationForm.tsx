@@ -16,6 +16,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { Form } from "@/components/ui/form";
 
 type Member = { id: string; name: string };
 
@@ -58,7 +59,7 @@ export function LoanApplicationForm({
       : "No guarantor coverage check required.";
 
   return (
-    <form action={action} className="space-y-5">
+    <Form action={action} className="space-y-5">
       {state.error && (
         <Alert variant="destructive">
           <AlertDescription>{state.error}</AlertDescription>
@@ -95,9 +96,9 @@ export function LoanApplicationForm({
 
       <div className="space-y-1.5">
         <Label htmlFor="guarantor1">First Guarantor</Label>
-        <input type="hidden" name="guarantor1Id" value={guarantor1Id} />
+        <Input type="hidden" name="guarantor1Id" value={guarantor1Id} />
         <Select value={guarantor1Id} onValueChange={(v) => setGuarantor1Id(v ?? "")}>
-          <SelectTrigger id="guarantor1">
+          <SelectTrigger id="guarantor1" className="w-full">
             <SelectValue>
               {guarantor1Id
                 ? (members.find((m) => m.id === guarantor1Id)?.name ?? "Select a verified member")
@@ -116,9 +117,9 @@ export function LoanApplicationForm({
 
       <div className="space-y-1.5">
         <Label htmlFor="guarantor2">Second Guarantor</Label>
-        <input type="hidden" name="guarantor2Id" value={guarantor2Id} />
+        <Input type="hidden" name="guarantor2Id" value={guarantor2Id} />
         <Select value={guarantor2Id} onValueChange={(v) => setGuarantor2Id(v ?? "")}>
-          <SelectTrigger id="guarantor2">
+          <SelectTrigger id="guarantor2" className="w-full">
             <SelectValue>
               {guarantor2Id
                 ? (members.find((m) => m.id === guarantor2Id)?.name ?? "Select a verified member")
@@ -143,6 +144,6 @@ export function LoanApplicationForm({
       >
         {pending ? "Submitting…" : "Submit Application"}
       </Button>
-    </form>
+    </Form>
   );
 }

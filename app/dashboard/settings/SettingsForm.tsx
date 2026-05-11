@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Form } from "@/components/ui/form";
 
 export function SettingsForm({
   currentName,
@@ -95,7 +96,7 @@ export function SettingsForm({
           </p>
         </div>
 
-        <form onSubmit={handleNameSave} className="space-y-3">
+        <Form onSubmit={handleNameSave} className="space-y-3">
           <div className="space-y-1.5">
             <Label htmlFor="name">Display Name</Label>
             <Input
@@ -117,7 +118,7 @@ export function SettingsForm({
           >
             {namePending ? "Saving…" : "Save Name"}
           </Button>
-        </form>
+        </Form>
       </div>
 
       {/* Password section */}
@@ -126,7 +127,7 @@ export function SettingsForm({
           Change Password
         </h2>
 
-        <form onSubmit={handlePasswordSave} className="space-y-4">
+        <Form onSubmit={handlePasswordSave} className="space-y-4">
           {pwError && (
             <Alert variant="destructive">
               <AlertDescription>{pwError}</AlertDescription>
@@ -171,7 +172,7 @@ export function SettingsForm({
           <Button type="submit" size="sm" disabled={pwPending}>
             {pwPending ? "Saving…" : "Update Password"}
           </Button>
-        </form>
+        </Form>
       </div>
     </div>
   );

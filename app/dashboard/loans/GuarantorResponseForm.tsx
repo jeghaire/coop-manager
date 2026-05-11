@@ -3,8 +3,10 @@
 import { useActionState, useState } from "react";
 import { respondAsGuarantor, type LoanActionState } from "@/app/actions/loans";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Form } from "@/components/ui/form";
 
 export function GuarantorResponseForm({ loanId }: { loanId: string }) {
   const [state, action, pending] = useActionState<LoanActionState, FormData>(
@@ -22,9 +24,9 @@ export function GuarantorResponseForm({ loanId }: { loanId: string }) {
   }
 
   return (
-    <form action={action} className="space-y-3">
-      <input type="hidden" name="loanId" value={loanId} />
-      <input type="hidden" name="response" value={choice ?? ""} />
+    <Form action={action} className="space-y-3">
+      <Input type="hidden" name="loanId" value={loanId} />
+      <Input type="hidden" name="response" value={choice ?? ""} />
 
       {state.error && (
         <Alert variant="destructive">
@@ -73,6 +75,6 @@ export function GuarantorResponseForm({ loanId }: { loanId: string }) {
           </Button>
         )}
       </div>
-    </form>
+    </Form>
   );
 }

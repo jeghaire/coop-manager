@@ -7,6 +7,8 @@ import {
   type SettingsActionState,
 } from "@/app/actions/settings";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Form } from "@/components/ui/form";
 
 export function SetPreferredForm({
   accountId,
@@ -21,13 +23,13 @@ export function SetPreferredForm({
   );
 
   return (
-    <form action={action}>
-      <input type="hidden" name="accountId" value={accountId} />
-      <input type="hidden" name="cooperativeId" value={cooperativeId} />
+    <Form action={action}>
+      <Input type="hidden" name="accountId" value={accountId} />
+      <Input type="hidden" name="cooperativeId" value={cooperativeId} />
       <Button type="submit" size="sm" variant="outline" disabled={pending}>
         {pending ? "…" : "Set preferred"}
       </Button>
-    </form>
+    </Form>
   );
 }
 
@@ -44,17 +46,17 @@ export function DeleteBankAccountForm({
   );
 
   return (
-    <form
+    <Form
       action={action}
       onSubmit={(e) => {
         if (!confirm("Delete this bank account?")) e.preventDefault();
       }}
     >
-      <input type="hidden" name="accountId" value={accountId} />
-      <input type="hidden" name="cooperativeId" value={cooperativeId} />
+      <Input type="hidden" name="accountId" value={accountId} />
+      <Input type="hidden" name="cooperativeId" value={cooperativeId} />
       <Button type="submit" size="sm" variant="destructive" disabled={pending}>
         {pending ? "…" : "Delete"}
       </Button>
-    </form>
+    </Form>
   );
 }

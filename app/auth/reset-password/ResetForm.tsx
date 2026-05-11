@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Link from "next/link";
+import { Form } from "@/components/ui/form";
 
 export function ResetForm() {
   const router = useRouter();
@@ -70,7 +71,7 @@ export function ResetForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <Form onSubmit={handleSubmit} className="space-y-4">
       {error && (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
@@ -101,6 +102,6 @@ export function ResetForm() {
       <Button type="submit" className="w-full" disabled={pending}>
         {pending ? "Saving…" : "Set New Password"}
       </Button>
-    </form>
+    </Form>
   );
 }

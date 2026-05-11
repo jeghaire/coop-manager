@@ -6,6 +6,8 @@ import {
   type AnnouncementActionState,
 } from "@/app/actions/announcements";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Form } from "@/components/ui/form";
 
 export function DeactivateButton({
   announcementId,
@@ -40,9 +42,9 @@ export function DeactivateButton({
   }
 
   return (
-    <form action={action} className="flex items-center gap-2">
-      <input type="hidden" name="announcementId" value={announcementId} />
-      <input type="hidden" name="cooperativeId" value={cooperativeId} />
+    <Form action={action} className="flex items-center gap-2">
+      <Input type="hidden" name="announcementId" value={announcementId} />
+      <Input type="hidden" name="cooperativeId" value={cooperativeId} />
       {state.error && (
         <p className="text-xs text-red-600 dark:text-red-400">{state.error}</p>
       )}
@@ -57,6 +59,6 @@ export function DeactivateButton({
       >
         Cancel
       </Button>
-    </form>
+    </Form>
   );
 }

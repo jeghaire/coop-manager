@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Form } from "@/components/ui/form";
 
 export function BankAccountForm({ cooperativeId }: { cooperativeId: string }) {
   const [state, action, pending] = useActionState<SettingsActionState, FormData>(
@@ -14,8 +16,8 @@ export function BankAccountForm({ cooperativeId }: { cooperativeId: string }) {
   );
 
   return (
-    <form action={action} className="space-y-4">
-      <input type="hidden" name="cooperativeId" value={cooperativeId} />
+    <Form action={action} className="space-y-4">
+      <Input type="hidden" name="cooperativeId" value={cooperativeId} />
 
       {state.error && (
         <Alert variant="destructive">
@@ -48,7 +50,7 @@ export function BankAccountForm({ cooperativeId }: { cooperativeId: string }) {
         </div>
         <div className="flex items-end pb-0.5">
           <label className="flex items-center gap-2 cursor-pointer text-sm text-zinc-700 dark:text-zinc-300">
-            <input type="checkbox" name="isPreferred" className="rounded" />
+            <Checkbox name="isPreferred" />
             Mark as preferred
           </label>
         </div>
@@ -57,6 +59,6 @@ export function BankAccountForm({ cooperativeId }: { cooperativeId: string }) {
       <Button type="submit" size="sm" disabled={pending}>
         {pending ? "Adding…" : "Add Bank Account"}
       </Button>
-    </form>
+    </Form>
   );
 }

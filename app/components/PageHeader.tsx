@@ -5,7 +5,7 @@ import { useEffect, useRef } from "react";
 export function PageHeader({
   title,
   description,
-  action
+  action,
 }: {
   title: string;
   description?: string;
@@ -21,11 +21,11 @@ export function PageHeader({
       ([entry]) => {
         window.dispatchEvent(
           new CustomEvent("page-title-visible", {
-            detail: { visible: entry.isIntersecting }
-          })
+            detail: { visible: entry.isIntersecting },
+          }),
         );
       },
-      { threshold: 0 }
+      { threshold: 0 },
     );
 
     observer.observe(el);

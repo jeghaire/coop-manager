@@ -6,6 +6,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Form } from "@/components/ui/form";
 
 type Props = {
   loanId: string;
@@ -27,8 +28,8 @@ export function RepaymentForm({ loanId, remaining, currencySymbol, adminMode }: 
   }
 
   return (
-    <form action={formAction} className="space-y-4">
-      <input type="hidden" name="loanId" value={loanId} />
+    <Form action={formAction} className="space-y-4">
+      <Input type="hidden" name="loanId" value={loanId} />
 
       {state.error && (
         <Alert variant="destructive">
@@ -103,6 +104,6 @@ export function RepaymentForm({ loanId, remaining, currencySymbol, adminMode }: 
       <Button type="submit" size="sm" disabled={pending}>
         {pending ? "Recording…" : "Record Payment"}
       </Button>
-    </form>
+    </Form>
   );
 }

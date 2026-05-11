@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Form } from "@/components/ui/form";
 
 export function NotificationSettingsForm({
   phoneNumber,
@@ -38,7 +40,7 @@ export function NotificationSettingsForm({
         </p>
       )}
 
-      <form action={action} className="space-y-4">
+      <Form action={action} className="space-y-4">
         <div className="space-y-1.5">
           <Label htmlFor="phoneNumber">Phone Number (for SMS)</Label>
           <Input
@@ -55,11 +57,9 @@ export function NotificationSettingsForm({
 
         <div className="space-y-3">
           <label className="flex items-center gap-3 cursor-pointer">
-            <input
-              type="checkbox"
+            <Checkbox
               name="emailNotifications"
               defaultChecked={emailNotifications}
-              className="w-4 h-4 rounded accent-emerald-600"
             />
             <span className="text-sm text-zinc-700 dark:text-zinc-300">
               Email notifications (loan updates, contribution verified, dividends)
@@ -67,11 +67,9 @@ export function NotificationSettingsForm({
           </label>
 
           <label className="flex items-center gap-3 cursor-pointer">
-            <input
-              type="checkbox"
+            <Checkbox
               name="smsNotifications"
               defaultChecked={smsNotifications}
-              className="w-4 h-4 rounded accent-emerald-600"
             />
             <span className="text-sm text-zinc-700 dark:text-zinc-300">
               SMS notifications (requires phone number above)
@@ -82,7 +80,7 @@ export function NotificationSettingsForm({
         <Button type="submit" size="sm" disabled={pending}>
           {pending ? "Saving…" : "Save Preferences"}
         </Button>
-      </form>
+      </Form>
     </div>
   );
 }

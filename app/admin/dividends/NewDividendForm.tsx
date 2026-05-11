@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Form } from "@/components/ui/form";
 
 export function NewDividendForm({
   cooperativeId,
@@ -48,12 +49,14 @@ export function NewDividendForm({
             <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
               Create Dividend Payout
             </h2>
-            <button
+            <Button
+              type="button"
               onClick={() => setOpen(false)}
+              variant="ghost"
               className="text-xs text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
             >
               Cancel
-            </button>
+            </Button>
           </div>
 
           {state.error && (
@@ -62,15 +65,15 @@ export function NewDividendForm({
             </Alert>
           )}
 
-          <form action={action} className="space-y-4">
-            <input type="hidden" name="cooperativeId" value={cooperativeId} />
+          <Form action={action} className="space-y-4">
+            <Input type="hidden" name="cooperativeId" value={cooperativeId} />
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="period">Period</Label>
-                <input type="hidden" name="period" value={period} />
+                <Input type="hidden" name="period" value={period} />
                 <Select value={period} onValueChange={(v) => setPeriod(v ?? "Q1")}>
-                  <SelectTrigger id="period">
+                  <SelectTrigger id="period" className="w-full">
                     <SelectValue>{period}</SelectValue>
                   </SelectTrigger>
                   <SelectContent>
@@ -168,7 +171,7 @@ export function NewDividendForm({
             <Button type="submit" className="w-full" disabled={pending || pool <= 0}>
               {pending ? "Creating…" : "Create Payout"}
             </Button>
-          </form>
+          </Form>
         </div>
       )}
     </div>

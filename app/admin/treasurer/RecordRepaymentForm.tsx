@@ -1,11 +1,20 @@
 "use client";
 
+import { useState } from "react";
 import { useActionState } from "react";
 import { recordRepaymentForMember } from "@/app/actions/loans";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Form } from "@/components/ui/form";
 
 type Loan = {
   id: string;
@@ -21,9 +30,10 @@ type Props = {
 
 export function RecordRepaymentForm({ loans, currencySymbol }: Props) {
   const [state, formAction, pending] = useActionState(recordRepaymentForMember, {});
+  const [loanId, setLoanId] = useState("");
 
   return (
-    <form action={formAction} className="space-y-4">
+    <Form action={formAction} className="space-y-4">
       {state.error && (
         <Alert variant="destructive">
           <AlertDescription>{state.error}</AlertDescription>
@@ -37,22 +47,25 @@ export function RecordRepaymentForm({ loans, currencySymbol }: Props) {
 
       <div className="space-y-1.5">
         <Label htmlFor="loanId">Active Loan</Label>
-        <select
-          id="loanId"
-          name="loanId"
-          required
-          className="w-full rounded-md border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-        >
-          <option value="">Select a loan…</option>
-          {loans.map((loan) => (
-            <option key={loan.id} value={loan.id}>
-              {loan.applicant.name} — {currencySymbol}
-              {Number(loan.amountRequested).toLocaleString()} (
-              {currencySymbol}
-              {loan.remaining.toLocaleString(undefined, { maximumFractionDigits: 2 })} remaining)
-            </option>
-          ))}
-        </select>
+        <Input type="hidden" name="loanId" value={loanId} />
+        <Select value={loanId} onValueChange={(v) => setLoanId(v ?? "")}>
+          <SelectTrigger id="loanId" className="w-full">
+            <SelectValue placeholder="Select a loan…" />
+          </SelectTrigger>
+          <SelectContent>
+            {loans.map((loan) => (
+              <SelectItem key={loan.id} value={loan.id}>
+                {loan.applicant.name} — {currencySymbol}
+                {Number(loan.amountRequested).toLocaleString()} (
+                {currencySymbol}
+                {loan.remaining.toLocaleString(undefined, {
+                  maximumFractionDigits: 2,
+                })}{" "}
+                remaining)
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="space-y-1.5">
@@ -78,9 +91,9 @@ export function RecordRepaymentForm({ loans, currencySymbol }: Props) {
         />
       </div>
 
-      <Button type="submit" size="sm" disabled={pending}>
+      <Button type="submit" size="sm" disabled={pending || !loanId}>
         {pending ? "Recording…" : "Record Repayment"}
       </Button>
-    </form>
+    </Form>
   );
 }

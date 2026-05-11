@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Form } from "@/components/ui/form";
 
 const REASONS = [
   { value: "PERSONAL", label: "Personal Use" },
@@ -47,7 +48,7 @@ export function WithdrawalForm({
   }, [state.success, router]);
 
   return (
-    <form action={action} className="space-y-5">
+    <Form action={action} className="space-y-5">
       {state.error && (
         <Alert variant="destructive">
           <AlertDescription>{state.error}</AlertDescription>
@@ -82,9 +83,9 @@ export function WithdrawalForm({
 
       <div className="space-y-1.5">
         <Label htmlFor="reason">Reason</Label>
-        <input type="hidden" name="reason" value={reason} />
+        <Input type="hidden" name="reason" value={reason} />
         <Select value={reason} onValueChange={(v) => setReason(v ?? "")}>
-          <SelectTrigger id="reason">
+          <SelectTrigger id="reason" className="w-full">
             <SelectValue placeholder="Select a reason" />
           </SelectTrigger>
           <SelectContent>
@@ -119,6 +120,6 @@ export function WithdrawalForm({
       >
         {pending ? "Submitting…" : "Request Withdrawal"}
       </Button>
-    </form>
+    </Form>
   );
 }

@@ -6,8 +6,10 @@ import {
   type ContributionActionState,
 } from "@/app/actions/contributions";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Form } from "@/components/ui/form";
 
 export function ContributionReviewForm({
   contributionId,
@@ -31,12 +33,12 @@ export function ContributionReviewForm({
   }
 
   return (
-    <form
+    <Form
       action={action}
       className="space-y-3 mt-4 pt-4 border-t border-zinc-100 dark:border-zinc-800"
     >
-      <input type="hidden" name="contributionId" value={contributionId} />
-      <input type="hidden" name="decision" value={decision ?? ""} />
+      <Input type="hidden" name="contributionId" value={contributionId} />
+      <Input type="hidden" name="decision" value={decision ?? ""} />
 
       {state.error && (
         <Alert variant="destructive">
@@ -85,6 +87,6 @@ export function ContributionReviewForm({
           </Button>
         )}
       </div>
-    </form>
+    </Form>
   );
 }

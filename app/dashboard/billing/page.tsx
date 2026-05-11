@@ -11,11 +11,11 @@ import { PageHeader } from "@/app/components/PageHeader";
 const STATUS_BADGE = {
   ACTIVE: "success",
   PAST_DUE: "warning",
-  CANCELED: "destructive"
+  CANCELED: "destructive",
 } as const;
 
 export default async function BillingPage({
-  searchParams
+  searchParams,
 }: {
   searchParams: Promise<{ success?: string; canceled?: string }>;
 }) {
@@ -32,8 +32,8 @@ export default async function BillingPage({
       name: true,
       subscriptionStatus: true,
       billingCycleEnd: true,
-      stripeSubscriptionId: true
-    }
+      stripeSubscriptionId: true,
+    },
   });
 
   const { success, canceled } = await searchParams;
@@ -72,6 +72,7 @@ export default async function BillingPage({
               STATUS_BADGE[cooperative?.subscriptionStatus ?? "CANCELED"] ??
               "secondary"
             }
+            className="w-fit text-[10px]"
           >
             {cooperative?.subscriptionStatus ?? "INACTIVE"}
           </Badge>
@@ -83,7 +84,7 @@ export default async function BillingPage({
             {new Date(cooperative.billingCycleEnd).toLocaleDateString("en-GB", {
               day: "numeric",
               month: "long",
-              year: "numeric"
+              year: "numeric",
             })}
           </p>
         )}

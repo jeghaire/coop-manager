@@ -1,6 +1,12 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState, startTransition } from "react";
+import {
+  useActionState,
+  useEffect,
+  useRef,
+  useState,
+  startTransition,
+} from "react";
 import {
   submitContribution,
   type ContributionActionState,
@@ -17,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
+import { Form } from "@/components/ui/form";
 
 const PAYMENT_METHODS = [
   { value: "BANK_TRANSFER", label: "Bank Transfer" },
@@ -26,11 +33,15 @@ const PAYMENT_METHODS = [
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
-export function ContributionSubmitForm({ onSuccess }: { onSuccess?: () => void }) {
+export function ContributionSubmitForm({
+  onSuccess,
+}: {
+  onSuccess?: () => void;
+}) {
   const router = useRouter();
   const [state, formAction] = useActionState<ContributionActionState, FormData>(
     submitContribution,
-    {}
+    {},
   );
   const [paymentMethod, setPaymentMethod] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -69,7 +80,7 @@ export function ContributionSubmitForm({ onSuccess }: { onSuccess?: () => void }
       try {
         const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
         const res = await fetch(
-          `/api/receipts/presign?ext=${encodeURIComponent(ext)}&type=${encodeURIComponent(file.type)}`
+          `/api/receipts/presign?ext=${encodeURIComponent(ext)}&type=${encodeURIComponent(file.type)}`,
         );
         if (!res.ok) {
           const body = await res.json().catch(() => ({}));
@@ -85,7 +96,9 @@ export function ContributionSubmitForm({ onSuccess }: { onSuccess?: () => void }
           headers: { "Content-Type": file.type },
         });
         if (!putRes.ok) {
-          setFileError("Upload failed. Please try again.");
+          const text = await putRes.text().catch(() => "");
+          console.error("R2 PUT failed", putRes.status, text);
+          setFileError(`Upload failed (${putRes.status}). Please try again.`);
           setUploading(false);
           return;
         }
@@ -94,8 +107,13 @@ export function ContributionSubmitForm({ onSuccess }: { onSuccess?: () => void }
         rawFormData.set("receiptFileName", file.name);
         rawFormData.set("receiptFileSize", String(file.size));
         rawFormData.set("receiptFileType", file.type);
-      } catch {
-        setFileError("Upload failed. Please try again.");
+      } catch (err) {
+        console.error("Upload error:", err);
+        const msg =
+          err instanceof TypeError
+            ? "Network error — check R2 CORS settings."
+            : "Upload failed. Please try again.";
+        setFileError(msg);
         setUploading(false);
         return;
       }
@@ -110,7 +128,7 @@ export function ContributionSubmitForm({ onSuccess }: { onSuccess?: () => void }
   const pending = uploading;
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} className="space-y-5">
+    <Form ref={formRef} onSubmit={handleSubmit} className="space-y-5">
       {state.error && (
         <Alert variant="destructive">
           <AlertDescription>{state.error}</AlertDescription>
@@ -132,12 +150,12 @@ export function ContributionSubmitForm({ onSuccess }: { onSuccess?: () => void }
 
       <div className="space-y-1.5">
         <Label htmlFor="paymentMethod">Payment Method</Label>
-        <input type="hidden" name="paymentMethod" value={paymentMethod} />
+        <Input type="hidden" name="paymentMethod" value={paymentMethod} />
         <Select
           value={paymentMethod}
           onValueChange={(v) => setPaymentMethod(v ?? "")}
         >
-          <SelectTrigger id="paymentMethod">
+          <SelectTrigger id="paymentMethod" className="w-full">
             <SelectValue placeholder="How did you pay?" />
           </SelectTrigger>
           <SelectContent>
@@ -186,6 +204,6 @@ export function ContributionSubmitForm({ onSuccess }: { onSuccess?: () => void }
       >
         {uploading ? "Uploading…" : "Submit Contribution"}
       </Button>
-    </form>
+    </Form>
   );
 }

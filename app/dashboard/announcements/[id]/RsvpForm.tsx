@@ -6,6 +6,8 @@ import {
   type AnnouncementActionState,
 } from "@/app/actions/announcements";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Form } from "@/components/ui/form";
 
 const OPTIONS = [
   { value: "ATTENDING", label: "Attending" },
@@ -34,9 +36,9 @@ export function RsvpForm({
         {OPTIONS.map(({ value, label }) => {
           const isSelected = currentStatus === value;
           return (
-            <form key={value} action={action}>
-              <input type="hidden" name="announcementId" value={announcementId} />
-              <input type="hidden" name="rsvpStatus" value={value} />
+            <Form key={value} action={action}>
+              <Input type="hidden" name="announcementId" value={announcementId} />
+              <Input type="hidden" name="rsvpStatus" value={value} />
               <Button
                 type="submit"
                 size="sm"
@@ -50,7 +52,7 @@ export function RsvpForm({
               >
                 {label}
               </Button>
-            </form>
+            </Form>
           );
         })}
       </div>

@@ -7,6 +7,7 @@ import {
   type AdminActionState,
 } from "@/app/actions/admin";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -15,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState } from "react";
+import { Form } from "@/components/ui/form";
 
 const ROLES = [
   { value: "MEMBER", label: "Member" },
@@ -44,9 +46,9 @@ export function RoleChangeForm({
   }
 
   return (
-    <form action={action} className="flex items-center gap-2">
-      <input type="hidden" name="memberId" value={memberId} />
-      <input type="hidden" name="newRole" value={role} />
+    <Form action={action} className="flex items-center gap-2">
+      <Input type="hidden" name="memberId" value={memberId} />
+      <Input type="hidden" name="newRole" value={role} />
       <Select value={role} onValueChange={(v) => setRole(v ?? currentRole)}>
         <SelectTrigger className="h-7 text-xs w-32">
           <SelectValue />
@@ -64,7 +66,7 @@ export function RoleChangeForm({
           {pending ? "…" : "Save"}
         </Button>
       )}
-    </form>
+    </Form>
   );
 }
 
@@ -82,8 +84,8 @@ export function RemoveMemberForm({ memberId }: { memberId: string }) {
   }
 
   return (
-    <form action={action}>
-      <input type="hidden" name="memberId" value={memberId} />
+    <Form action={action}>
+      <Input type="hidden" name="memberId" value={memberId} />
       {confirm ? (
         <div className="flex items-center gap-1.5">
           <Button type="submit" size="xs" variant="destructive" disabled={pending}>
@@ -109,6 +111,6 @@ export function RemoveMemberForm({ memberId }: { memberId: string }) {
           Remove
         </Button>
       )}
-    </form>
+    </Form>
   );
 }

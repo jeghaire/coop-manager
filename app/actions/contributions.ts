@@ -3,7 +3,7 @@
 import prisma from "@/app/lib/prisma";
 import { requireAuth } from "@/app/lib/auth-helpers";
 import { notifyContributionVerified, notifyContributionRejected } from "@/app/lib/notifications";
-import { getPublicUrl } from "@/app/lib/s3";
+import { getPublicUrl } from "@/app/lib/s3-upload";
 import { revalidatePath } from "next/cache";
 
 export type ContributionActionState = {

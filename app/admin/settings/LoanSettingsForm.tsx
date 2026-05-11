@@ -6,6 +6,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Form } from "@/components/ui/form";
 
 type Props = {
   cooperativeId: string;
@@ -27,8 +28,8 @@ export function LoanSettingsForm({
   const [state, formAction, pending] = useActionState(updateLoanSettings, {});
 
   return (
-    <form action={formAction} className="space-y-4">
-      <input type="hidden" name="cooperativeId" value={cooperativeId} />
+    <Form action={formAction} className="space-y-4">
+      <Input type="hidden" name="cooperativeId" value={cooperativeId} />
 
       {state.error && (
         <Alert variant="destructive">
@@ -113,6 +114,6 @@ export function LoanSettingsForm({
       <Button type="submit" size="sm" disabled={pending}>
         {pending ? "Saving…" : "Save Loan Settings"}
       </Button>
-    </form>
+    </Form>
   );
 }

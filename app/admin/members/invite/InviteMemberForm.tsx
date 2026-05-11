@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Form } from "@/components/ui/form";
 
 const ROLES = [
   { value: "MEMBER", label: "Member" },
@@ -61,7 +62,7 @@ export function InviteMemberForm({ isOwner }: { isOwner: boolean }) {
   }
 
   return (
-    <form action={action} className="space-y-5">
+    <Form action={action} className="space-y-5">
       {state.error && (
         <Alert variant="destructive">
           <AlertDescription>{state.error}</AlertDescription>
@@ -103,9 +104,9 @@ export function InviteMemberForm({ isOwner }: { isOwner: boolean }) {
       {isOwner && (
         <div className="space-y-1.5">
           <Label htmlFor="role">Role</Label>
-          <input type="hidden" name="role" value={role} />
+          <Input type="hidden" name="role" value={role} />
           <Select value={role} onValueChange={(v) => setRole(v ?? "MEMBER")}>
-            <SelectTrigger id="role">
+            <SelectTrigger id="role" className="w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -122,6 +123,6 @@ export function InviteMemberForm({ isOwner }: { isOwner: boolean }) {
       <Button type="submit" className="w-full" disabled={pending}>
         {pending ? "Sending invite…" : "Send Invite"}
       </Button>
-    </form>
+    </Form>
   );
 }

@@ -6,7 +6,9 @@ import {
   type SettingsActionState
 } from "@/app/actions/settings";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Form } from "@/components/ui/form";
 
 const MODE_OPTIONS = [
   { value: "OFF", label: "OFF", description: "No coverage check" },
@@ -35,8 +37,8 @@ export function GuarantorModeForm({
   >(updateGuarantorCoverageMode, {});
 
   return (
-    <form action={action} className="space-y-3 mt-2">
-      <input type="hidden" name="cooperativeId" value={cooperativeId} />
+    <Form action={action} className="space-y-3 mt-2">
+      <Input type="hidden" name="cooperativeId" value={cooperativeId} />
 
       {state.error && (
         <Alert variant="destructive">
@@ -60,7 +62,7 @@ export function GuarantorModeForm({
               name="guarantorCoverageMode"
               value={opt.value}
               defaultChecked={currentMode === opt.value}
-              className="my-auto"
+              className="my-auto accent-primary"
             />
             <span>
               <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
@@ -77,6 +79,6 @@ export function GuarantorModeForm({
       <Button type="submit" size="sm" disabled={pending}>
         {pending ? "Saving…" : "Save Changes"}
       </Button>
-    </form>
+    </Form>
   );
 }

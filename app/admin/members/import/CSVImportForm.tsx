@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
+import { Form } from "@/components/ui/form";
 
 export function CSVImportForm() {
   const [state, action, pending] = useActionState<AdminActionState, FormData>(
@@ -53,7 +54,7 @@ export function CSVImportForm() {
   }
 
   return (
-    <form action={action} className="space-y-5">
+    <Form action={action} className="space-y-5">
       {state.error && (
         <Alert variant="destructive">
           <AlertDescription>{state.error}</AlertDescription>
@@ -62,8 +63,9 @@ export function CSVImportForm() {
 
       {/* Mode toggle */}
       <div className="flex gap-1 p-1 bg-zinc-100 dark:bg-zinc-800 rounded-lg w-fit">
-        <button
+        <Button
           type="button"
+          variant="ghost"
           onClick={() => setMode("paste")}
           className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
             mode === "paste"
@@ -72,9 +74,10 @@ export function CSVImportForm() {
           }`}
         >
           Paste CSV
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          variant="ghost"
           onClick={() => setMode("file")}
           className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
             mode === "file"
@@ -83,7 +86,7 @@ export function CSVImportForm() {
           }`}
         >
           Upload File
-        </button>
+        </Button>
       </div>
 
       {mode === "paste" ? (
@@ -113,6 +116,6 @@ export function CSVImportForm() {
       <Button type="submit" className="w-full" disabled={pending}>
         {pending ? "Importing…" : "Import Members"}
       </Button>
-    </form>
+    </Form>
   );
 }

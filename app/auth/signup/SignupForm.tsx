@@ -14,6 +14,7 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { useState } from "react";
+import { Form } from "@/components/ui/form";
 
 type Cooperative = { id: string; name: string };
 
@@ -25,7 +26,7 @@ export function SignupForm({ cooperatives }: { cooperatives: Cooperative[] }) {
   const [cooperativeId, setCooperativeId] = useState("");
 
   return (
-    <form action={action} className="space-y-4">
+    <Form action={action} className="space-y-4">
       {state.error && (
         <Alert variant="destructive">
           <AlertDescription>{state.error}</AlertDescription>
@@ -62,9 +63,9 @@ export function SignupForm({ cooperatives }: { cooperatives: Cooperative[] }) {
       <div className="space-y-1.5">
         <Label htmlFor="cooperative">Cooperative</Label>
         {/* Hidden input carries the value to FormData */}
-        <input type="hidden" name="cooperativeId" value={cooperativeId} />
+        <Input type="hidden" name="cooperativeId" value={cooperativeId} />
         <Select value={cooperativeId} onValueChange={(v) => setCooperativeId(v ?? "")} required>
-          <SelectTrigger id="cooperative">
+          <SelectTrigger id="cooperative" className="w-full">
             <SelectValue>
               {cooperativeId
                 ? (cooperatives.find((c) => c.id === cooperativeId)?.name ?? "Select your cooperative")
@@ -89,6 +90,6 @@ export function SignupForm({ cooperatives }: { cooperatives: Cooperative[] }) {
       <Button type="submit" className="w-full" disabled={pending}>
         {pending ? "Creating account…" : "Create Account"}
       </Button>
-    </form>
+    </Form>
   );
 }

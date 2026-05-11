@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Link from "next/link";
+import { Form } from "@/components/ui/form";
 
 export function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
@@ -55,7 +56,7 @@ export function ForgotPasswordForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <Form onSubmit={handleSubmit} className="space-y-4">
       {error && (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
@@ -83,6 +84,6 @@ export function ForgotPasswordForm() {
           Back to sign in
         </Link>
       </p>
-    </form>
+    </Form>
   );
 }

@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Link from "next/link";
+import { Form } from "@/components/ui/form";
 
 export function SigninForm({ registered, reset }: { registered?: boolean; reset?: boolean }) {
   const router = useRouter();
@@ -40,7 +41,7 @@ export function SigninForm({ registered, reset }: { registered?: boolean; reset?
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <Form onSubmit={handleSubmit} className="space-y-4">
       {registered && (
         <Alert>
           <AlertDescription>Account created! Sign in to continue.</AlertDescription>
@@ -85,6 +86,6 @@ export function SigninForm({ registered, reset }: { registered?: boolean; reset?
       <Button type="submit" className="w-full" disabled={pending}>
         {pending ? "Signing in…" : "Sign In"}
       </Button>
-    </form>
+    </Form>
   );
 }

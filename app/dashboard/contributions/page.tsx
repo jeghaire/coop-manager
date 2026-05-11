@@ -3,6 +3,8 @@ export const dynamic = "force-dynamic";
 import { getSession } from "@/app/lib/auth-helpers";
 import { redirect } from "next/navigation";
 import prisma from "@/app/lib/prisma";
+import { getPublicUrl } from "@/app/lib/s3-upload";
+import { ReceiptViewerDialog } from "@/app/components/ReceiptViewerDialog";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/app/components/PageHeader";
 import { ContributionSubmitSheet } from "@/app/components/ContributionSubmitSheet";
@@ -33,10 +35,15 @@ export default async function ContributionsPage() {
   const userId = session.user.id;
   const cooperativeId = session.user.cooperativeId as string;
 
-  const contributions = await prisma.contribution.findMany({
+  const raw = await prisma.contribution.findMany({
     where: { userId, cooperativeId, deletedAt: null },
     orderBy: { submittedAt: "desc" },
   });
+
+  const contributions = raw.map((c) => ({
+    ...c,
+    receiptUrl: c.receiptKey ? getPublicUrl(c.receiptKey) : c.receiptUrl,
+  }));
 
   const verifiedTotal = contributions
     .filter((c) => c.status === "VERIFIED")
@@ -94,14 +101,14 @@ export default async function ContributionsPage() {
                     })}
                   </p>
                   {c.receiptUrl && (
-                    <a
-                      href={c.receiptUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <ReceiptViewerDialog
+                      url={c.receiptUrl}
+                      fileType={c.receiptFileType}
+                      fileName={c.receiptFileName}
                       className="text-xs text-emerald-600 dark:text-emerald-400 hover:underline mt-1 inline-block"
                     >
-                      View receipt ↗
-                    </a>
+                      View receipt
+                    </ReceiptViewerDialog>
                   )}
                   {c.status === "REJECTED" && c.rejectionReason && (
                     <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">

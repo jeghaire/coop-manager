@@ -1,5 +1,5 @@
 import { requireAuth } from "@/app/lib/auth-helpers";
-import { buildReceiptKey, generatePresignUrl } from "@/app/lib/s3";
+import { buildReceiptKey, generatePresignUrl } from "@/app/lib/s3-upload";
 import { NextRequest, NextResponse } from "next/server";
 
 const VALID_EXTENSIONS = new Set(["jpg", "jpeg", "png", "gif", "pdf", "heic", "heif", "webp"]);

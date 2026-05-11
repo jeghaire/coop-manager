@@ -1,5 +1,5 @@
 import { getSession } from "@/app/lib/auth-helpers";
-import { Building2, ArrowRightToLine, LogOutIcon } from "lucide-react";
+import { Building2, LogOutIcon } from "lucide-react";
 import Link from "next/link";
 import { ThemeToggle } from "./ThemeToggle";
 import { MobileNavDrawer } from "./MobileNavDrawer";

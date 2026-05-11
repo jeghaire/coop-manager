@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -17,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Form } from "@/components/ui/form";
 
 export function NewAnnouncementForm({ cooperativeId }: { cooperativeId: string }) {
   const [state, action, pending] = useActionState<AnnouncementActionState, FormData>(
@@ -41,12 +43,12 @@ export function NewAnnouncementForm({ cooperativeId }: { cooperativeId: string }
   const isAgm = type === "AGM";
 
   return (
-    <form action={action} className="space-y-5">
-      <input type="hidden" name="cooperativeId" value={cooperativeId} />
-      <input type="hidden" name="type" value={type} />
-      <input type="hidden" name="recipientType" value={recipientType} />
-      <input type="hidden" name="isPinned" value={String(isPinned)} />
-      <input type="hidden" name="allowRsvp" value={String(isAgm && allowRsvp)} />
+    <Form action={action} className="space-y-5">
+      <Input type="hidden" name="cooperativeId" value={cooperativeId} />
+      <Input type="hidden" name="type" value={type} />
+      <Input type="hidden" name="recipientType" value={recipientType} />
+      <Input type="hidden" name="isPinned" value={String(isPinned)} />
+      <Input type="hidden" name="allowRsvp" value={String(isAgm && allowRsvp)} />
 
       {state.error && (
         <Alert variant="destructive">
@@ -62,7 +64,7 @@ export function NewAnnouncementForm({ cooperativeId }: { cooperativeId: string }
       <div className="space-y-1.5">
         <Label htmlFor="type-select">Type</Label>
         <Select value={type} onValueChange={(v) => { if (v) { setType(v); if (v !== "AGM") setAllowRsvp(false); } }}>
-          <SelectTrigger id="type-select">
+          <SelectTrigger id="type-select" className="w-full">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -88,7 +90,7 @@ export function NewAnnouncementForm({ cooperativeId }: { cooperativeId: string }
       <div className="space-y-1.5">
         <Label htmlFor="recipient-select">Recipients</Label>
         <Select value={recipientType} onValueChange={(v) => { if (v) setRecipientType(v); }}>
-          <SelectTrigger id="recipient-select">
+          <SelectTrigger id="recipient-select" className="w-full">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -118,11 +120,9 @@ export function NewAnnouncementForm({ cooperativeId }: { cooperativeId: string }
             />
           </div>
           <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
+            <Checkbox
               checked={allowRsvp}
-              onChange={(e) => setAllowRsvp(e.target.checked)}
-              className="rounded"
+              onCheckedChange={(v) => setAllowRsvp(v === true)}
             />
             <span className="text-sm text-zinc-700 dark:text-zinc-300">
               Allow members to RSVP
@@ -144,11 +144,9 @@ export function NewAnnouncementForm({ cooperativeId }: { cooperativeId: string }
       </div>
 
       <label className="flex items-center gap-2 cursor-pointer">
-        <input
-          type="checkbox"
+        <Checkbox
           checked={isPinned}
-          onChange={(e) => setIsPinned(e.target.checked)}
-          className="rounded"
+          onCheckedChange={(v) => setIsPinned(v === true)}
         />
         <span className="text-sm text-zinc-700 dark:text-zinc-300">
           Pin to dashboard banner
@@ -158,6 +156,6 @@ export function NewAnnouncementForm({ cooperativeId }: { cooperativeId: string }
       <Button type="submit" className="w-full" disabled={pending}>
         {pending ? "Creating…" : "Create & Send"}
       </Button>
-    </form>
+    </Form>
   );
 }

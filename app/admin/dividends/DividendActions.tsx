@@ -7,7 +7,9 @@ import {
   type DividendActionState,
 } from "@/app/actions/dividends";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Form } from "@/components/ui/form";
 
 export function ApproveButton({
   payoutId,
@@ -21,14 +23,14 @@ export function ApproveButton({
     {}
   );
   return (
-    <form action={action}>
-      <input type="hidden" name="payoutId" value={payoutId} />
-      <input type="hidden" name="cooperativeId" value={cooperativeId} />
+    <Form action={action}>
+      <Input type="hidden" name="payoutId" value={payoutId} />
+      <Input type="hidden" name="cooperativeId" value={cooperativeId} />
       {state.error && <p className="text-xs text-red-500 mb-1">{state.error}</p>}
       <Button size="sm" variant="outline" disabled={pending}>
         {pending ? "Approving…" : "Approve"}
       </Button>
-    </form>
+    </Form>
   );
 }
 
@@ -44,9 +46,9 @@ export function ProcessButton({
     {}
   );
   return (
-    <form action={action}>
-      <input type="hidden" name="payoutId" value={payoutId} />
-      <input type="hidden" name="cooperativeId" value={cooperativeId} />
+    <Form action={action}>
+      <Input type="hidden" name="payoutId" value={payoutId} />
+      <Input type="hidden" name="cooperativeId" value={cooperativeId} />
       {state.error && (
         <Alert variant="destructive" className="mb-2">
           <AlertDescription>{state.error}</AlertDescription>
@@ -55,6 +57,6 @@ export function ProcessButton({
       <Button size="sm" disabled={pending}>
         {pending ? "Processing…" : "Pay Out"}
       </Button>
-    </form>
+    </Form>
   );
 }
