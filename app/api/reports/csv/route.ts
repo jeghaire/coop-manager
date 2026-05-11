@@ -1,6 +1,8 @@
 import { getSession } from "@/app/lib/auth-helpers";
 import { NextRequest, NextResponse } from "next/server";
 import { getFinancialSummary, getDividendSnapshot, getLoanDecisions } from "@/app/admin/reports/data";
+import prisma from "@/app/lib/prisma";
+import { getCurrencySymbol } from "@/app/lib/currency";
 
 function csvRow(cells: (string | number)[]): string {
   return cells
@@ -25,6 +27,11 @@ export async function GET(request: NextRequest) {
   }
 
   const cooperativeId = session.user.cooperativeId as string;
+  const cooperative = await prisma.cooperative.findUnique({
+    where: { id: cooperativeId },
+    select: { currency: true },
+  });
+  const sym = getCurrencySymbol(cooperative?.currency ?? "NGN");
   const { searchParams } = new URL(request.url);
   const type = searchParams.get("type") ?? "financial";
   const distribute = Number(searchParams.get("distribute") ?? 0);
@@ -37,22 +44,22 @@ export async function GET(request: NextRequest) {
     filename = "financial-summary.csv";
     csv = [
       csvRow(["Metric", "Value"]),
-      csvRow(["Total Verified Contributions (₦)", data.totalVerified]),
+      csvRow(["Total Verified Contributions ({sym})", data.totalVerified]),
       csvRow(["Verified Payment Count", data.verifiedCount]),
-      csvRow(["Pending Contributions (₦)", data.pendingAmount]),
+      csvRow(["Pending Contributions ({sym})", data.pendingAmount]),
       csvRow(["Pending Count", data.pendingCount]),
-      csvRow(["Total Approved Loans (₦)", data.totalLoaned]),
+      csvRow(["Total Approved Loans ({sym})", data.totalLoaned]),
       csvRow(["Approved Loan Count", data.loanedCount]),
       csvRow(["Loans in Pipeline", data.activeLoans]),
-      csvRow(["Available Funds (₦)", data.availableFunds]),
+      csvRow(["Available Funds ({sym})", data.availableFunds]),
       csvRow(["Total Active Members", data.totalMembers]),
-      csvRow(["Monthly Contribution Target (₦)", data.monthlyTarget]),
+      csvRow(["Monthly Contribution Target ({sym})", data.monthlyTarget]),
     ].join("\n");
   } else if (type === "dividends") {
     const { rows, grandTotal } = await getDividendSnapshot(cooperativeId);
     filename = "dividend-snapshot.csv";
-    const headers = ["Name", "Email", "Role", "Total Contributed (₦)", "Share %"];
-    if (distribute > 0) headers.push("Dividend (₦)");
+    const headers = ["Name", "Email", "Role", "Total Contributed ({sym})", "Share %"];
+    if (distribute > 0) headers.push("Dividend ({sym})");
     csv = [
       csvRow(headers),
       ...rows.map((r) => {
@@ -76,7 +83,7 @@ export async function GET(request: NextRequest) {
     const data = await getLoanDecisions(cooperativeId);
     filename = "loan-decisions.csv";
     csv = [
-      csvRow(["Applicant", "Amount (₦)", "Status", "Reviewed By", "Date", "Rejection Reason"]),
+      csvRow(["Applicant", "Amount ({sym})", "Status", "Reviewed By", "Date", "Rejection Reason"]),
       ...data.loans.map((l) =>
         csvRow([
           l.applicant.name,

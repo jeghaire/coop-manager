@@ -3,6 +3,7 @@
 import { getSession } from "@/app/lib/auth-helpers";
 import { redirect } from "next/navigation";
 import prisma from "@/app/lib/prisma";
+import { getCurrencySymbol } from "@/app/lib/currency";
 import { Badge } from "@/components/ui/badge";
 import { NewDividendForm } from "./NewDividendForm";
 import { ApproveButton, ProcessButton } from "./DividendActions";
@@ -20,7 +21,7 @@ export default async function DividendsPage() {
   const [cooperative, payouts] = await Promise.all([
     prisma.cooperative.findUnique({
       where: { id: cooperativeId },
-      select: { currencySymbol: true }
+      select: { currency: true }
     }),
     prisma.dividendPayout.findMany({
       where: { cooperativeId },
@@ -32,7 +33,7 @@ export default async function DividendsPage() {
   ]);
 
   if (!cooperative) redirect("/dashboard");
-  const sym = cooperative.currencySymbol;
+  const sym = getCurrencySymbol(cooperative.currency);
 
   return (
     <div className="space-y-8">

@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { PageHeader } from "@/app/components/PageHeader";
 import { Users } from "lucide-react";
+import { getCurrencySymbol } from "@/app/lib/currency";
 
 export default async function DashboardPage() {
   const session = await getSession();
@@ -20,7 +21,7 @@ export default async function DashboardPage() {
   const cooperativeId = user.cooperativeId as string;
 
   // Summary counts
-  const [myActiveLoans, myPendingGuarantorRequests, verifiedContributions] =
+  const [myActiveLoans, myPendingGuarantorRequests, verifiedContributions, cooperative] =
     await Promise.all([
       prisma.loanApplication.count({
         where: {
@@ -47,12 +48,17 @@ export default async function DashboardPage() {
         },
         select: { amount: true },
       }),
+      prisma.cooperative.findUnique({
+        where: { id: cooperativeId },
+        select: { currency: true },
+      }),
     ]);
 
   const verifiedTotal = verifiedContributions.reduce(
     (sum, c) => sum + Number(c.amount),
     0,
   );
+  const sym = getCurrencySymbol(cooperative?.currency ?? "NGN");
 
   function roleBadge(role: string) {
     switch (role) {
@@ -98,7 +104,7 @@ export default async function DashboardPage() {
             Total Contributed
           </p>
           <p className="text-3xl font-semibold text-zinc-900 dark:text-zinc-100">
-            ₦{verifiedTotal.toLocaleString()}
+            {sym}{verifiedTotal.toLocaleString()}
           </p>
           <Link
             href="/dashboard/contributions"

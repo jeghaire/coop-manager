@@ -7,6 +7,7 @@ import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/app/lib/utils";
+import { getCurrencySymbol } from "@/app/lib/currency";
 
 export default async function RejectedLoanPage({
   params,
@@ -20,15 +21,21 @@ export default async function RejectedLoanPage({
   const userId = session.user.id;
   const cooperativeId = session.user.cooperativeId as string;
 
-  const loan = await prisma.loanApplication.findUnique({
-    where: { id },
-    include: {
-      guarantors: {
-        where: { deletedAt: null },
-        include: { guarantor: { select: { name: true } } },
+  const [loan, cooperative] = await Promise.all([
+    prisma.loanApplication.findUnique({
+      where: { id },
+      include: {
+        guarantors: {
+          where: { deletedAt: null },
+          include: { guarantor: { select: { name: true } } },
+        },
       },
-    },
-  });
+    }),
+    prisma.cooperative.findUnique({
+      where: { id: cooperativeId },
+      select: { currency: true },
+    }),
+  ]);
 
   if (!loan || loan.cooperativeId !== cooperativeId || loan.userId !== userId) {
     redirect("/dashboard/loans");
@@ -53,7 +60,7 @@ export default async function RejectedLoanPage({
           Loan Rejected
         </h1>
         <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
-          ₦{Number(loan.amountRequested).toLocaleString()} — applied{" "}
+          {getCurrencySymbol(cooperative?.currency ?? "NGN")}{Number(loan.amountRequested).toLocaleString()} — applied{" "}
           {new Date(loan.appliedAt).toLocaleDateString("en-GB", {
             day: "numeric",
             month: "short",

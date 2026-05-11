@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { getSession } from "@/app/lib/auth-helpers";
 import { redirect } from "next/navigation";
 import prisma from "@/app/lib/prisma";
+import { getCurrencySymbol } from "@/app/lib/currency";
 import { RecordContributionForm } from "./RecordContributionForm";
 import { RecordRepaymentForm } from "./RecordRepaymentForm";
 import { PageHeader } from "@/app/components/PageHeader";
@@ -34,11 +35,11 @@ export default async function TreasurerPage() {
     }),
     prisma.cooperative.findUnique({
       where: { id: cooperativeId },
-      select: { currencySymbol: true }
+      select: { currency: true }
     })
   ]);
 
-  const sym = cooperative?.currencySymbol ?? "₦";
+  const sym = getCurrencySymbol(cooperative?.currency ?? "NGN");
 
   const loansWithBalance = activeLoans.map((loan) => {
     const totalDue = Number(loan.totalAmountDue ?? loan.amountRequested);

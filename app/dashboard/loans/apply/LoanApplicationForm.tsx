@@ -24,12 +24,14 @@ export function LoanApplicationForm({
   members,
   borrowingCapacity,
   guarantorCoverageMode,
+  currencySymbol,
   defaultValues,
   onSuccess,
 }: {
   members: Member[];
   borrowingCapacity: number;
   guarantorCoverageMode: string;
+  currencySymbol: string;
   defaultValues?: { amount: string; guarantor1Id: string; guarantor2Id: string };
   onSuccess?: () => void;
 }) {
@@ -67,7 +69,7 @@ export function LoanApplicationForm({
       )}
 
       <div className="space-y-1.5">
-        <Label htmlFor="amount">Amount (₦)</Label>
+        <Label htmlFor="amount">Amount ({currencySymbol})</Label>
         <Input
           id="amount"
           name="amount"
@@ -80,7 +82,7 @@ export function LoanApplicationForm({
           required
         />
         <p className="text-xs text-zinc-500 dark:text-zinc-400">
-          Maximum: ₦{borrowingCapacity.toLocaleString()}
+          Maximum: {currencySymbol}{borrowingCapacity.toLocaleString()}
         </p>
       </div>
 

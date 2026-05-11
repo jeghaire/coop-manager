@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { GuarantorResponseForm } from "./GuarantorResponseForm";
 import { PageHeader } from "@/app/components/PageHeader";
 import { LoanApplySheet } from "@/app/components/LoanApplySheet";
+import { getCurrencySymbol } from "@/app/lib/currency";
 
 function loanStatusBadge(status: string) {
   switch (status) {
@@ -69,7 +70,7 @@ export default async function LoansPage() {
       }),
       prisma.cooperative.findUnique({
         where: { id: cooperativeId },
-        select: { borrowingMultiplier: true, guarantorCoverageMode: true },
+        select: { borrowingMultiplier: true, guarantorCoverageMode: true, currency: true },
       }),
       prisma.user.findMany({
         where: {
@@ -96,6 +97,7 @@ export default async function LoansPage() {
     ? totalContributed * cooperative.borrowingMultiplier
     : 0;
   const canApply = totalContributed > 0 && eligibleMembers.length >= 2;
+  const sym = getCurrencySymbol(cooperative?.currency ?? "NGN");
 
   const pendingGuarantorRequests = guarantorRequests.filter(
     (g) => g.status === "PENDING" && g.loan.status === "PENDING_GUARANTORS"
@@ -114,6 +116,7 @@ export default async function LoansPage() {
             members={eligibleMembers}
             borrowingCapacity={borrowingCapacity}
             guarantorCoverageMode={cooperative?.guarantorCoverageMode ?? "COMBINED"}
+            currencySymbol={sym}
             canApply={canApply}
           />
         }
@@ -142,7 +145,7 @@ export default async function LoansPage() {
                     <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
                       Requesting{" "}
                       <span className="font-semibold text-zinc-700 dark:text-zinc-300">
-                        ₦{Number(g.loan.amountRequested).toLocaleString()}
+                        {sym}{Number(g.loan.amountRequested).toLocaleString()}
                       </span>
                     </p>
                     <p className="text-xs text-zinc-400 dark:text-zinc-600 mt-1">
@@ -185,7 +188,7 @@ export default async function LoansPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 flex-wrap">
                       <span className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-                        ₦{Number(loan.amountRequested).toLocaleString()}
+                        {sym}{Number(loan.amountRequested).toLocaleString()}
                       </span>
                       {loanStatusBadge(loan.status)}
                     </div>
@@ -262,7 +265,7 @@ export default async function LoansPage() {
                       {g.loan.applicant.name}
                     </p>
                     <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                      ₦{Number(g.loan.amountRequested).toLocaleString()} •{" "}
+                      {sym}{Number(g.loan.amountRequested).toLocaleString()} •{" "}
                       {new Date(g.createdAt).toLocaleDateString("en-GB", {
                         day: "numeric",
                         month: "short",

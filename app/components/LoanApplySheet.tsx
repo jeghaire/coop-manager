@@ -13,11 +13,13 @@ export function LoanApplySheet({
   members,
   borrowingCapacity,
   guarantorCoverageMode,
+  currencySymbol,
   canApply,
 }: {
   members: Member[];
   borrowingCapacity: number;
   guarantorCoverageMode: string;
+  currencySymbol: string;
   canApply: boolean;
 }) {
   const [open, setOpen] = useState(false);
@@ -52,13 +54,14 @@ export function LoanApplySheet({
               Your Borrowing Capacity
             </p>
             <p className="text-2xl font-semibold text-emerald-800 dark:text-emerald-300">
-              ₦{borrowingCapacity.toLocaleString()}
+              {currencySymbol}{borrowingCapacity.toLocaleString()}
             </p>
           </div>
           <LoanApplicationForm
             members={members}
             borrowingCapacity={borrowingCapacity}
             guarantorCoverageMode={guarantorCoverageMode}
+            currencySymbol={currencySymbol}
             onSuccess={() => setOpen(false)}
           />
         </div>

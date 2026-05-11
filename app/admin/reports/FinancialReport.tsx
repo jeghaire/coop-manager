@@ -1,4 +1,6 @@
 import { getFinancialSummary } from "./data";
+import prisma from "@/app/lib/prisma";
+import { getCurrencySymbol } from "@/app/lib/currency";
 
 function Stat({
   label,
@@ -43,9 +45,12 @@ export async function FinancialReport({
 }: {
   cooperativeId: string;
 }) {
-  const data = await getFinancialSummary(cooperativeId);
-
-  const fmt = (n: number) => `₦${n.toLocaleString()}`;
+  const [data, cooperative] = await Promise.all([
+    getFinancialSummary(cooperativeId),
+    prisma.cooperative.findUnique({ where: { id: cooperativeId }, select: { currency: true } }),
+  ]);
+  const sym = getCurrencySymbol(cooperative?.currency ?? "NGN");
+  const fmt = (n: number) => `${sym}${n.toLocaleString()}`;
 
   return (
     <div className="space-y-6">
@@ -94,18 +99,21 @@ export async function FinancialReport({
             amount={data.totalVerified}
             total={data.totalVerified}
             color="emerald"
+            sym={sym}
           />
           <FundBar
             label="Loaned Out"
             amount={data.totalLoaned}
             total={data.totalVerified}
             color="amber"
+            sym={sym}
           />
           <FundBar
             label="Available"
             amount={Math.max(0, data.availableFunds)}
             total={data.totalVerified}
             color="sky"
+            sym={sym}
           />
         </div>
       </div>
@@ -118,11 +126,13 @@ function FundBar({
   amount,
   total,
   color,
+  sym,
 }: {
   label: string;
   amount: number;
   total: number;
   color: "emerald" | "amber" | "sky";
+  sym: string;
 }) {
   const pct = total > 0 ? Math.min(100, (amount / total) * 100) : 0;
 
@@ -145,7 +155,7 @@ function FundBar({
           {label}
         </span>
         <span className="text-zinc-900 dark:text-zinc-100 font-semibold">
-          ₦{amount.toLocaleString()}{" "}
+          {sym}{amount.toLocaleString()}{" "}
           <span className="text-zinc-400 dark:text-zinc-600 font-normal">
             ({pct.toFixed(1)}%)
           </span>

@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { ApproveForm, RejectForm, MarkPaidForm } from "./WithdrawalActions";
 import prisma from "@/app/lib/prisma";
 import { PageHeader } from "@/app/components/PageHeader";
+import { getCurrencySymbol } from "@/app/lib/currency";
 
 const STATUS_BADGE: Record<
   string,
@@ -38,11 +39,11 @@ export default async function AdminWithdrawalsPage() {
     getAllWithdrawals(cooperativeId),
     prisma.cooperative.findUnique({
       where: { id: cooperativeId },
-      select: { currencySymbol: true },
+      select: { currency: true },
     }),
   ]);
 
-  const sym = cooperative?.currencySymbol ?? "â‚¦";
+  const sym = getCurrencySymbol(cooperative?.currency ?? "NGN");
 
   const pending = withdrawals.filter((w) => w.status === "REQUESTED");
   const others = withdrawals.filter((w) => w.status !== "REQUESTED");
@@ -51,7 +52,7 @@ export default async function AdminWithdrawalsPage() {
     <div className="space-y-8">
       <PageHeader
         title="Withdrawal Requests"
-        description={`${pending.length} pending Â· ${withdrawals.length} total`}
+        description={`${pending.length} pending · ${withdrawals.length} total`}
       />
 
       {withdrawals.length === 0 && (
@@ -190,4 +191,3 @@ export default async function AdminWithdrawalsPage() {
     </div>
   );
 }
-

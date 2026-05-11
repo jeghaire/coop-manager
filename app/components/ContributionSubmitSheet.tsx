@@ -7,7 +7,7 @@ import { ContributionSubmitForm } from "@/app/dashboard/contributions/submit/Con
 import { cn } from "@/app/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 
-export function ContributionSubmitSheet() {
+export function ContributionSubmitSheet({ currencySymbol }: { currencySymbol?: string }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -33,7 +33,7 @@ export function ContributionSubmitSheet() {
         onClose={() => setOpen(false)}
         title="Submit Contribution"
       >
-        <ContributionSubmitForm onSuccess={() => setOpen(false)} />
+        <ContributionSubmitForm currencySymbol={currencySymbol} onSuccess={() => setOpen(false)} />
       </BottomSheet>
     </>
   );

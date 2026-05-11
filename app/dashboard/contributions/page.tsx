@@ -8,6 +8,7 @@ import { ReceiptViewerDialog } from "@/app/components/ReceiptViewerDialog";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/app/components/PageHeader";
 import { ContributionSubmitSheet } from "@/app/components/ContributionSubmitSheet";
+import { getCurrencySymbol } from "@/app/lib/currency";
 
 const PAYMENT_METHOD_LABEL: Record<string, string> = {
   BANK_TRANSFER: "Bank Transfer",
@@ -35,10 +36,16 @@ export default async function ContributionsPage() {
   const userId = session.user.id;
   const cooperativeId = session.user.cooperativeId as string;
 
-  const raw = await prisma.contribution.findMany({
-    where: { userId, cooperativeId, deletedAt: null },
-    orderBy: { submittedAt: "desc" },
-  });
+  const [raw, cooperative] = await Promise.all([
+    prisma.contribution.findMany({
+      where: { userId, cooperativeId, deletedAt: null },
+      orderBy: { submittedAt: "desc" },
+    }),
+    prisma.cooperative.findUnique({
+      where: { id: cooperativeId },
+      select: { currency: true },
+    }),
+  ]);
 
   const contributions = raw.map((c) => ({
     ...c,
@@ -48,13 +55,14 @@ export default async function ContributionsPage() {
   const verifiedTotal = contributions
     .filter((c) => c.status === "VERIFIED")
     .reduce((sum, c) => sum + Number(c.amount), 0);
+  const sym = getCurrencySymbol(cooperative?.currency ?? "NGN");
 
   return (
     <div className="space-y-8">
       <PageHeader
         title="Contributions"
         description="Track your monthly contribution history"
-        action={<ContributionSubmitSheet />}
+        action={<ContributionSubmitSheet currencySymbol={sym} />}
       />
 
       {/* Verified total */}
@@ -63,7 +71,7 @@ export default async function ContributionsPage() {
           Total Verified
         </p>
         <p className="text-3xl font-semibold text-emerald-800 dark:text-emerald-300">
-          ₦{verifiedTotal.toLocaleString()}
+          {sym}{verifiedTotal.toLocaleString()}
         </p>
       </div>
 
@@ -85,7 +93,7 @@ export default async function ContributionsPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 flex-wrap">
                     <span className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-                      ₦{Number(c.amount).toLocaleString()}
+                      {sym}{Number(c.amount).toLocaleString()}
                     </span>
                     {statusBadge(c.status)}
                     <span className="text-xs text-zinc-400 dark:text-zinc-600">

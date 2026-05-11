@@ -3,6 +3,7 @@
 import { getSession } from "@/app/lib/auth-helpers";
 import { redirect } from "next/navigation";
 import prisma from "@/app/lib/prisma";
+import { getCurrencySymbol } from "@/app/lib/currency";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
@@ -19,21 +20,21 @@ export default async function TransactionsPage() {
   const [cooperative, contributions, loans] = await Promise.all([
     prisma.cooperative.findUnique({
       where: { id: cooperativeId },
-      select: { currencySymbol: true }
+      select: { currency: true },
     }),
     prisma.contribution.findMany({
       where: { userId, cooperativeId, deletedAt: null },
-      orderBy: { createdAt: "desc" }
+      orderBy: { createdAt: "desc" },
     }),
     prisma.loanApplication.findMany({
       where: { userId, cooperativeId, deletedAt: null },
-      include: { repayments: { orderBy: { paidAt: "desc" } } }
-    })
+      include: { repayments: { orderBy: { paidAt: "desc" } } },
+    }),
   ]);
 
   if (!cooperative) redirect("/dashboard");
 
-  const sym = cooperative.currencySymbol;
+  const sym = getCurrencySymbol(cooperative.currency);
 
   type TxRow = {
     date: Date;
@@ -51,7 +52,7 @@ export default async function TransactionsPage() {
       kind: "contribution",
       amount: Number(c.amount),
       status: c.status,
-      ref: c.id.slice(-8)
+      ref: c.id.slice(-8),
     });
   }
 
@@ -62,7 +63,7 @@ export default async function TransactionsPage() {
         kind: "repayment",
         amount: Number(r.amount),
         status: "RECORDED",
-        ref: loan.id.slice(-8)
+        ref: loan.id.slice(-8),
       });
     }
   }
@@ -79,10 +80,10 @@ export default async function TransactionsPage() {
             href="/dashboard/financial-summary"
             className={cn(
               buttonVariants({ variant: "outline", size: "sm" }),
-              "hidden md:inline-flex"
+              "hidden md:inline-flex",
             )}
           >
-            â† Summary
+            ← Summary
           </Link>
         }
       />
@@ -142,7 +143,7 @@ export default async function TransactionsPage() {
                       <StatusBadge status={tx.status} />
                     </td>
                     <td className="px-4 py-3 font-mono text-xs text-zinc-400 hidden sm:table-cell">
-                      â€¦{tx.ref}
+                      ...{tx.ref}
                     </td>
                   </tr>
                 ))}
@@ -172,4 +173,3 @@ function StatusBadge({ status }: { status: string }) {
       return <Badge variant="secondary">{status}</Badge>;
   }
 }
-

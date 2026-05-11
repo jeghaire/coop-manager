@@ -200,7 +200,6 @@ export async function updateLoanSettings(
   const repaymentMonthsStr = (formData.get("loanRepaymentMonths") as string)?.trim();
   const gracePeriodStr = (formData.get("defaultGracePeriodDays") as string)?.trim();
   const currency = (formData.get("currency") as string)?.trim();
-  const currencySymbol = (formData.get("currencySymbol") as string)?.trim();
 
   const interestRate = parseFloat(interestRateStr);
   const repaymentMonths = parseInt(repaymentMonthsStr);
@@ -215,8 +214,8 @@ export async function updateLoanSettings(
   if (isNaN(gracePeriod) || gracePeriod < 0) {
     return { error: "Grace period must be 0 or more days." };
   }
-  if (!currency || !currencySymbol) {
-    return { error: "Currency and symbol are required." };
+  if (!currency) {
+    return { error: "Currency is required." };
   }
 
   await prisma.cooperative.update({
@@ -226,7 +225,6 @@ export async function updateLoanSettings(
       loanRepaymentMonths: repaymentMonths,
       defaultGracePeriodDays: gracePeriod,
       currency,
-      currencySymbol,
     },
   });
 
@@ -237,7 +235,7 @@ export async function updateLoanSettings(
       actorId: session.user.id,
       actorType: "admin",
       entityType: "settings",
-      data: { interestRate, repaymentMonths, gracePeriod, currency, currencySymbol },
+      data: { interestRate, repaymentMonths, gracePeriod, currency },
     },
   });
 

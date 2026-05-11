@@ -1,6 +1,7 @@
 import prisma from "./prisma";
 import { Resend } from "resend";
 import { UserRole } from "@prisma/client";
+import { getCurrencySymbol } from "./currency";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -78,7 +79,7 @@ async function getUserAndCoop(userId: string, cooperativeId: string) {
     }),
     prisma.cooperative.findUnique({
       where: { id: cooperativeId },
-      select: { name: true, currencySymbol: true },
+      select: { name: true, currency: true },
     }),
   ]);
   return { user: user as UserPrefs | null, cooperative };
@@ -91,7 +92,7 @@ export async function notifyLoanApproved(
   const { user, cooperative } = await getUserAndCoop(userId, cooperativeId);
   if (!user || !cooperative) return;
 
-  const sym = cooperative.currencySymbol;
+  const sym = getCurrencySymbol(cooperative.currency);
   const monthly = Math.round(totalDue / repaymentMonths).toLocaleString();
 
   if (user.emailNotifications) {
@@ -126,7 +127,7 @@ export async function notifyLoanRejected(
   const { user, cooperative } = await getUserAndCoop(userId, cooperativeId);
   if (!user || !cooperative) return;
 
-  const sym = cooperative.currencySymbol;
+  const sym = getCurrencySymbol(cooperative.currency);
 
   if (user.emailNotifications) {
     await sendEmail({
@@ -155,7 +156,7 @@ export async function notifyGuarantorRequested(
   const { user: guarantor, cooperative } = await getUserAndCoop(guarantorId, cooperativeId);
   if (!guarantor || !cooperative) return;
 
-  const sym = cooperative.currencySymbol;
+  const sym = getCurrencySymbol(cooperative.currency);
 
   if (guarantor.emailNotifications) {
     await sendEmail({
@@ -182,7 +183,7 @@ export async function notifyContributionVerified(
   const { user, cooperative } = await getUserAndCoop(userId, cooperativeId);
   if (!user || !cooperative) return;
 
-  const sym = cooperative.currencySymbol;
+  const sym = getCurrencySymbol(cooperative.currency);
 
   if (user.emailNotifications) {
     await sendEmail({
@@ -215,7 +216,7 @@ export async function notifyContributionRejected(
       to: user.email,
       subject: "Your contribution could not be verified",
       html: `<p>Hi ${user.name},</p>
-<p>Your contribution of ${cooperative.currencySymbol}${amount.toLocaleString()} could not be verified.</p>
+<p>Your contribution of ${getCurrencySymbol(cooperative.currency)}${amount.toLocaleString()} could not be verified.</p>
 <p><strong>Reason:</strong> ${reason}</p>
 <p>Please contact your administrator if you have questions.</p>`,
     });
@@ -229,7 +230,7 @@ export async function notifyPaymentOverdue(
   const { user, cooperative } = await getUserAndCoop(userId, cooperativeId);
   if (!user || !cooperative) return;
 
-  const sym = cooperative.currencySymbol;
+  const sym = getCurrencySymbol(cooperative.currency);
 
   if (user.emailNotifications) {
     await sendEmail({
@@ -260,7 +261,7 @@ export async function notifyDividendPaid(
   const { user, cooperative } = await getUserAndCoop(userId, cooperativeId);
   if (!user || !cooperative) return;
 
-  const sym = cooperative.currencySymbol;
+  const sym = getCurrencySymbol(cooperative.currency);
 
   if (user.emailNotifications) {
     await sendEmail({
@@ -288,7 +289,7 @@ export async function notifyWithdrawalApproved(
   const { user, cooperative } = await getUserAndCoop(userId, cooperativeId);
   if (!user || !cooperative) return;
 
-  const sym = cooperative.currencySymbol;
+  const sym = getCurrencySymbol(cooperative.currency);
 
   if (user.emailNotifications) {
     await sendEmail({
@@ -316,7 +317,7 @@ export async function notifyWithdrawalRejected(
   const { user, cooperative } = await getUserAndCoop(userId, cooperativeId);
   if (!user || !cooperative) return;
 
-  const sym = cooperative.currencySymbol;
+  const sym = getCurrencySymbol(cooperative.currency);
 
   if (user.emailNotifications) {
     await sendEmail({
@@ -367,7 +368,7 @@ export async function notifyWithdrawalPaid(
   const { user, cooperative } = await getUserAndCoop(userId, cooperativeId);
   if (!user || !cooperative) return;
 
-  const sym = cooperative.currencySymbol;
+  const sym = getCurrencySymbol(cooperative.currency);
 
   if (user.emailNotifications) {
     await sendEmail({
@@ -398,7 +399,7 @@ export async function notifyAnnouncement(announcementId: string, cooperativeId: 
 
     const cooperative = await prisma.cooperative.findUnique({
       where: { id: cooperativeId },
-      select: { name: true, currencySymbol: true },
+      select: { name: true, currency: true },
     });
     if (!cooperative) return;
 

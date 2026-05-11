@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { ContributionReviewForm } from "./ContributionReviewForm";
 import Link from "next/link";
 import { PageHeader } from "@/app/components/PageHeader";
+import { getCurrencySymbol } from "@/app/lib/currency";
 
 const PAYMENT_METHOD_LABEL: Record<string, string> = {
   BANK_TRANSFER: "Bank Transfer",
@@ -58,6 +59,14 @@ export default async function AdminContributionsPage({
   )
     ? (rawStatus as StatusFilter)
     : "PENDING_VERIFICATION";
+
+  const [cooperative] = await Promise.all([
+    prisma.cooperative.findUnique({
+      where: { id: cooperativeId },
+      select: { currency: true },
+    }),
+  ]);
+  const sym = getCurrencySymbol(cooperative?.currency ?? "NGN");
 
   const raw = await prisma.contribution.findMany({
     where: {
@@ -136,7 +145,7 @@ export default async function AdminContributionsPage({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 flex-wrap">
                     <span className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
-                      ₦{Number(c.amount).toLocaleString()}
+                      {sym}{Number(c.amount).toLocaleString()}
                     </span>
                     {c.status === "PENDING_VERIFICATION" && (
                       <Badge variant="warning">Pending</Badge>

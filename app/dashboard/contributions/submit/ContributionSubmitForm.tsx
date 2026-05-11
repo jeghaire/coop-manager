@@ -35,8 +35,10 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 export function ContributionSubmitForm({
   onSuccess,
+  currencySymbol,
 }: {
   onSuccess?: () => void;
+  currencySymbol?: string;
 }) {
   const router = useRouter();
   const [state, formAction] = useActionState<ContributionActionState, FormData>(
@@ -136,7 +138,7 @@ export function ContributionSubmitForm({
       )}
 
       <div className="space-y-1.5">
-        <Label htmlFor="amount">Amount (₦)</Label>
+        <Label htmlFor="amount">Amount ({currencySymbol ?? "₦"})</Label>
         <Input
           id="amount"
           name="amount"

@@ -59,7 +59,6 @@ model Cooperative {
   loanRepaymentMonths    Int               @default(12)
   defaultGracePeriodDays Int               @default(30)
   currency               String            @default("NGN")
-  currencySymbol         String            @default("₦")
   deletedAt              DateTime?
   createdAt              DateTime          @default(now())
   updatedAt              DateTime          @updatedAt

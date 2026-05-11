@@ -2,6 +2,7 @@
 
 import prisma from "@/app/lib/prisma";
 import { requireAuth } from "@/app/lib/auth-helpers";
+import { getCurrencySymbol } from "@/app/lib/currency";
 import { revalidatePath } from "next/cache";
 import {
   notifyWithdrawalApproved,
@@ -83,10 +84,13 @@ export async function requestWithdrawal(
     return { error: "Your account must be verified before requesting a withdrawal." };
   }
 
-  const available = await getAvailableWithdrawal(userId, cooperativeId);
+  const [available, coop] = await Promise.all([
+    getAvailableWithdrawal(userId, cooperativeId),
+    prisma.cooperative.findUnique({ where: { id: cooperativeId }, select: { currency: true } }),
+  ]);
   if (amount > available) {
     return {
-      error: `Amount cannot exceed your available balance of ₦${available.toLocaleString()}.`,
+      error: `Amount cannot exceed your available balance of ${getCurrencySymbol(coop?.currency ?? "NGN")}${available.toLocaleString()}.`,
     };
   }
 

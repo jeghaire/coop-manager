@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { getSession, getTotalContributed } from "@/app/lib/auth-helpers";
 import { redirect } from "next/navigation";
 import prisma from "@/app/lib/prisma";
+import { getCurrencySymbol } from "@/app/lib/currency";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { DownloadStatementButton } from "./DownloadStatementButton";
@@ -20,7 +21,7 @@ export default async function FinancialSummaryPage() {
       getTotalContributed(userId),
       prisma.cooperative.findUnique({
         where: { id: cooperativeId },
-        select: { name: true, borrowingMultiplier: true, currencySymbol: true },
+        select: { name: true, borrowingMultiplier: true, currency: true },
       }),
       prisma.loanApplication.findMany({
         where: { userId, cooperativeId, deletedAt: null },
@@ -34,7 +35,7 @@ export default async function FinancialSummaryPage() {
 
   if (!cooperative) redirect("/dashboard");
 
-  const sym = cooperative.currencySymbol;
+  const sym = getCurrencySymbol(cooperative.currency);
 
   const activeLoan =
     loans.find((l) => l.status === "APPROVED" && !l.repaidAt) ?? null;

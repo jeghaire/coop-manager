@@ -29,23 +29,22 @@ export default async function AdminSettingsPage() {
         loanRepaymentMonths: true,
         defaultGracePeriodDays: true,
         currency: true,
-        currencySymbol: true
-      }
+      },
     }),
     prisma.cooperativeBank.findMany({
       where: { cooperativeId },
-      orderBy: { isPreferred: "desc" }
-    })
+      orderBy: { isPreferred: "desc" },
+    }),
   ]);
 
   if (!cooperative) redirect("/dashboard");
 
   const modeDescriptions: Record<string, string> = {
-    OFF: "No coverage check â€” any verified guarantors can be selected.",
+    OFF: "No coverage check - any verified guarantors can be selected.",
     COMBINED:
       "Guarantors' combined contributions must equal or exceed the loan amount.",
     INDIVIDUAL:
-      "Each guarantor must individually have contributions equal to or exceeding the loan amount."
+      "Each guarantor must individually have contributions equal to or exceeding the loan amount.",
   };
 
   return (
@@ -68,14 +67,14 @@ export default async function AdminSettingsPage() {
             </label>
             <div className="flex items-center gap-3">
               <div className="border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-500 bg-zinc-50 dark:bg-zinc-800">
-                {cooperative.borrowingMultiplier}Ã—
+                {cooperative.borrowingMultiplier}x
               </div>
               <span className="text-xs text-zinc-400 dark:text-zinc-600 italic">
                 Coming soon
               </span>
             </div>
             <p className="text-xs text-zinc-400 dark:text-zinc-600">
-              Members can borrow up to {cooperative.borrowingMultiplier}Ã— their
+              Members can borrow up to {cooperative.borrowingMultiplier}x their
               total contributions.
             </p>
           </div>
@@ -86,7 +85,7 @@ export default async function AdminSettingsPage() {
               Guarantor Coverage Mode
             </label>
             <p className="text-xs text-zinc-500 dark:text-zinc-400">
-              Current: <strong>{cooperative.guarantorCoverageMode}</strong> â€”{" "}
+              Current: <strong>{cooperative.guarantorCoverageMode}</strong> -{" "}
               {modeDescriptions[cooperative.guarantorCoverageMode]}
             </p>
             {isOwner ? (
@@ -115,7 +114,6 @@ export default async function AdminSettingsPage() {
             repaymentMonths={cooperative.loanRepaymentMonths}
             gracePeriodDays={cooperative.defaultGracePeriodDays}
             currency={cooperative.currency}
-            currencySymbol={cooperative.currencySymbol}
           />
         </div>
       </section>
@@ -165,7 +163,7 @@ export default async function AdminSettingsPage() {
                           {account.accountName}
                           {account.isPreferred && (
                             <span className="ml-2 text-xs text-emerald-600 dark:text-emerald-400">
-                              âœ“ Preferred
+                              Preferred
                             </span>
                           )}
                         </p>
@@ -213,4 +211,3 @@ export default async function AdminSettingsPage() {
     </div>
   );
 }
-

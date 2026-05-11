@@ -51,7 +51,7 @@ export async function LoanDecisions({
         </div>
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-4">
           <p className="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-600 mb-1">
-            Total Approved (â‚¦)
+            Total Approved Amount
           </p>
           <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
             {data.totalApprovedAmount.toLocaleString()}
@@ -152,7 +152,7 @@ export async function LoanDecisions({
                   Applicant
                 </th>
                 <th className="text-right px-4 py-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider hidden sm:table-cell">
-                  Amount (â‚¦)
+                  Amount
                 </th>
                 <th className="text-center px-4 py-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                   Decision
@@ -190,7 +190,7 @@ export async function LoanDecisions({
                     )}
                   </td>
                   <td className="px-5 py-3 text-zinc-600 dark:text-zinc-400 hidden md:table-cell">
-                    {loan.reviewer?.name ?? "â€”"}
+                    {loan.reviewer?.name ?? "—"}
                   </td>
                   <td className="px-5 py-3 text-right text-zinc-500 dark:text-zinc-500 text-xs hidden sm:table-cell">
                     {loan.reviewedAt
@@ -199,7 +199,7 @@ export async function LoanDecisions({
                           month: "short",
                           year: "numeric",
                         })
-                      : "â€”"}
+                      : "-"}
                   </td>
                 </tr>
               ))}
@@ -210,4 +210,3 @@ export async function LoanDecisions({
     </div>
   );
 }
-

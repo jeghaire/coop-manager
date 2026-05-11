@@ -4,6 +4,7 @@ import { getSession } from "@/app/lib/auth-helpers";
 import { redirect } from "next/navigation";
 import prisma from "@/app/lib/prisma";
 import { LoanApplicationForm } from "./LoanApplicationForm";
+import { getCurrencySymbol } from "@/app/lib/currency";
 import Link from "next/link";
 
 export default async function ApplyForLoanPage({
@@ -21,7 +22,7 @@ export default async function ApplyForLoanPage({
   const [cooperative, contributions, dbUser] = await Promise.all([
     prisma.cooperative.findUnique({
       where: { id: cooperativeId },
-      select: { borrowingMultiplier: true, guarantorCoverageMode: true }
+      select: { borrowingMultiplier: true, guarantorCoverageMode: true, currency: true }
     }),
     prisma.contribution.findMany({
       where: { userId, status: "VERIFIED", deletedAt: null },
@@ -53,6 +54,7 @@ export default async function ApplyForLoanPage({
   const borrowingCapacity = cooperative
     ? totalContributed * cooperative.borrowingMultiplier
     : 0;
+  const sym = getCurrencySymbol(cooperative?.currency ?? "NGN");
 
   // If retrying a rejected loan, pre-fill form values
   let retryData: {
@@ -107,10 +109,10 @@ export default async function ApplyForLoanPage({
           Your Borrowing Capacity
         </p>
         <p className="text-2xl font-semibold text-emerald-800 dark:text-emerald-300">
-          ₦{borrowingCapacity.toLocaleString()}
+          {sym}{borrowingCapacity.toLocaleString()}
         </p>
         <p className="text-xs text-emerald-700 dark:text-emerald-500">
-          Based on ₦{totalContributed.toLocaleString()} contributed ×{" "}
+          Based on {sym}{totalContributed.toLocaleString()} contributed ×{" "}
           {cooperative?.borrowingMultiplier ?? 3}
         </p>
       </div>
@@ -131,9 +133,8 @@ export default async function ApplyForLoanPage({
           <LoanApplicationForm
             members={members}
             borrowingCapacity={borrowingCapacity}
-            guarantorCoverageMode={
-              cooperative?.guarantorCoverageMode ?? "COMBINED"
-            }
+            guarantorCoverageMode={cooperative?.guarantorCoverageMode ?? "COMBINED"}
+            currencySymbol={sym}
             defaultValues={retryData ?? undefined}
           />
         )}

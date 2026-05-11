@@ -6,6 +6,7 @@ import prisma from "@/app/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/app/components/PageHeader";
 import { BadgeCheck } from "lucide-react";
+import { getCurrencySymbol } from "@/app/lib/currency";
 
 const ROLE_BADGE: Record<string, "success" | "sky" | "warning" | "secondary"> =
   {
@@ -28,7 +29,7 @@ export default async function ProfilePage() {
       verifiedAt: true,
       monthlyContributionAmount: true,
       createdAt: true,
-      cooperative: { select: { name: true } },
+      cooperative: { select: { name: true, currency: true } },
       contributions: {
         where: { status: "VERIFIED", deletedAt: null },
         select: { amount: true },
@@ -39,6 +40,7 @@ export default async function ProfilePage() {
   if (!user) redirect("/auth/signin");
 
   const isVerified = !!user.verifiedAt;
+  const sym = getCurrencySymbol(user.cooperative.currency);
   const totalContributed = user.contributions.reduce(
     (sum, c) => sum + Number(c.amount),
     0,
@@ -59,7 +61,7 @@ export default async function ProfilePage() {
           <div className="flex items-center gap-2">
             <Badge
               variant={ROLE_BADGE[user.role] ?? "secondary"}
-              className="text-[11px]"
+              className="text-[10px]"
             >
               {user.role}
             </Badge>
@@ -113,13 +115,15 @@ export default async function ProfilePage() {
           <div className="flex justify-between text-sm">
             <dt className="text-zinc-500 dark:text-zinc-400">Total verified</dt>
             <dd className="font-semibold text-emerald-700 dark:text-emerald-400">
-              ₦{totalContributed.toLocaleString()}
+              {sym}
+              {totalContributed.toLocaleString()}
             </dd>
           </div>
           <div className="flex justify-between text-sm">
             <dt className="text-zinc-500 dark:text-zinc-400">Monthly target</dt>
             <dd className="font-medium text-zinc-900 dark:text-zinc-100">
-              ₦{Number(user.monthlyContributionAmount).toLocaleString()}
+              {sym}
+              {Number(user.monthlyContributionAmount).toLocaleString()}
             </dd>
           </div>
         </dl>

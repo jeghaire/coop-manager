@@ -71,7 +71,7 @@ export default async function AdminMembersPage() {
                   Member
                 </th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider hidden sm:table-cell">
-                  Monthly (â‚¦)
+                  Monthly
                 </th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                   Role
@@ -137,4 +137,3 @@ export default async function AdminMembersPage() {
     </div>
   );
 }
-

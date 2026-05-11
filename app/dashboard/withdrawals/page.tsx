@@ -3,6 +3,7 @@
 import { getSession } from "@/app/lib/auth-helpers";
 import { redirect } from "next/navigation";
 import prisma from "@/app/lib/prisma";
+import { getCurrencySymbol } from "@/app/lib/currency";
 import {
   getAvailableWithdrawal,
   getMemberWithdrawals
@@ -41,11 +42,11 @@ export default async function WithdrawalsPage() {
     getAvailableWithdrawal(session.user.id, cooperativeId),
     prisma.cooperative.findUnique({
       where: { id: cooperativeId },
-      select: { currencySymbol: true }
+      select: { currency: true }
     })
   ]);
 
-  const sym = cooperative?.currencySymbol ?? "â‚¦";
+  const sym = getCurrencySymbol(cooperative?.currency ?? "NGN");
   const hasPending = withdrawals.some((w) => w.status === "REQUESTED");
 
   return (

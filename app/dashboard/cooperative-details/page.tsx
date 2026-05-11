@@ -4,6 +4,8 @@ import { getSession } from "@/app/lib/auth-helpers";
 import { redirect } from "next/navigation";
 import prisma from "@/app/lib/prisma";
 import { PageHeader } from "@/app/components/PageHeader";
+import { getCurrencySymbol } from "@/app/lib/currency";
+import { Star } from "lucide-react";
 
 export default async function CooperativeDetailsPage() {
   const session = await getSession();
@@ -65,7 +67,8 @@ export default async function CooperativeDetailsPage() {
             Total Contributions
           </p>
           <p className="text-3xl font-semibold text-zinc-900 dark:text-zinc-100">
-            â‚¦{contributionTotal.toLocaleString()}
+            {getCurrencySymbol(cooperative.currency)}
+            {contributionTotal.toLocaleString()}
           </p>
         </div>
       </div>
@@ -101,9 +104,6 @@ export default async function CooperativeDetailsPage() {
                   <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                     Bank
                   </th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                    Status
-                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
@@ -113,24 +113,18 @@ export default async function CooperativeDetailsPage() {
                     className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/20"
                   >
                     <td className="px-4 py-3 font-medium text-zinc-900 dark:text-zinc-100">
-                      {account.accountName}
+                      <span className="flex items-center gap-1.5">
+                        {account.accountName}
+                        {account.isPreferred && (
+                          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
+                        )}
+                      </span>
                     </td>
                     <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300 font-mono hidden sm:table-cell">
                       {account.accountNumber}
                     </td>
                     <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">
                       {account.bankName}
-                    </td>
-                    <td className="px-4 py-3">
-                      {account.isPreferred ? (
-                        <span className="text-emerald-600 dark:text-emerald-400 text-xs font-medium">
-                          âœ“ Preferred
-                        </span>
-                      ) : (
-                        <span className="text-zinc-400 dark:text-zinc-600 text-xs">
-                          â€”
-                        </span>
-                      )}
                     </td>
                   </tr>
                 ))}
@@ -142,4 +136,3 @@ export default async function CooperativeDetailsPage() {
     </div>
   );
 }
-

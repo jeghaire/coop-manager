@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/app/lib/utils";
 import { PageHeader } from "@/app/components/PageHeader";
+import { getCurrencySymbol } from "@/app/lib/currency";
 
 export default async function AdminNotificationsPage() {
   const session = await getSession();
@@ -18,7 +19,7 @@ export default async function AdminNotificationsPage() {
 
   const cooperativeId = session.user.cooperativeId as string;
 
-  const pendingLoans = await prisma.loanApplication.findMany({
+  const [pendingLoans, cooperative] = await Promise.all([prisma.loanApplication.findMany({
     where: {
       cooperativeId,
       status: "PENDING_ADMIN_REVIEW",
@@ -32,7 +33,8 @@ export default async function AdminNotificationsPage() {
       }
     },
     orderBy: { appliedAt: "desc" }
-  });
+  }), prisma.cooperative.findUnique({ where: { id: cooperativeId }, select: { currency: true } })]);
+  const sym = getCurrencySymbol(cooperative?.currency ?? "NGN");
 
   return (
     <div className="space-y-6">
@@ -67,7 +69,7 @@ export default async function AdminNotificationsPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 flex-wrap">
                     <span className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-                      ₦{Number(loan.amountRequested).toLocaleString()}
+                      {sym}{Number(loan.amountRequested).toLocaleString()}
                     </span>
                     <Badge variant="warning">Needs Review</Badge>
                   </div>

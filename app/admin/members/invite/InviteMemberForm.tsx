@@ -21,7 +21,7 @@ const ROLES = [
   { value: "ADMIN", label: "Admin" },
 ];
 
-export function InviteMemberForm({ isOwner }: { isOwner: boolean }) {
+export function InviteMemberForm({ isOwner, currencySymbol = "₦" }: { isOwner: boolean; currencySymbol?: string }) {
   const [state, action, pending] = useActionState<AdminActionState, FormData>(
     inviteMember,
     {}
@@ -86,7 +86,7 @@ export function InviteMemberForm({ isOwner }: { isOwner: boolean }) {
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="monthlyAmount">Monthly Contribution (₦)</Label>
+        <Label htmlFor="monthlyAmount">Monthly Contribution ({currencySymbol})</Label>
         <Input
           id="monthlyAmount"
           name="monthlyAmount"

@@ -6,6 +6,7 @@ import prisma from "@/app/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { LoanReviewForm } from "./LoanReviewForm";
 import { PageHeader } from "@/app/components/PageHeader";
+import { getCurrencySymbol } from "@/app/lib/currency";
 
 function guarantorStatusBadge(status: string) {
   switch (status) {
@@ -47,7 +48,7 @@ export default async function AdminLoansPage() {
     }),
     prisma.cooperative.findUnique({
       where: { id: cooperativeId },
-      select: { borrowingMultiplier: true, guarantorCoverageMode: true }
+      select: { borrowingMultiplier: true, guarantorCoverageMode: true, currency: true }
     })
   ]);
 
@@ -97,6 +98,8 @@ export default async function AdminLoansPage() {
     })
   );
 
+  const sym = getCurrencySymbol(cooperative?.currency ?? "NGN");
+
   return (
     <div className="space-y-8">
       <PageHeader
@@ -123,7 +126,7 @@ export default async function AdminLoansPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 flex-wrap">
                       <span className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
-                        ₦{amount.toLocaleString()}
+                        {sym}{amount.toLocaleString()}
                       </span>
                       <Badge variant="sky">Pending Review</Badge>
                       {loan.covered ? (
@@ -145,9 +148,8 @@ export default async function AdminLoansPage() {
                         </span>
                       </p>
                       <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                        Contributed: ₦
-                        {loan.applicantContribution.toLocaleString()} ·
-                        Capacity: ₦{loan.borrowingCapacity.toLocaleString()}
+                        Contributed: {sym}{loan.applicantContribution.toLocaleString()} ·
+                        Capacity: {sym}{loan.borrowingCapacity.toLocaleString()}
                       </p>
                       <p className="text-xs text-zinc-400 dark:text-zinc-600">
                         Applied{" "}
@@ -176,7 +178,7 @@ export default async function AdminLoansPage() {
                             {guarantorStatusBadge(g.status)}
                             {contrib && (
                               <span className="text-zinc-400 dark:text-zinc-600">
-                                ₦{contrib.total.toLocaleString()} contributed
+                                {sym}{contrib.total.toLocaleString()} contributed
                               </span>
                             )}
                           </div>

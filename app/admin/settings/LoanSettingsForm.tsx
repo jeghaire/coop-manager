@@ -14,7 +14,6 @@ type Props = {
   repaymentMonths: number;
   gracePeriodDays: number;
   currency: string;
-  currencySymbol: string;
 };
 
 export function LoanSettingsForm({
@@ -23,7 +22,6 @@ export function LoanSettingsForm({
   repaymentMonths,
   gracePeriodDays,
   currency,
-  currencySymbol,
 }: Props) {
   const [state, formAction, pending] = useActionState(updateLoanSettings, {});
 
@@ -46,6 +44,7 @@ export function LoanSettingsForm({
         <div className="space-y-1.5">
           <Label htmlFor="loanInterestRate">Interest Rate (%)</Label>
           <Input
+            key={interestRate}
             id="loanInterestRate"
             name="loanInterestRate"
             type="number"
@@ -61,6 +60,7 @@ export function LoanSettingsForm({
         <div className="space-y-1.5">
           <Label htmlFor="loanRepaymentMonths">Repayment Period (months)</Label>
           <Input
+            key={repaymentMonths}
             id="loanRepaymentMonths"
             name="loanRepaymentMonths"
             type="number"
@@ -74,6 +74,7 @@ export function LoanSettingsForm({
         <div className="space-y-1.5">
           <Label htmlFor="defaultGracePeriodDays">Grace Period (days)</Label>
           <Input
+            key={gracePeriodDays}
             id="defaultGracePeriodDays"
             name="defaultGracePeriodDays"
             type="number"
@@ -87,6 +88,7 @@ export function LoanSettingsForm({
         <div className="space-y-1.5">
           <Label htmlFor="currency">Currency Code</Label>
           <Input
+            key={currency}
             id="currency"
             name="currency"
             type="text"
@@ -97,18 +99,6 @@ export function LoanSettingsForm({
           />
         </div>
 
-        <div className="space-y-1.5">
-          <Label htmlFor="currencySymbol">Currency Symbol</Label>
-          <Input
-            id="currencySymbol"
-            name="currencySymbol"
-            type="text"
-            maxLength={5}
-            defaultValue={currencySymbol}
-            placeholder="₦"
-            required
-          />
-        </div>
       </div>
 
       <Button type="submit" size="sm" disabled={pending}>

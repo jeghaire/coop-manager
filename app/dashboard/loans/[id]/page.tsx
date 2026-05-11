@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { getSession } from "@/app/lib/auth-helpers";
 import { redirect } from "next/navigation";
 import prisma from "@/app/lib/prisma";
+import { getCurrencySymbol } from "@/app/lib/currency";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { generateRepaymentSchedule, calculateLoanHealth } from "@/app/lib/loan-helpers";
@@ -66,7 +67,7 @@ export default async function LoanDetailsPage({
     }),
     prisma.cooperative.findUnique({
       where: { id: cooperativeId },
-      select: { currencySymbol: true },
+      select: { currency: true },
     }),
   ]);
 
@@ -76,7 +77,7 @@ export default async function LoanDetailsPage({
   const isOwn = loan.userId === userId;
   const isActive = loan.status === "APPROVED";
 
-  const sym = cooperative?.currencySymbol ?? "₦";
+  const sym = getCurrencySymbol(cooperative?.currency ?? "NGN");
   const fmt = (n: number) =>
     `${sym}${n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
 

@@ -9,33 +9,36 @@ function formatEventType(raw: string): string {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-const EVENT_TYPE_COLORS: Record<
-  string,
-  { dot: string; badge: string }
-> = {
+const EVENT_TYPE_COLORS: Record<string, { dot: string; badge: string }> = {
   LOAN_APPROVED: {
     dot: "bg-emerald-500",
-    badge: "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20",
+    badge:
+      "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20",
   },
   LOAN_REJECTED: {
     dot: "bg-red-500",
-    badge: "bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border-red-200 dark:border-red-500/20",
+    badge:
+      "bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border-red-200 dark:border-red-500/20",
   },
   CONTRIBUTION_VERIFIED: {
     dot: "bg-emerald-500",
-    badge: "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20",
+    badge:
+      "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20",
   },
   CONTRIBUTION_REJECTED: {
     dot: "bg-red-500",
-    badge: "bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border-red-200 dark:border-red-500/20",
+    badge:
+      "bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border-red-200 dark:border-red-500/20",
   },
   MEMBER_VERIFIED: {
     dot: "bg-sky-500",
-    badge: "bg-sky-50 dark:bg-sky-500/10 text-sky-700 dark:text-sky-400 border-sky-200 dark:border-sky-500/20",
+    badge:
+      "bg-sky-50 dark:bg-sky-500/10 text-sky-700 dark:text-sky-400 border-sky-200 dark:border-sky-500/20",
   },
   DIVIDEND_PAID: {
     dot: "bg-violet-500",
-    badge: "bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-400 border-violet-200 dark:border-violet-500/20",
+    badge:
+      "bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-400 border-violet-200 dark:border-violet-500/20",
   },
 };
 
@@ -49,7 +52,7 @@ function getEventStyle(eventType: string) {
   );
 }
 
-// â”€â”€â”€ Filter tabs (URL-based) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Filter tabs (URL-based)
 
 const FILTER_OPTIONS = [
   { label: "All", value: "" },
@@ -84,7 +87,7 @@ export async function AuditTrail({
                 "px-3 py-1 rounded-full text-xs font-medium border transition-colors",
                 isActive
                   ? "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-500/40"
-                  : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600"
+                  : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600",
               )}
             >
               {label}
@@ -150,13 +153,13 @@ export async function AuditTrail({
                         <span
                           className={cn(
                             "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium border",
-                            style.badge
+                            style.badge,
                           )}
                         >
                           <span
                             className={cn(
                               "w-1.5 h-1.5 rounded-full shrink-0",
-                              style.dot
+                              style.dot,
                             )}
                           />
                           {formatEventType(event.eventType)}
@@ -182,7 +185,7 @@ export async function AuditTrail({
                           </span>
                         ) : (
                           <span className="text-zinc-400 dark:text-zinc-600">
-                            â€”
+                            -
                           </span>
                         )}
                       </td>
@@ -197,4 +200,3 @@ export async function AuditTrail({
     </div>
   );
 }
-

@@ -3,6 +3,7 @@
 import prisma from "@/app/lib/prisma";
 import { requireAuth, protectVerifiedAction, protectAdminAction, getTotalContributed } from "@/app/lib/auth-helpers";
 import { calculateLoanTotals } from "@/app/lib/loan-helpers";
+import { getCurrencySymbol } from "@/app/lib/currency";
 import { notifyLoanApproved, notifyLoanRejected, notifyGuarantorRequested } from "@/app/lib/notifications";
 import { revalidatePath } from "next/cache";
 
@@ -62,15 +63,16 @@ export async function applyForLoan(
   // Fetch cooperative settings for borrowing capacity and guarantor mode
   const cooperative = await prisma.cooperative.findUnique({
     where: { id: cooperativeId },
-    select: { borrowingMultiplier: true, guarantorCoverageMode: true },
+    select: { borrowingMultiplier: true, guarantorCoverageMode: true, currency: true },
   });
 
   if (!cooperative) return { error: "Cooperative not found." };
 
+  const sym = getCurrencySymbol(cooperative.currency);
   const borrowingCapacity = totalContributed * cooperative.borrowingMultiplier;
   if (amount > borrowingCapacity) {
     return {
-      error: `Loan amount exceeds your borrowing capacity of ₦${borrowingCapacity.toLocaleString()} (${cooperative.borrowingMultiplier}× your contributions).`,
+      error: `Loan amount exceeds your borrowing capacity of ${sym}${borrowingCapacity.toLocaleString()} (${cooperative.borrowingMultiplier}× your contributions).`,
     };
   }
 
@@ -108,17 +110,17 @@ export async function applyForLoan(
       const combined = g1Total + g2Total;
       if (combined < amount) {
         return {
-          error: `Guarantors' combined contributions (₦${combined.toLocaleString()}) must cover the loan amount (₦${amount.toLocaleString()}).`,
+          error: `Guarantors' combined contributions (${sym}${combined.toLocaleString()}) must cover the loan amount (${sym}${amount.toLocaleString()}).`,
         };
       }
     } else if (cooperative.guarantorCoverageMode === "INDIVIDUAL") {
       const g1 = guarantors.find((g) => g.id === guarantor1Id)!;
       const g2 = guarantors.find((g) => g.id === guarantor2Id)!;
       if (g1Total < amount) {
-        return { error: `${g1.name}'s contributions (₦${g1Total.toLocaleString()}) must individually cover the loan amount (₦${amount.toLocaleString()}).` };
+        return { error: `${g1.name}'s contributions (${sym}${g1Total.toLocaleString()}) must individually cover the loan amount (${sym}${amount.toLocaleString()}).` };
       }
       if (g2Total < amount) {
-        return { error: `${g2.name}'s contributions (₦${g2Total.toLocaleString()}) must individually cover the loan amount (₦${amount.toLocaleString()}).` };
+        return { error: `${g2.name}'s contributions (${sym}${g2Total.toLocaleString()}) must individually cover the loan amount (${sym}${amount.toLocaleString()}).` };
       }
     }
   }
@@ -467,7 +469,9 @@ export async function repayLoan(
   const remaining = totalDue - totalPaid;
 
   if (loanAmount > remaining + 0.01) {
-    return { error: `Payment of ₦${loanAmount.toLocaleString()} exceeds remaining balance of ₦${remaining.toLocaleString()}.` };
+    const coop = await prisma.cooperative.findUnique({ where: { id: cooperativeId }, select: { currency: true } });
+    const sym = getCurrencySymbol(coop?.currency ?? "NGN");
+    return { error: `Payment of ${sym}${loanAmount.toLocaleString()} exceeds remaining balance of ${sym}${remaining.toLocaleString()}.` };
   }
 
   try {
@@ -570,7 +574,8 @@ export async function recordRepaymentForMember(
   const remaining = totalDue - totalPaid;
 
   if (amount > remaining + 0.01) {
-    return { error: `Amount exceeds remaining balance of ₦${remaining.toLocaleString()}.` };
+    const coop = await prisma.cooperative.findUnique({ where: { id: cooperativeId }, select: { currency: true } });
+    return { error: `Amount exceeds remaining balance of ${getCurrencySymbol(coop?.currency ?? "NGN")}${remaining.toLocaleString()}.` };
   }
 
   try {
