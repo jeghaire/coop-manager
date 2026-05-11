@@ -27,7 +27,7 @@ export function ApproveButton({
       <Input type="hidden" name="payoutId" value={payoutId} />
       <Input type="hidden" name="cooperativeId" value={cooperativeId} />
       {state.error && <p className="text-xs text-red-500 mb-1">{state.error}</p>}
-      <Button size="sm" variant="outline" disabled={pending}>
+      <Button type="submit" size="sm" variant="outline" disabled={pending}>
         {pending ? "Approving…" : "Approve"}
       </Button>
     </Form>
@@ -54,7 +54,7 @@ export function ProcessButton({
           <AlertDescription>{state.error}</AlertDescription>
         </Alert>
       )}
-      <Button size="sm" disabled={pending}>
+      <Button type="submit" size="sm" disabled={pending}>
         {pending ? "Processing…" : "Pay Out"}
       </Button>
     </Form>

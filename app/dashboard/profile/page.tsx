@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import prisma from "@/app/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/app/components/PageHeader";
+import { BadgeCheck } from "lucide-react";
 
 const ROLE_BADGE: Record<string, "success" | "sky" | "warning" | "secondary"> =
   {
@@ -63,9 +64,7 @@ export default async function ProfilePage() {
               {user.role}
             </Badge>
             {isVerified ? (
-              <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-                ✓ Verified
-              </span>
+              <BadgeCheck className="w-4 h-4 text-blue-500" />
             ) : (
               <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">
                 Pending verification

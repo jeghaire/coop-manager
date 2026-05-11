@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { verifyMember, type VerificationActionState } from "@/app/actions/verification";
+import { BadgeCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -21,11 +22,7 @@ export function VerifyMemberForm({
   const [confirming, setConfirming] = useState(false);
 
   if (state.success) {
-    return (
-      <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-        ✓ Verified
-      </span>
-    );
+    return <BadgeCheck className="w-4 h-4 text-blue-500" />;
   }
 
   if (!confirming) {

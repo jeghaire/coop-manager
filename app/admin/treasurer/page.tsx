@@ -20,7 +20,7 @@ export default async function TreasurerPage() {
 
   const [members, activeLoans, cooperative] = await Promise.all([
     prisma.user.findMany({
-      where: { cooperativeId, deletedAt: null },
+      where: { cooperativeId, deletedAt: null, id: { not: session.user.id } },
       select: { id: true, name: true, email: true },
       orderBy: { name: "asc" }
     }),
