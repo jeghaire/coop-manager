@@ -1,4 +1,4 @@
-export const dynamic = "force-dynamic";
+﻿export const dynamic = "force-dynamic";
 
 import { getSession } from "@/app/lib/auth-helpers";
 import { redirect } from "next/navigation";
@@ -65,7 +65,7 @@ export default async function CooperativeDetailsPage() {
             Total Contributions
           </p>
           <p className="text-3xl font-semibold text-zinc-900 dark:text-zinc-100">
-            ₦{contributionTotal.toLocaleString()}
+            â‚¦{contributionTotal.toLocaleString()}
           </p>
         </div>
       </div>
@@ -89,7 +89,7 @@ export default async function CooperativeDetailsPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="min-w-full text-sm">
               <thead>
                 <tr className="border-b border-zinc-100 dark:border-zinc-800">
                   <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
@@ -124,11 +124,11 @@ export default async function CooperativeDetailsPage() {
                     <td className="px-4 py-3">
                       {account.isPreferred ? (
                         <span className="text-emerald-600 dark:text-emerald-400 text-xs font-medium">
-                          ✓ Preferred
+                          âœ“ Preferred
                         </span>
                       ) : (
                         <span className="text-zinc-400 dark:text-zinc-600 text-xs">
-                          —
+                          â€”
                         </span>
                       )}
                     </td>
@@ -142,3 +142,4 @@ export default async function CooperativeDetailsPage() {
     </div>
   );
 }
+

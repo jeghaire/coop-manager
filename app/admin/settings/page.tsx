@@ -1,4 +1,4 @@
-export const dynamic = "force-dynamic";
+﻿export const dynamic = "force-dynamic";
 
 import { getSession } from "@/app/lib/auth-helpers";
 import { redirect } from "next/navigation";
@@ -41,7 +41,7 @@ export default async function AdminSettingsPage() {
   if (!cooperative) redirect("/dashboard");
 
   const modeDescriptions: Record<string, string> = {
-    OFF: "No coverage check — any verified guarantors can be selected.",
+    OFF: "No coverage check â€” any verified guarantors can be selected.",
     COMBINED:
       "Guarantors' combined contributions must equal or exceed the loan amount.",
     INDIVIDUAL:
@@ -68,14 +68,14 @@ export default async function AdminSettingsPage() {
             </label>
             <div className="flex items-center gap-3">
               <div className="border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-500 bg-zinc-50 dark:bg-zinc-800">
-                {cooperative.borrowingMultiplier}×
+                {cooperative.borrowingMultiplier}Ã—
               </div>
               <span className="text-xs text-zinc-400 dark:text-zinc-600 italic">
                 Coming soon
               </span>
             </div>
             <p className="text-xs text-zinc-400 dark:text-zinc-600">
-              Members can borrow up to {cooperative.borrowingMultiplier}× their
+              Members can borrow up to {cooperative.borrowingMultiplier}Ã— their
               total contributions.
             </p>
           </div>
@@ -86,7 +86,7 @@ export default async function AdminSettingsPage() {
               Guarantor Coverage Mode
             </label>
             <p className="text-xs text-zinc-500 dark:text-zinc-400">
-              Current: <strong>{cooperative.guarantorCoverageMode}</strong> —{" "}
+              Current: <strong>{cooperative.guarantorCoverageMode}</strong> â€”{" "}
               {modeDescriptions[cooperative.guarantorCoverageMode]}
             </p>
             {isOwner ? (
@@ -137,7 +137,7 @@ export default async function AdminSettingsPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="min-w-full text-sm">
                 <thead>
                   <tr className="border-b border-zinc-100 dark:border-zinc-800">
                     <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
@@ -165,7 +165,7 @@ export default async function AdminSettingsPage() {
                           {account.accountName}
                           {account.isPreferred && (
                             <span className="ml-2 text-xs text-emerald-600 dark:text-emerald-400">
-                              ✓ Preferred
+                              âœ“ Preferred
                             </span>
                           )}
                         </p>
@@ -213,3 +213,4 @@ export default async function AdminSettingsPage() {
     </div>
   );
 }
+

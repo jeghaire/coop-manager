@@ -1,4 +1,4 @@
-import { getAuditTrail } from "@/app/actions/reports";
+﻿import { getAuditTrail } from "@/app/actions/reports";
 import Link from "next/link";
 import { cn } from "@/app/lib/utils";
 
@@ -49,7 +49,7 @@ function getEventStyle(eventType: string) {
   );
 }
 
-// ─── Filter tabs (URL-based) ──────────────────────────────────────────────────
+// â”€â”€â”€ Filter tabs (URL-based) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const FILTER_OPTIONS = [
   { label: "All", value: "" },
@@ -112,7 +112,7 @@ export async function AuditTrail({
             </p>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="min-w-full text-sm">
               <thead>
                 <tr className="border-b border-zinc-100 dark:border-zinc-800">
                   <th className="text-left px-5 py-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
@@ -182,7 +182,7 @@ export async function AuditTrail({
                           </span>
                         ) : (
                           <span className="text-zinc-400 dark:text-zinc-600">
-                            —
+                            â€”
                           </span>
                         )}
                       </td>
@@ -197,3 +197,4 @@ export async function AuditTrail({
     </div>
   );
 }
+

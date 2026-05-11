@@ -274,7 +274,7 @@ export default async function LoanDetailsPage({
             <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Repayment Schedule</h2>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="min-w-full text-sm">
               <thead>
                 <tr className="border-b border-zinc-100 dark:border-zinc-800">
                   <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">

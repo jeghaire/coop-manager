@@ -1,4 +1,4 @@
-export const dynamic = "force-dynamic";
+﻿export const dynamic = "force-dynamic";
 
 import { getSession } from "@/app/lib/auth-helpers";
 import { redirect } from "next/navigation";
@@ -64,14 +64,14 @@ export default async function AdminMembersPage() {
 
       <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="min-w-full text-sm">
             <thead>
               <tr className="border-b border-zinc-100 dark:border-zinc-800">
                 <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                   Member
                 </th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider hidden sm:table-cell">
-                  Monthly (₦)
+                  Monthly (â‚¦)
                 </th>
                 <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                   Role
@@ -137,3 +137,4 @@ export default async function AdminMembersPage() {
     </div>
   );
 }
+

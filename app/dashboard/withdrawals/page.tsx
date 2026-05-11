@@ -1,4 +1,4 @@
-export const dynamic = "force-dynamic";
+﻿export const dynamic = "force-dynamic";
 
 import { getSession } from "@/app/lib/auth-helpers";
 import { redirect } from "next/navigation";
@@ -45,7 +45,7 @@ export default async function WithdrawalsPage() {
     })
   ]);
 
-  const sym = cooperative?.currencySymbol ?? "₦";
+  const sym = cooperative?.currencySymbol ?? "â‚¦";
   const hasPending = withdrawals.some((w) => w.status === "REQUESTED");
 
   return (
@@ -102,7 +102,7 @@ export default async function WithdrawalsPage() {
           </h2>
           <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="min-w-full text-sm">
                 <thead>
                   <tr className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900">
                     <th className="text-left px-4 py-3 font-medium text-zinc-500 dark:text-zinc-400">
@@ -157,3 +157,4 @@ export default async function WithdrawalsPage() {
     </div>
   );
 }
+

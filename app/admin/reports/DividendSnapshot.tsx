@@ -1,4 +1,4 @@
-import { getDividendSnapshot } from "./data";
+﻿import { getDividendSnapshot } from "./data";
 import { Badge } from "@/components/ui/badge";
 
 const ROLE_BADGE: Record<string, "success" | "sky" | "warning" | "secondary"> =
@@ -36,7 +36,7 @@ export async function DividendSnapshot({
             Total Fund
           </p>
           <p className="text-2xl font-semibold text-emerald-800 dark:text-emerald-300">
-            ₦{grandTotal.toLocaleString()}
+            â‚¦{grandTotal.toLocaleString()}
           </p>
           <p className="text-xs text-emerald-600 dark:text-emerald-500 mt-0.5">
             Verified contributions
@@ -49,7 +49,7 @@ export async function DividendSnapshot({
               Distribution Amount
             </p>
             <p className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
-              ₦{distributionAmount.toLocaleString()}
+              â‚¦{distributionAmount.toLocaleString()}
             </p>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
               Pro-rated by contribution %
@@ -70,21 +70,21 @@ export async function DividendSnapshot({
 
       <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="min-w-full text-sm">
             <thead>
               <tr className="border-b border-zinc-100 dark:border-zinc-800">
                 <th className="text-left px-5 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                   Member
                 </th>
                 <th className="text-right px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider hidden sm:table-cell">
-                  Contributed (₦)
+                  Contributed (â‚¦)
                 </th>
                 <th className="text-right px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                   Share %
                 </th>
                 {distributionAmount > 0 && (
                   <th className="text-right px-5 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                    Dividend (₦)
+                    Dividend (â‚¦)
                   </th>
                 )}
               </tr>
@@ -167,3 +167,4 @@ export async function DividendSnapshot({
     </div>
   );
 }
+

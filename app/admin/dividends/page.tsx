@@ -1,4 +1,4 @@
-export const dynamic = "force-dynamic";
+﻿export const dynamic = "force-dynamic";
 
 import { getSession } from "@/app/lib/auth-helpers";
 import { redirect } from "next/navigation";
@@ -58,7 +58,7 @@ export default async function DividendsPage() {
             </h2>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="min-w-full text-sm">
               <thead className="bg-zinc-50 dark:bg-zinc-800/50 border-b border-zinc-200 dark:border-zinc-800">
                 <tr>
                   <th className="px-4 py-3 text-left font-medium text-zinc-500 dark:text-zinc-400">
@@ -156,3 +156,4 @@ function StatusBadge({ status }: { status: string }) {
       return <Badge variant="secondary">{status}</Badge>;
   }
 }
+
