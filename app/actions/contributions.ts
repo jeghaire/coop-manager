@@ -1,7 +1,8 @@
 "use server";
 
 import prisma from "@/app/lib/prisma";
-import { requireAuth } from "@/app/lib/auth-helpers";
+import { requireAuth, isAdminTreasurerOrOwner } from "@/app/lib/auth-helpers";
+import { getString, getOptionalString, getNumber } from "@/app/lib/form";
 import { notifyContributionVerified, notifyContributionRejected } from "@/app/lib/notifications";
 import { getPublicUrl } from "@/app/lib/s3-upload";
 import { revalidatePath } from "next/cache";
@@ -21,20 +22,18 @@ export async function submitContribution(
   const userId = session.user.id;
   const cooperativeId = session.user.cooperativeId as string;
 
-  const amountStr = (formData.get("amount") as string)?.trim();
-  const paymentMethod = (formData.get("paymentMethod") as string)?.trim();
-  const receiptKey = (formData.get("receiptKey") as string)?.trim() || null;
-  const receiptFileName = (formData.get("receiptFileName") as string)?.trim() || null;
-  const receiptFileSizeStr = (formData.get("receiptFileSize") as string)?.trim();
-  const receiptFileType = (formData.get("receiptFileType") as string)?.trim() || null;
-  const legacyReceiptUrl = (formData.get("receiptUrl") as string)?.trim() || null;
+  const amount = getNumber(formData, "amount");
+  const paymentMethod = getString(formData, "paymentMethod");
+  const receiptKey = getOptionalString(formData, "receiptKey");
+  const receiptFileName = getOptionalString(formData, "receiptFileName");
+  const receiptFileSizeStr = getString(formData, "receiptFileSize");
+  const receiptFileType = getOptionalString(formData, "receiptFileType");
+  const legacyReceiptUrl = getOptionalString(formData, "receiptUrl");
 
-  if (!amountStr || !paymentMethod) {
+  if (isNaN(amount) || !paymentMethod) {
     return { error: "Amount and payment method are required." };
   }
-
-  const amount = parseFloat(amountStr);
-  if (isNaN(amount) || amount <= 0) {
+  if (amount <= 0) {
     return { error: "Amount must be a positive number." };
   }
 
@@ -96,24 +95,21 @@ export async function recordContributionForMember(
   const session = await requireAuth();
   const role = session.user.role as string;
 
-  if (role !== "ADMIN" && role !== "OWNER" && role !== "TREASURER") {
+  if (!isAdminTreasurerOrOwner(role)) {
     return { error: "Only admins and treasurers can record contributions." };
   }
 
   const cooperativeId = session.user.cooperativeId as string;
-  const memberId = (formData.get("memberId") as string)?.trim();
-  const amountStr = (formData.get("amount") as string)?.trim();
-  const note = (formData.get("note") as string)?.trim();
+  const memberId = getString(formData, "memberId");
+  const amount = getNumber(formData, "amount");
+  const note = getOptionalString(formData, "note");
 
-  if (!memberId || !amountStr) {
+  if (!memberId) {
     return { error: "Member and amount are required." };
   }
-
   if (memberId === session.user.id) {
     return { error: "You cannot record a contribution for yourself. Submit it as a member instead." };
   }
-
-  const amount = parseFloat(amountStr);
   if (isNaN(amount) || amount <= 0) {
     return { error: "Amount must be a positive number." };
   }
@@ -150,7 +146,7 @@ export async function recordContributionForMember(
           actorId: session.user.id,
           actorType: role.toLowerCase(),
           entityType: "contribution",
-          data: { contributionId: contribution.id, memberId, amount, note: note || null },
+          data: { contributionId: contribution.id, memberId, amount, note },
         },
       });
     });
@@ -174,14 +170,14 @@ export async function verifyContribution(
   const session = await requireAuth();
   const role = session.user.role as string;
 
-  if (role !== "ADMIN" && role !== "OWNER" && role !== "TREASURER") {
+  if (!isAdminTreasurerOrOwner(role)) {
     return { error: "Only admins and treasurers can verify contributions." };
   }
 
   const cooperativeId = session.user.cooperativeId as string;
-  const contributionId = (formData.get("contributionId") as string)?.trim();
-  const decision = formData.get("decision") as string;
-  const rejectionReason = (formData.get("rejectionReason") as string)?.trim();
+  const contributionId = getString(formData, "contributionId");
+  const decision = getString(formData, "decision");
+  const rejectionReason = getOptionalString(formData, "rejectionReason");
 
   if (!contributionId || !decision) {
     return { error: "Missing required fields." };
@@ -237,7 +233,7 @@ export async function verifyContribution(
           data: {
             contributionId,
             decision,
-            rejectionReason: rejectionReason || null,
+            rejectionReason,
           },
         },
       });

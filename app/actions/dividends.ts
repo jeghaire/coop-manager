@@ -2,6 +2,7 @@
 
 import prisma from "@/app/lib/prisma";
 import { protectAdminAction } from "@/app/lib/auth-helpers";
+import { getString, getNumber, getInt } from "@/app/lib/form";
 import { notifyDividendPaid } from "@/app/lib/notifications";
 import { revalidatePath } from "next/cache";
 
@@ -11,24 +12,19 @@ export async function createDividendPayout(
   _prev: DividendActionState,
   formData: FormData
 ): Promise<DividendActionState> {
-  const cooperativeId = (formData.get("cooperativeId") as string)?.trim();
+  const cooperativeId = getString(formData, "cooperativeId");
   if (!cooperativeId) return { error: "Missing cooperative ID." };
 
   const session = await protectAdminAction(cooperativeId);
 
-  const period = (formData.get("period") as string)?.trim();
-  const yearStr = (formData.get("year") as string)?.trim();
-  const totalProfitStr = (formData.get("totalProfit") as string)?.trim();
-  const adminCostsPctStr = (formData.get("adminCostsPct") as string)?.trim();
-  const loanLossReservePctStr = (formData.get("loanLossReservePct") as string)?.trim();
+  const period = getString(formData, "period");
+  const year = getInt(formData, "year");
+  const totalProfit = getNumber(formData, "totalProfit");
+  const adminCostsPct = getNumber(formData, "adminCostsPct");
+  const loanLossReservePct = getNumber(formData, "loanLossReservePct");
 
   const validPeriods = ["Q1", "Q2", "Q3", "Q4", "ANNUAL"];
   if (!validPeriods.includes(period)) return { error: "Invalid period." };
-
-  const year = parseInt(yearStr);
-  const totalProfit = parseFloat(totalProfitStr);
-  const adminCostsPct = parseFloat(adminCostsPctStr);
-  const loanLossReservePct = parseFloat(loanLossReservePctStr);
 
   if (isNaN(year) || year < 2000 || year > 2100) return { error: "Invalid year." };
   if (isNaN(totalProfit) || totalProfit <= 0) return { error: "Total profit must be positive." };
@@ -118,8 +114,8 @@ export async function approveDividendPayout(
   _prev: DividendActionState,
   formData: FormData
 ): Promise<DividendActionState> {
-  const cooperativeId = (formData.get("cooperativeId") as string)?.trim();
-  const payoutId = (formData.get("payoutId") as string)?.trim();
+  const cooperativeId = getString(formData, "cooperativeId");
+  const payoutId = getString(formData, "payoutId");
   if (!cooperativeId || !payoutId) return { error: "Missing required fields." };
 
   const session = await protectAdminAction(cooperativeId);
@@ -152,8 +148,8 @@ export async function processDividendPayout(
   _prev: DividendActionState,
   formData: FormData
 ): Promise<DividendActionState> {
-  const cooperativeId = (formData.get("cooperativeId") as string)?.trim();
-  const payoutId = (formData.get("payoutId") as string)?.trim();
+  const cooperativeId = getString(formData, "cooperativeId");
+  const payoutId = getString(formData, "payoutId");
   if (!cooperativeId || !payoutId) return { error: "Missing required fields." };
 
   const session = await protectAdminAction(cooperativeId);

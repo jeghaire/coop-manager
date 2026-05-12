@@ -1,7 +1,8 @@
 "use server";
 
 import prisma from "@/app/lib/prisma";
-import { requireAuth, protectVerifiedAction, protectAdminAction, getTotalContributed } from "@/app/lib/auth-helpers";
+import { requireAuth, protectVerifiedAction, protectAdminAction, getTotalContributed, isAdminOrOwner, isAdminTreasurerOrOwner } from "@/app/lib/auth-helpers";
+import { getString, getOptionalString, getNumber } from "@/app/lib/form";
 import { calculateLoanTotals } from "@/app/lib/loan-helpers";
 import { getCurrencySymbol } from "@/app/lib/currency";
 import { notifyLoanApproved, notifyLoanRejected, notifyGuarantorRequested } from "@/app/lib/notifications";
@@ -32,16 +33,14 @@ export async function applyForLoan(
     }
   }
 
-  const amountStr = (formData.get("amount") as string)?.trim();
-  const guarantor1Id = (formData.get("guarantor1Id") as string)?.trim();
-  const guarantor2Id = (formData.get("guarantor2Id") as string)?.trim();
-  const purposeText = (formData.get("purpose") as string)?.trim();
+  const amount = getNumber(formData, "amount");
+  const guarantor1Id = getString(formData, "guarantor1Id");
+  const guarantor2Id = getString(formData, "guarantor2Id");
+  const purposeText = getOptionalString(formData, "purpose");
 
-  if (!amountStr || !guarantor1Id || !guarantor2Id) {
+  if (!guarantor1Id || !guarantor2Id) {
     return { error: "Amount and two guarantors are required." };
   }
-
-  const amount = parseFloat(amountStr);
   if (isNaN(amount) || amount <= 0) {
     return { error: "Amount must be a positive number." };
   }
@@ -153,7 +152,7 @@ export async function applyForLoan(
           data: {
             loanId: loan.id,
             amount,
-            purpose: purposeText || null,
+            purpose: purposeText,
             guarantorIds: [guarantor1Id, guarantor2Id],
             userContribution: totalContributed,
             borrowingCapacity,
@@ -183,9 +182,9 @@ export async function respondAsGuarantor(
   const userId = session.user.id;
   const cooperativeId = session.user.cooperativeId as string;
 
-  const loanId = (formData.get("loanId") as string)?.trim();
-  const response = formData.get("response") as string;
-  const rejectionReason = (formData.get("rejectionReason") as string)?.trim();
+  const loanId = getString(formData, "loanId");
+  const response = getString(formData, "response");
+  const rejectionReason = getOptionalString(formData, "rejectionReason");
 
   if (!loanId || !response) {
     return { error: "Missing required fields." };
@@ -243,7 +242,7 @@ export async function respondAsGuarantor(
           data: {
             loanId,
             guarantorId: userId,
-            rejectionReason: rejectionReason || null,
+            rejectionReason,
           },
         },
       });
@@ -306,14 +305,14 @@ export async function reviewLoan(
   const session = await requireAuth();
   const role = session.user.role as string;
 
-  if (role !== "ADMIN" && role !== "OWNER") {
+  if (!isAdminOrOwner(role)) {
     return { error: "Only admins can review loans." };
   }
 
   const cooperativeId = session.user.cooperativeId as string;
-  const loanId = (formData.get("loanId") as string)?.trim();
-  const decision = formData.get("decision") as string;
-  const reason = (formData.get("reason") as string)?.trim();
+  const loanId = getString(formData, "loanId");
+  const decision = getString(formData, "decision");
+  const reason = getOptionalString(formData, "reason");
 
   if (!loanId || !decision) {
     return { error: "Missing required fields." };
@@ -392,7 +391,7 @@ export async function reviewLoan(
           data: {
             loanId,
             decision,
-            reason: reason || null,
+            reason,
             amount: loan.amountRequested,
           },
         },
@@ -428,14 +427,11 @@ export async function repayLoan(
   const userId = session.user.id;
   const cooperativeId = session.user.cooperativeId as string;
 
-  const loanId = (formData.get("loanId") as string)?.trim();
-  const loanAmountStr = (formData.get("loanAmount") as string)?.trim();
-  const contributionAmountStr = (formData.get("contributionAmount") as string)?.trim();
-
+  const loanId = getString(formData, "loanId");
   if (!loanId) return { error: "Missing loan ID." };
 
-  const loanAmount = parseFloat(loanAmountStr || "0");
-  const contributionAmount = parseFloat(contributionAmountStr || "0");
+  const loanAmount = getNumber(formData, "loanAmount") || 0;
+  const contributionAmount = getNumber(formData, "contributionAmount") || 0;
 
   if (loanAmount < 0 || contributionAmount < 0) {
     return { error: "Amounts cannot be negative." };
@@ -538,18 +534,16 @@ export async function recordRepaymentForMember(
   const session = await requireAuth();
   const role = session.user.role as string;
 
-  if (role !== "ADMIN" && role !== "OWNER" && role !== "TREASURER") {
+  if (!isAdminTreasurerOrOwner(role)) {
     return { error: "Only admins and treasurers can record repayments." };
   }
 
   const cooperativeId = session.user.cooperativeId as string;
-  const loanId = (formData.get("loanId") as string)?.trim();
-  const amountStr = (formData.get("amount") as string)?.trim();
-  const note = (formData.get("note") as string)?.trim();
+  const loanId = getString(formData, "loanId");
+  const amount = getNumber(formData, "amount");
+  const note = getOptionalString(formData, "note");
 
-  if (!loanId || !amountStr) return { error: "Missing required fields." };
-
-  const amount = parseFloat(amountStr);
+  if (!loanId) return { error: "Missing required fields." };
   if (isNaN(amount) || amount <= 0) return { error: "Invalid amount." };
 
   const loan = await prisma.loanApplication.findUnique({
@@ -588,7 +582,7 @@ export async function recordRepaymentForMember(
           paymentType: "LOAN_REPAYMENT",
           paidAt: now,
           recordedBy: session.user.id,
-          note: note || null,
+          note,
         },
       });
 

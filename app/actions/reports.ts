@@ -1,7 +1,7 @@
 "use server";
 
 import prisma from "@/app/lib/prisma";
-import { requireAuth, protectAdminAction } from "@/app/lib/auth-helpers";
+import { requireAuth, protectAdminAction, isAdminOrOwner } from "@/app/lib/auth-helpers";
 
 // ─── Member Financial Summary ────────────────────────────────────────────────
 
@@ -24,10 +24,9 @@ export async function getMemberFinancialSummary(
   const session = await requireAuth();
 
   const role = session.user.role as string;
-  const isAdminOrOwner = role === "ADMIN" || role === "OWNER";
   const isSelf = session.user.id === userId;
 
-  if (!isSelf && !isAdminOrOwner) {
+  if (!isSelf && !isAdminOrOwner(role)) {
     throw new Error("Forbidden: Access denied");
   }
 

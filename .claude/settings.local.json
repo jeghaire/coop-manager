@@ -24,7 +24,15 @@
       "Bash(git -C \"c:/Users/Mavi/Documents/Development/Web/coop-manager\" status)",
       "Bash(git -C \"c:/Users/Mavi/Documents/Development/Web/coop-manager\" diff)",
       "Bash(npx prisma *)",
-      "Bash(pnpm install *)"
+      "Bash(pnpm install *)",
+      "Bash(Remove-Item -Recurse -Force \"c:\\\\Users\\\\Mavi\\\\Documents\\\\Development\\\\Web\\\\coop-manager\\\\.next\" -ErrorAction SilentlyContinue)",
+      "Bash(Write-Output \"Cleared\")",
+      "Bash(npx shadcn *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Mavi\\\\Documents\\\\Development\\\\Web\\\\coop-manager\\\\app\" -Recurse -File)",
+      "Bash(Select-Object FullName)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Mavi\\\\Documents\\\\Development\\\\Web\\\\coop-manager\\\\components\" -Recurse -File)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Mavi\\\\Documents\\\\Development\\\\Web\\\\coop-manager\\\\app\" -Recurse -File 2>$null | ForEach-Object { $_.FullName })",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Mavi\\\\Documents\\\\Development\\\\Web\\\\coop-manager\\\\components\" -Recurse -File 2>$null | ForEach-Object { $_.FullName })"
     ]
   }
 }

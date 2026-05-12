@@ -2,7 +2,8 @@
 
 import prisma from "@/app/lib/prisma";
 import { auth } from "@/app/lib/auth";
-import { requireAuth } from "@/app/lib/auth-helpers";
+import { requireAuth, isAdminOrOwner } from "@/app/lib/auth-helpers";
+import { getString } from "@/app/lib/form";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { Resend } from "resend";
@@ -57,15 +58,15 @@ export async function inviteMember(
   const session = await requireAuth();
   const role = session.user.role as string;
 
-  if (role !== "ADMIN" && role !== "OWNER") {
+  if (!isAdminOrOwner(role)) {
     return { error: "Only admins can invite members." };
   }
 
   const cooperativeId = session.user.cooperativeId as string;
-  const name = (formData.get("name") as string)?.trim();
-  const email = (formData.get("email") as string)?.trim().toLowerCase();
-  const monthlyAmount = (formData.get("monthlyAmount") as string)?.trim() || "0";
-  const memberRole = (formData.get("role") as string)?.trim() || "MEMBER";
+  const name = getString(formData, "name");
+  const email = getString(formData, "email").toLowerCase();
+  const monthlyAmount = getString(formData, "monthlyAmount") || "0";
+  const memberRole = getString(formData, "role") || "MEMBER";
 
   if (!name || !email) {
     return { error: "Name and email are required." };
@@ -171,7 +172,7 @@ export async function importMembers(
   const session = await requireAuth();
   const role = session.user.role as string;
 
-  if (role !== "OWNER" && role !== "ADMIN") {
+  if (!isAdminOrOwner(role)) {
     return { error: "Only admins can import members." };
   }
 
@@ -307,8 +308,8 @@ export async function updateMemberRole(
   }
 
   const cooperativeId = session.user.cooperativeId as string;
-  const memberId = (formData.get("memberId") as string)?.trim();
-  const newRole = (formData.get("newRole") as string)?.trim();
+  const memberId = getString(formData, "memberId");
+  const newRole = getString(formData, "newRole");
 
   if (!memberId || !newRole) return { error: "Missing fields." };
 
@@ -352,12 +353,12 @@ export async function removeMember(
   const session = await requireAuth();
   const role = session.user.role as string;
 
-  if (role !== "OWNER" && role !== "ADMIN") {
+  if (!isAdminOrOwner(role)) {
     return { error: "Only admins can remove members." };
   }
 
   const cooperativeId = session.user.cooperativeId as string;
-  const memberId = (formData.get("memberId") as string)?.trim();
+  const memberId = getString(formData, "memberId");
 
   if (!memberId) return { error: "Missing member ID." };
   if (memberId === session.user.id) return { error: "You cannot remove yourself." };

@@ -2,6 +2,7 @@
 
 import prisma from "@/app/lib/prisma";
 import { requireAuth } from "@/app/lib/auth-helpers";
+import { getOptionalString } from "@/app/lib/form";
 import { revalidatePath } from "next/cache";
 
 export type UserActionState = { error?: string; success?: boolean };
@@ -12,7 +13,7 @@ export async function updateNotificationSettings(
 ): Promise<UserActionState> {
   const session = await requireAuth();
 
-  const phoneNumber = (formData.get("phoneNumber") as string)?.trim() || null;
+  const phoneNumber = getOptionalString(formData, "phoneNumber");
   const emailNotifications = formData.get("emailNotifications") === "on";
   const smsNotifications = formData.get("smsNotifications") === "on";
 

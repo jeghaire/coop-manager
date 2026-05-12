@@ -91,6 +91,14 @@ export async function protectAdminAction(cooperativeId: string) {
   return session;
 }
 
+export function isAdminOrOwner(role: string): boolean {
+  return role === "ADMIN" || role === "OWNER";
+}
+
+export function isAdminTreasurerOrOwner(role: string): boolean {
+  return role === "ADMIN" || role === "OWNER" || role === "TREASURER";
+}
+
 export async function getTotalContributed(userId: string): Promise<number> {
   const contributions = await prisma.contribution.findMany({
     where: { userId, status: "VERIFIED", deletedAt: null },

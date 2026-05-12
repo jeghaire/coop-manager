@@ -1,7 +1,8 @@
 "use server";
 
 import prisma from "@/app/lib/prisma";
-import { requireAuth } from "@/app/lib/auth-helpers";
+import { requireAuth, isAdminOrOwner } from "@/app/lib/auth-helpers";
+import { getString, getOptionalString, getNumber } from "@/app/lib/form";
 import { getCurrencySymbol } from "@/app/lib/currency";
 import { revalidatePath } from "next/cache";
 import {
@@ -58,15 +59,13 @@ export async function requestWithdrawal(
   const userId = session.user.id;
   const cooperativeId = session.user.cooperativeId as string;
 
-  const amountStr = (formData.get("amount") as string)?.trim();
-  const reason = (formData.get("reason") as string)?.trim();
-  const notes = (formData.get("notes") as string)?.trim() || null;
+  const amount = getNumber(formData, "amount");
+  const reason = getString(formData, "reason");
+  const notes = getOptionalString(formData, "notes");
 
-  if (!amountStr || !reason) {
+  if (!reason) {
     return { error: "Amount and reason are required." };
   }
-
-  const amount = parseFloat(amountStr);
   if (isNaN(amount) || amount <= 0) {
     return { error: "Amount must be a positive number." };
   }
@@ -135,12 +134,12 @@ export async function approveWithdrawal(
   const session = await requireAuth();
   const role = session.user.role as string;
 
-  if (role !== "ADMIN" && role !== "OWNER") {
+  if (!isAdminOrOwner(role)) {
     return { error: "Only admins can approve withdrawals." };
   }
 
   const cooperativeId = session.user.cooperativeId as string;
-  const withdrawalId = (formData.get("withdrawalId") as string)?.trim();
+  const withdrawalId = getString(formData, "withdrawalId");
 
   if (!withdrawalId) return { error: "Missing withdrawal ID." };
 
@@ -193,13 +192,13 @@ export async function rejectWithdrawal(
   const session = await requireAuth();
   const role = session.user.role as string;
 
-  if (role !== "ADMIN" && role !== "OWNER") {
+  if (!isAdminOrOwner(role)) {
     return { error: "Only admins can reject withdrawals." };
   }
 
   const cooperativeId = session.user.cooperativeId as string;
-  const withdrawalId = (formData.get("withdrawalId") as string)?.trim();
-  const rejectionReason = (formData.get("rejectionReason") as string)?.trim();
+  const withdrawalId = getString(formData, "withdrawalId");
+  const rejectionReason = getString(formData, "rejectionReason");
 
   if (!withdrawalId) return { error: "Missing withdrawal ID." };
   if (!rejectionReason) return { error: "Rejection reason is required." };
@@ -253,12 +252,12 @@ export async function markWithdrawalPaid(
   const session = await requireAuth();
   const role = session.user.role as string;
 
-  if (role !== "ADMIN" && role !== "OWNER") {
+  if (!isAdminOrOwner(role)) {
     return { error: "Only admins can mark withdrawals as paid." };
   }
 
   const cooperativeId = session.user.cooperativeId as string;
-  const withdrawalId = (formData.get("withdrawalId") as string)?.trim();
+  const withdrawalId = getString(formData, "withdrawalId");
 
   if (!withdrawalId) return { error: "Missing withdrawal ID." };
 
@@ -316,7 +315,7 @@ export async function getAllWithdrawals(cooperativeId: string, status?: string) 
   const session = await requireAuth();
   const role = session.user.role as string;
 
-  if (role !== "ADMIN" && role !== "OWNER") {
+  if (!isAdminOrOwner(role)) {
     throw new Error("Unauthorized");
   }
 

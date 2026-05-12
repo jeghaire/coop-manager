@@ -2,6 +2,7 @@
 
 import prisma from "@/app/lib/prisma";
 import { auth } from "@/app/lib/auth";
+import { getString } from "@/app/lib/form";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -13,10 +14,10 @@ export async function createCooperative(
   _prev: CreateCoopState,
   formData: FormData
 ): Promise<CreateCoopState> {
-  const coopName = (formData.get("coopName") as string)?.trim();
-  const name = (formData.get("name") as string)?.trim();
-  const email = (formData.get("email") as string)?.trim().toLowerCase();
-  const password = (formData.get("password") as string) ?? "";
+  const coopName = getString(formData, "coopName");
+  const name = getString(formData, "name");
+  const email = getString(formData, "email").toLowerCase();
+  const password = getString(formData, "password");
 
   if (!coopName || !name || !email || !password) {
     return { error: "All fields are required." };

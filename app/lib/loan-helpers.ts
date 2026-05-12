@@ -1,7 +1,6 @@
 export function calculateLoanTotals(principal: number, interestRatePct: number) {
   const interest = principal * (interestRatePct / 100);
   const totalDue = principal + interest;
-  const monthlyPayment = totalDue / 12; // placeholder, real calc uses repaymentMonths
   return { interest, totalDue };
 }
 

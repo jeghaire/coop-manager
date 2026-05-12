@@ -2,6 +2,7 @@
 
 import prisma from "@/app/lib/prisma";
 import { protectAdminAction } from "@/app/lib/auth-helpers";
+import { getString, getNumber, getInt } from "@/app/lib/form";
 import { revalidatePath } from "next/cache";
 
 export type SettingsActionState = {
@@ -13,8 +14,8 @@ export async function updateGuarantorCoverageMode(
   _prev: SettingsActionState,
   formData: FormData
 ): Promise<SettingsActionState> {
-  const mode = (formData.get("guarantorCoverageMode") as string)?.trim();
-  const cooperativeId = (formData.get("cooperativeId") as string)?.trim();
+  const mode = getString(formData, "guarantorCoverageMode");
+  const cooperativeId = getString(formData, "cooperativeId");
 
   if (!cooperativeId) return { error: "Missing cooperative ID." };
 
@@ -47,14 +48,14 @@ export async function addBankAccount(
   _prev: SettingsActionState,
   formData: FormData
 ): Promise<SettingsActionState> {
-  const cooperativeId = (formData.get("cooperativeId") as string)?.trim();
+  const cooperativeId = getString(formData, "cooperativeId");
   if (!cooperativeId) return { error: "Missing cooperative ID." };
 
   const session = await protectAdminAction(cooperativeId);
 
-  const accountName = (formData.get("accountName") as string)?.trim();
-  const accountNumber = (formData.get("accountNumber") as string)?.trim();
-  const bankName = (formData.get("bankName") as string)?.trim();
+  const accountName = getString(formData, "accountName");
+  const accountNumber = getString(formData, "accountNumber");
+  const bankName = getString(formData, "bankName");
   const isPreferred = formData.get("isPreferred") === "on";
 
   if (!accountName || !accountNumber || !bankName) {
@@ -92,15 +93,15 @@ export async function updateBankAccount(
   _prev: SettingsActionState,
   formData: FormData
 ): Promise<SettingsActionState> {
-  const cooperativeId = (formData.get("cooperativeId") as string)?.trim();
-  const accountId = (formData.get("accountId") as string)?.trim();
+  const cooperativeId = getString(formData, "cooperativeId");
+  const accountId = getString(formData, "accountId");
   if (!cooperativeId || !accountId) return { error: "Missing required fields." };
 
   const session = await protectAdminAction(cooperativeId);
 
-  const accountName = (formData.get("accountName") as string)?.trim();
-  const accountNumber = (formData.get("accountNumber") as string)?.trim();
-  const bankName = (formData.get("bankName") as string)?.trim();
+  const accountName = getString(formData, "accountName");
+  const accountNumber = getString(formData, "accountNumber");
+  const bankName = getString(formData, "bankName");
   const isPreferred = formData.get("isPreferred") === "on";
 
   if (!accountName || !accountNumber || !bankName) {
@@ -148,8 +149,8 @@ export async function deleteBankAccount(
   _prev: SettingsActionState,
   formData: FormData
 ): Promise<SettingsActionState> {
-  const cooperativeId = (formData.get("cooperativeId") as string)?.trim();
-  const accountId = (formData.get("accountId") as string)?.trim();
+  const cooperativeId = getString(formData, "cooperativeId");
+  const accountId = getString(formData, "accountId");
   if (!cooperativeId || !accountId) return { error: "Missing required fields." };
 
   const session = await protectAdminAction(cooperativeId);
@@ -191,19 +192,15 @@ export async function updateLoanSettings(
   _prev: SettingsActionState,
   formData: FormData
 ): Promise<SettingsActionState> {
-  const cooperativeId = (formData.get("cooperativeId") as string)?.trim();
+  const cooperativeId = getString(formData, "cooperativeId");
   if (!cooperativeId) return { error: "Missing cooperative ID." };
 
   const session = await protectAdminAction(cooperativeId);
 
-  const interestRateStr = (formData.get("loanInterestRate") as string)?.trim();
-  const repaymentMonthsStr = (formData.get("loanRepaymentMonths") as string)?.trim();
-  const gracePeriodStr = (formData.get("defaultGracePeriodDays") as string)?.trim();
-  const currency = (formData.get("currency") as string)?.trim();
-
-  const interestRate = parseFloat(interestRateStr);
-  const repaymentMonths = parseInt(repaymentMonthsStr);
-  const gracePeriod = parseInt(gracePeriodStr);
+  const interestRate = getNumber(formData, "loanInterestRate");
+  const repaymentMonths = getInt(formData, "loanRepaymentMonths");
+  const gracePeriod = getInt(formData, "defaultGracePeriodDays");
+  const currency = getString(formData, "currency");
 
   if (isNaN(interestRate) || interestRate < 0 || interestRate > 100) {
     return { error: "Interest rate must be between 0 and 100." };
@@ -247,8 +244,8 @@ export async function setPreferredBankAccount(
   _prev: SettingsActionState,
   formData: FormData
 ): Promise<SettingsActionState> {
-  const cooperativeId = (formData.get("cooperativeId") as string)?.trim();
-  const accountId = (formData.get("accountId") as string)?.trim();
+  const cooperativeId = getString(formData, "cooperativeId");
+  const accountId = getString(formData, "accountId");
   if (!cooperativeId || !accountId) return { error: "Missing required fields." };
 
   const session = await protectAdminAction(cooperativeId);

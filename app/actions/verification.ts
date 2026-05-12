@@ -1,7 +1,8 @@
 "use server";
 
 import prisma from "@/app/lib/prisma";
-import { requireAuth } from "@/app/lib/auth-helpers";
+import { requireAuth, isAdminOrOwner } from "@/app/lib/auth-helpers";
+import { getString } from "@/app/lib/form";
 import { notifyMemberVerified } from "@/app/lib/notifications";
 import { revalidatePath } from "next/cache";
 
@@ -17,11 +18,11 @@ export async function verifyMember(
   const session = await requireAuth();
   const role = session.user.role as string;
 
-  if (role !== "ADMIN" && role !== "OWNER") {
+  if (!isAdminOrOwner(role)) {
     return { error: "Only admins can verify members." };
   }
 
-  const memberId = (formData.get("memberId") as string)?.trim();
+  const memberId = getString(formData, "memberId");
   const cooperativeId = session.user.cooperativeId as string;
 
   if (!memberId) return { error: "Missing member ID." };

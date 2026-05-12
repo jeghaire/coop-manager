@@ -1,4 +1,4 @@
-# Cooperative Manager SaaS - Complete Implementation Spec (FINAL - MERGED)
+# Cooperative Manager — Spec
 
 ## Problem Statement
 
@@ -17,1019 +17,325 @@ Currently used for Nigerian savings & credit cooperatives.
 
 ---
 
-## Goals
-
-1. Build production-grade SaaS with multi-tenancy isolation
-2. Enable 1000+ users per cooperative to manage finances
-3. Provide compliance audit trail for regulatory bodies
-4. Support manual contribution verification (members upload receipts)
-5. Automate loan approval workflow with guarantor validation
-6. Enforce member verification for sensitive operations
-7. Provide configurable loan eligibility & repayment rules
-8. Track loan repayments with flexible payment scheduling
-9. Enable site-wide currency configuration
-10. Keep members informed via email/SMS notifications
-11. Provide transparent member financial dashboard
-12. Enable dividend distribution to reward member contributions
-13. Enable password resets + account management
-14. Enable bulk member onboarding via CSV
-15. Enable member withdrawals with approval workflow
-
----
-
 ## Tech Stack
 
-- **Frontend:** Next.js 16 (app router), React 19, TypeScript, shadcn/ui
-- **Backend:** Next.js Server Actions, TypeScript
-- **Database:** PostgreSQL + Prisma 7 ORM
-- **Auth:** Better-auth (email/password)
-- **Payments:** Stripe (£500/year per cooperative)
+- **Frontend:** Next.js (app router), React 19, TypeScript, shadcn/ui
+- **Backend:** Next.js Server Actions (`useActionState` + `FormData` — no RHF)
+- **Database:** PostgreSQL + Prisma ORM (hosted on Neon)
+- **Auth:** Better-auth (email/password; password reset via `Verification` table)
+- **Billing:** Stripe (per-cooperative subscription; checkout + billing portal)
 - **File Storage:** AWS S3 (contribution receipt uploads — presigned PUT URLs)
-- **Email:** Resend (transactional emails + notifications); sender configured via `EMAIL_FROM` env var
-- **SMS:** Twilio (SMS notifications)
+- **Email:** Resend (transactional emails + notifications; sender via `EMAIL_FROM` env var)
+- **SMS:** Twilio (SMS notifications; `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_PHONE_NUMBER`)
 - **Package Manager:** pnpm
 - **Styling:** Tailwind CSS + shadcn/ui components
 - **Icons:** lucide-react
-- **PDF Export:** jsPDF + jspdf-autotable (client-side, member statements + cooperative reports)
+- **PDF Export:** jsPDF + jspdf-autotable (client-side; member statements + cooperative reports)
 
 ---
 
-## Current State (Phases 1-4 Partially Complete)
+## Goals
 
-### ✅ Completed
+1. Production-grade SaaS with multi-tenancy isolation
+2. Enable 1000+ users per cooperative
+3. Compliance audit trail for regulatory bodies
+4. Manual contribution verification (members upload receipts)
+5. Automated loan approval workflow with guarantor validation
+6. Member verification gating for sensitive operations
+7. Configurable loan eligibility & repayment rules
+8. Flexible loan repayment tracking
+9. Site-wide currency configuration (symbol derived at runtime, not stored)
+10. Email/SMS notifications for key events
+11. Transparent member financial dashboard
+12. Dividend distribution based on contribution percentage
+13. Password reset + account settings (name, password)
+14. Bulk member onboarding via CSV
+15. Member withdrawals with approval workflow
 
-- Prisma schema (all models, enums, soft deletes, timestamps)
-- PostgreSQL production setup (Neon)
-- Multi-tenancy structure (cooperativeId isolation)
-- Cooperative access middleware (verified working)
-- Member & admin dashboard endpoints
-- Basic authentication (signup/signin working)
-- **Phase 1.5:** Member verification system (two-tier access)
-- **Phase 2:** Loan eligibility validation + guarantor coverage + repayment tracking
-- Mobile bottom navigation
-- Bank account management
-- **Phase 1.5 (Notifications):** Email via Resend + SMS via Twilio setup
-  - Loan approved/rejected notifications
-  - Contribution verified/rejected notifications
-  - Guarantor request notifications
-  - Payment overdue daily check (8 AM UTC cron)
-  - Member notification preferences (email/SMS toggles, phone number)
-- **Phase 2.5 (Financial Dashboard):** 
-  - `/dashboard/financial-summary` (4 stat cards + breakdown + PDF statement download)
-  - `/dashboard/transactions` (unified timeline)
-- **Phase 2.5 (Dividends):**
-  - `/admin/dividends` (create payouts with live preview)
-  - Status flow: PENDING → APPROVED → PAID
-  - Member share calculation by contribution %
-  - Notifications on payment + dashboard visibility
-- **Phase 4 (Security Guards):**
-  - Self-approval prevention: admins cannot approve their own loans or record their own contributions
-  - Self-repayment prevention: admins cannot record repayments against their own loans
-  - Member verified notification: email + SMS sent on account verification
-- **Phase 4 (Receipt Uploads):**
-  - AWS S3 presigned PUT URL flow for direct browser-to-S3 uploads
-  - Contribution submit form accepts images (JPEG/PNG/WEBP) and PDFs
-  - Admin contributions page shows image thumbnails and PDF icons
-  - Filter tabs: ALL / PENDING / VERIFIED / REJECTED with counts
-- **Phase 4 (Announcements System):**
-  - `/admin/announcements` — list with type badges, RSVP counts, deactivate
-  - `/admin/announcements/new` — create form with conditional AGM fields
-  - `/dashboard/announcements/[id]` — member view + RSVP
-  - Pinned announcement banners on all dashboard pages (dismissable)
-  - Types: GENERAL, AGM, URGENT; recipient types: ALL, MEMBERS_ONLY, ADMINS_ONLY
-  - Bulk email + SMS notification on announcement creation
-- **Phase 4 (Advanced Reporting):**
-  - `/admin/reports` — overview, loan portfolio, contributions, member breakdown, audit trail
-  - Audit trail with event type filter + colour-coded badges
-  - PDF export for cooperative-level reports (landscape A4)
-  - Member financial statement PDF download (portrait A4)
+---
 
-### ❌ Not Started (Phase 4 - Remaining Pre-Launch Features)
+## Status: Feature Complete
 
-- Forgot password / password reset
-- CSV member import
-- Account settings (change name/phone/password)
-- Withdrawal requests + approval workflow
-- Refactoring & mobile polish
+All planned features are implemented. The app is in pre-launch polish/test phase.
+
+### Implemented Features
+
+- **Auth:** Signup, signin, signout, forgot password, password reset
+- **Member verification:** Two-tier (unverified → verified); owner auto-verified
+- **Loans:** Application, guarantor flow, admin review, repayment tracking, health status
+- **Contributions:** Member upload (S3 receipts), treasurer manual entry, admin verification
+- **Dividends:** Create with profit split preview → approve → process (PENDING → APPROVED → PAID)
+- **Withdrawals:** Member request → admin approve/reject → mark paid (REQUESTED → APPROVED/REJECTED → PAID)
+- **Announcements:** Create, pin, RSVP, deactivate; bulk email+SMS notification
+- **Reporting:** Financial overview, loan portfolio, contribution report, audit trail, CSV export, PDF export
+- **Billing:** Stripe checkout + billing portal per cooperative
+- **Settings:** Loan config, guarantor coverage mode, bank accounts, currency
+- **Treasurer role:** Dedicated page to record contributions + repayments for offline members
+- **Notifications:** Email (Resend) + SMS (Twilio); per-member opt-in/out toggles
+- **Account settings:** Name + password change via better-auth client
+- **CSV import:** Bulk member onboarding with email invites and temp passwords
 
 ---
 
 ## Key Architecture Decisions
 
-### 1. Multi-Tenancy Model
-**Decision:** Shared database, `cooperativeId` on every table
-- Pro: Simple, cost-effective for MVP
-- Con: Requires strict authorization middleware
-- **Mitigation:** All endpoints validate cooperativeId match
+### 1. Multi-Tenancy
+Shared database, `cooperativeId` on every table. All queries filter by cooperativeId. Auth helpers enforce cooperative membership.
 
 ### 2. Member Verification (Two-Tier Access)
-**Decision:** Unverified users can only see own profile
-- UNVERIFIED: Can log in, see own profile + balance, CANNOT apply for loans or see member list
-- VERIFIED: Full access to dashboard, loans, contributions, reports
-- Owner auto-verified on signup; other members require owner/admin approval
+- **Unverified:** Can log in, see own profile, cannot apply for loans or see member list
+- **Verified:** Full member dashboard access
+- Owner auto-verified on signup; all others require admin/owner approval
 
-### 3. Loan Eligibility Validation
-**Decision:** Enforce contribution requirement + borrowing multiplier
-- User must have: `totalContributed > 0`
-- Loan amount cannot exceed: `totalContributed × borrowingMultiplier`
-- Default multiplier: 3x (configurable by owner)
+### 3. Loan Eligibility
+- Must have at least one verified contribution
+- Loan amount ≤ `totalContributed × borrowingMultiplier` (default 3×, configurable)
 
 ### 4. Guarantor Coverage (Configurable)
-**Decision:** Guarantors must collectively cover loan; owner can toggle rule
-- Default: **Guarantors Combined** (sum of all guarantors' contributions >= loan amount)
-- Owner options: "Off", "Combined" (default), "Individual"
+- **OFF:** No coverage requirement
+- **COMBINED:** Sum of guarantors' contributions ≥ loan amount (default)
+- **INDIVIDUAL:** Each guarantor's contributions ≥ loan amount individually
 
-### 5. Loan Repayment (Simple Interest + Monthly Amortization)
-**Decision:** Calculate total with interest, divide by months, track flexible payments
-- Formula: `Total Due = Principal + (Principal × Interest Rate)`
-- Divided over configurable months (default 12)
-- Owner configurable: interest rate, duration, grace period
+### 5. Loan Repayment (Simple Interest)
+- `Total Due = Principal + (Principal × interestRate%)`
+- Divided over `loanRepaymentMonths` (default 12); owner-configurable
+- Flexible payments tracked individually; loan auto-marked REPAID when cleared
 
-### 6. Treasurer Role (Separate from Admin)
-**Decision:** Treasurer is distinct role, can record contributions & repayments for non-tech members
-- Treasurer-only actions: record contributions (auto-verified), record repayments
-- Can't approve loans, invite members, edit settings (owner only)
+### 6. Treasurer Role
+Distinct from ADMIN. Can record contributions (auto-verified) and repayments for members who pay offline. Cannot approve loans or change settings.
 
-### 7. Currency Configuration
-**Decision:** Owner sets site-wide currency (not hardcoded)
-- Cooperative.currency: "NGN", "USD", "GHS", etc.
-- Cooperative.currencySymbol: "₦", "$", "GH₵", etc.
-- Used throughout UI dynamically
+### 7. Currency
+`Cooperative.currency` stores ISO code (e.g. `"NGN"`). Symbol (`₦`, `$`, etc.) is derived at runtime via `getCurrencySymbol()`. No stored symbol column.
 
-### 8. Mobile Navigation
-**Decision:** Bottom nav bar with 4 icons (best UX for mobile)
-- Icons: Home, Contributions, Loans, Profile
-- Always visible, tap to navigate
-- Icons larger, more discoverable than text
+### 8. Forms
+All forms use React's `useActionState` with server actions. FormData is parsed server-side with helpers in `app/lib/form.ts`. No RHF or zod.
 
-### 9. Payment Splitting
-**Decision:** User specifies how much of payment is contribution vs loan repayment
-- User payment form: total amount → contribution amount + loan repayment amount
-- System validates: contribution + repayment = total
-- Overpayment auto-allocation: excess goes to contributions
+### 9. Payment Splitting (Loan Repayment)
+The repayment form accepts separate `loanAmount` + `contributionAmount` fields, allowing a member to partially repay a loan and make a contribution in one submission.
 
 ### 10. Notification System
-**Decision:** Email + SMS notifications for key events
-- Members informed via email (Resend) + SMS (Twilio)
-- Optional for each member (can disable)
-- Daily background job checks for overdue loans
-- All notifications logged for audit trail
+Email via Resend + SMS via Twilio. Members can opt out of each channel independently. Daily cron at `/api/cron/check-overdue` checks for overdue loans (8 AM UTC).
 
-### 11. Member Financial Dashboard
-**Decision:** Unified transparent view of member's financial position
-- Shows: contributions, loans, borrowing capacity, dividends
-- Real-time calculations
-- All transactions in one place
+### 11. Dividend Distribution
+1. Owner enters total profit, admin costs %, loan loss reserve %
+2. Remaining pool distributed to members proportional to verified contribution total
+3. Status: PENDING → APPROVED → PAID
 
-### 12. Dividend Distribution
-**Decision:** Owner-configured quarterly/annual profit distribution
-- Owner enters profit, system calculates member shares
-- Admin costs & loan loss reserve taken out (% configurable)
-- Remaining distributed to members based on contribution %
-- Members see expected dividends on dashboard
+### 12. Audit Trail
+Immutable `Event` table. Every critical action is logged. Never deleted.
 
-### 13. Audit Trail
-**Decision:** Immutable Event table
-- Every action logged: loan_applied, contribution_submitted, loan_approved, dividend_paid, etc.
-- Never deleted, soft-delete for records
-- Used for compliance reports, dividend calculations, investigations
+### 13. Password Reset
+Handled by better-auth via the `Verification` table (token + expiry). No custom `resetToken` fields on User.
 
-### 14. Password Reset
-**Decision:** Email-based password recovery with time-limited tokens
-- User forgotten password → email with reset link
-- Reset link valid for 24 hours
-- Token stored as resetToken + resetTokenExpiresAt
-- No password hints (security)
+### 14. Billing
+Stripe per-cooperative subscription. Checkout via `/api/billing/checkout`, portal via `/api/billing/portal`. Webhook at `/api/webhooks/stripe` updates `subscriptionStatus`.
 
-### 15. CSV Member Import
-**Decision:** Bulk onboarding for cooperatives
-- Owner uploads CSV (email, name, phone optional)
-- System creates unverified accounts + welcome emails
-- Duplicates skipped, counts shown
-- Temp password sent, members change on first login
-
-### 16. Member Withdrawals
-**Decision:** Members can request to withdraw contributions
-- Available = totalContributed - activeBalance
-- Owner approves/rejects with reason
-- Affects borrowing capacity
-- Shows in transaction history
+### 15. Mobile Navigation
+`BottomTabBar`, `MobileTopBar`, and `MobileNavDrawer` components exist but are currently commented out in the dashboard layout. Desktop sidebar (`DashboardNav`) is active.
 
 ---
 
-## Data Model Summary
+## Data Model
 
-### Core Tables
+### Cooperative
+`id, name, stripeCustomerId, stripeSubscriptionId, subscriptionStatus, billingCycleEnd, borrowingMultiplier, guarantorCoverageMode, loanInterestRate, loanRepaymentMonths, defaultGracePeriodDays, currency, deletedAt`
 
-- **Cooperative** — Tenant (subscriptionStatus, billingCycleEnd, borrowingMultiplier, guarantorCoverageMode, loanInterestRate, loanRepaymentMonths, defaultGracePeriodDays, currency, currencySymbol)
-- **CooperativeBank** — Multiple bank accounts per cooperative
-- **User** — Member (role, cooperativeId, verifiedAt, verifiedBy, monthlyContributionAmount, emailNotifications, smsNotifications, phoneNumber, resetToken, resetTokenExpiresAt)
-- **LoanApplication** — Request (status, interestRate, repaymentMonths, totalAmountDue, approvedAt, repaidAt, rejectionReason)
-- **LoanRepayment** — Tracking (loanId, amount, paymentType, paidAt, receiptUrl, recordedBy)
-- **LoanGuarantor** — Link (guarantorId, status)
-- **Contribution** — Payment (status, receiptUrl, receiptKey, receiptFileName, receiptFileSize, receiptFileType, receiptUploadedAt, rejectionCount, verifiedBy, recordedBy, isManualEntry)
-- **DividendPayout** — Payout record (quarter, year, totalProfit, dividendPool, status)
-- **MemberDividend** — Per-member share (dividendPayoutId, userId, amount, status)
-- **Notification** — Audit log (cooperativeId, userId, type, channel, recipient, status)
-- **WithdrawalRequest** — Request (userId, amount, reason, status, approvedBy, rejectionReason)
-- **Announcement** — Cooperative announcement (type, recipientType, agmDate, agmLocation, allowRsvp, isPinned, isActive, expiresAt, createdBy)
-- **AnnouncementRsvp** — RSVP response (announcementId, userId, response) — unique per (announcement, user)
-- **Event** — Audit log (immutable)
+### User
+`id, cooperativeId, email, name, role (MEMBER|TREASURER|ADMIN|OWNER), monthlyContributionAmount, verifiedAt, verifiedBy, phoneNumber, emailNotifications, smsNotifications, deletedAt`
 
-### Key Fields
+Note: No `resetToken`/`resetTokenExpiresAt` — better-auth uses its own `Verification` table.
 
-- User.phoneNumber: String (for SMS)
-- User.emailNotifications: Boolean (default true)
-- User.smsNotifications: Boolean (default true)
-- User.resetToken: String (unique, password recovery)
-- User.resetTokenExpiresAt: DateTime (24-hour expiry)
-- WithdrawalRequest: (amount, reason, status, rejectionReason, approvedAt, paidAt)
-- Contribution.receiptKey: String? (S3 object key)
-- Contribution.receiptFileName: String? (original filename)
-- Contribution.receiptFileSize: Int? (bytes)
-- Contribution.receiptFileType: String? (MIME type)
-- Contribution.receiptUploadedAt: DateTime? (S3 upload timestamp)
-- Contribution.rejectionCount: Int (default 0, incremented on each rejection)
-- Announcement.type: Enum (GENERAL | AGM | URGENT)
-- Announcement.recipientType: Enum (ALL | MEMBERS_ONLY | ADMINS_ONLY)
-- AnnouncementRsvp.response: Enum (ATTENDING | MAYBE | NOT_ATTENDING)
+### LoanApplication
+`id, cooperativeId, userId, amountRequested, status (PENDING_GUARANTORS|PENDING_ADMIN_REVIEW|APPROVED|REJECTED|REPAID), interestRate, repaymentMonths, totalAmountDue, approvedAt, repaidAt, reviewedBy, reviewedAt, rejectionReason, deletedAt`
 
----
+### LoanGuarantor
+`id, loanId, guarantorId, status (PENDING|ACCEPTED|REJECTED), acceptedAt, rejectionReason, deletedAt`
 
-## Phase Breakdown
+### LoanRepayment
+`id, loanId, amount, paymentType, paidAt, receiptUrl, recordedBy, note`
 
-### Phase 1.5: Member Verification ✅ Complete
-- Two-tier access (unverified → verified)
-- Owner auto-verified, members need approval
-- Verification page for owner/admin
+### Contribution
+`id, cooperativeId, userId, amount, status (PENDING_VERIFICATION|VERIFIED|REJECTED), paymentMethod (BANK_TRANSFER|MOBILE_MONEY|CASH|DIRECT_PAYMENT), receiptUrl, receiptKey, receiptFileName, receiptFileSize, receiptFileType, receiptUploadedAt, rejectionCount, verifiedByUserId, verifiedAt, rejectionReason, deletedAt`
 
-### Phase 2: Loan System Overhaul ✅ Complete
-- Loan eligibility validation
-- Guarantor coverage (configurable)
-- Loan repayment scheduling
-- Simple interest + monthly amortization
-- Flexible payment tracking
+### CooperativeBank
+`id, cooperativeId, accountName, accountNumber, bankName, isPreferred`
 
-### Phase 2.5: Notifications, Dashboard, Dividends ✅ Complete
-- **Notifications:** Email (Resend) + SMS (Twilio) for key events
-- **Financial Dashboard:** Summary + transactions pages
-- **Dividends:** Owner-configurable quarterly/annual distribution
-- **Settings:** Loan config, bank accounts, currency
+### WithdrawalRequest
+`id, userId, cooperativeId, amount, reason, notes, status (REQUESTED|APPROVED|REJECTED|PAID), rejectionReason, approvedAt, approvedBy, paidAt, deletedAt`
 
-### Phase 4a: Security + Uploads + Announcements + Reporting ✅ Complete
-- **Security Guards:** Self-approval / self-repayment / self-contribution-entry prevention
-- **Receipt Uploads:** AWS S3 presigned PUT URL flow; images + PDFs; admin thumbnail preview
-- **Announcements System:** Create/deactivate, pinned banners, RSVP, bulk notifications
-- **Advanced Reporting:** Audit trail with filters, PDF export, member statements
-- **Member Verified Notification:** Email + SMS triggered on account approval
+### Announcement
+`id, cooperativeId, title, message, type (GENERAL|AGM|MAINTENANCE|RULE_CHANGE), recipientType (ALL|MEMBERS_ONLY|ADMINS_ONLY), agmDate, agmLocation, allowRsvp, isPinned, isActive, expiresAt, createdBy`
 
-### Phase 4b: Pre-Launch Features (IN PROGRESS)
-1. **Forgot Password / Password Reset**
-   - Email with reset link (24-hour token)
-   - Page: `/auth/forgot-password`, `/auth/reset-password?token=ABC`
-   - Database: User.resetToken, User.resetTokenExpiresAt
+### AnnouncementRsvp
+`id, announcementId, userId, rsvpStatus (ATTENDING|NOT_ATTENDING|MAYBE)` — unique per (announcement, user)
 
-2. **CSV Member Import**
-   - Page: `/admin/members/import`
-   - Upload CSV (email, name, phone)
-   - Create unverified accounts + welcome emails
-   - Duplicate handling
+### DividendPayout
+`id, cooperativeId, period (Q1|Q2|Q3|Q4|ANNUAL), year, totalProfit, adminCosts, loanLossReserve, dividendPool, totalMembers, status (PENDING|APPROVED|PAID), approvedAt, approvedBy, paidAt`
 
-3. **Account Settings**
-   - Page: `/dashboard/settings/account`
-   - Change name, phone, password
-   - Phone format validation + normalization
-   - Password strength requirements
+### MemberDividend
+`id, payoutId, userId, cooperativeId, contributionPct, amount, status (PENDING|PAID), paidAt`
 
-4. **Withdrawal Requests**
-   - Page: `/dashboard/withdraw`
-   - Calculate: available = totalContributed - activeBalance
-   - Status flow: REQUESTED → APPROVED/REJECTED → PAID
-   - Admin approval + member notifications
+### Notification
+`id, cooperativeId, userId, type, channel, recipient, subject, body, status, externalId`
 
-5. **Refactoring & Polish**
-   - Mobile responsiveness (375px+)
-   - Type safety (zero `any` types)
-   - N+1 query optimization
-   - Error message consistency
-   - Empty states + loading states
-   - Form validation polish
-   - Soft delete verification
-   - Multi-tenancy isolation audit
-   - Accessibility (WCAG AA)
+### Event (Audit)
+`id, cooperativeId, eventType, actorId, actorType, entityType, entityId, data (JSON)` — immutable
 
 ---
 
-## Notification System
+## Notification Triggers
 
-### What Triggers Notifications
-- **Loan Approved** → Email + SMS to member
-- **Loan Rejected** → Email to member (reason shown)
-- **Payment Overdue** → Email + SMS (daily check, 8 AM UTC, max 1/day)
-- **Contribution Verified** → Email + SMS to member
-- **Contribution Rejected** → Email to member (reason shown)
-- **Guarantor Requested** → Email + SMS to guarantor
-- **Dividend Paid** → Email + SMS to member
-- **Member Verified** → Email + SMS to member on account approval
-- **Announcement Created** → Bulk email + SMS to all matching recipients (based on recipientType)
+| Event | Email | SMS |
+|---|---|---|
+| Loan approved | ✓ | ✓ |
+| Loan rejected | ✓ | — |
+| Contribution verified | ✓ | ✓ |
+| Contribution rejected | ✓ | — |
+| Guarantor requested | ✓ | ✓ |
+| Dividend paid | ✓ | ✓ |
+| Member verified | ✓ | ✓ |
+| Announcement created | ✓ (bulk) | ✓ (bulk) |
+| Payment overdue | ✓ | ✓ |
 
-### Channels
-- **Email** via Resend (already configured)
-- **SMS** via Twilio (requires env vars: TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER)
-
-### User Control
-- User.emailNotifications (boolean, default true)
-- User.smsNotifications (boolean, default true)
-- User.phoneNumber (optional, for SMS)
-- Members update in `/dashboard/settings`
-
-### Audit Trail
-- Notification table logs all sent/failed
-- Used for compliance + troubleshooting
-
-### Background Jobs
-- Daily cron: `/api/cron/check-overdue-loans`
-- Runs at 8 AM UTC
-- Only notifies once per day per member
+Daily cron: `GET /api/cron/check-overdue` (secured with `CRON_SECRET`).
 
 ---
 
-## Member Financial Dashboard
+## Audit Event Types
 
-### Pages
-
-**Page 1: Financial Summary** (`/dashboard/financial-summary`)
-- 4 stat cards: Total Contributed, Active Loan, Borrowing Capacity, Available to Borrow, Expected Dividend
-- Contribution breakdown (total, count, %)
-- Loan breakdown (borrowed, repaid, balance, count)
-
-**Page 2: All Transactions** (`/dashboard/transactions`)
-- Unified list of contributions + repayments
-- Sortable by date, type, amount
-- Filterable by status
-- Status badges
-
-### Data Calculated Real-Time
-- totalContributed = sum(verified contributions)
-- borrowingCapacity = totalContributed × multiplier
-- activeBalance = totalAmountDue - totalRepaid
-- availableToBorrow = borrowingCapacity - activeBalance
-- expectedDividend = sum(pending member dividends)
-
----
-
-## Dividend Distribution System
-
-### Process Flow
-1. **Create:** Owner enters profit, admin costs %, reserve %
-2. **Calculate:** System calculates member shares by contribution %
-3. **Approve:** Owner reviews + approves distribution
-4. **Process:** System marks as PAID, sends notifications
-5. **Display:** Members see on dashboard
-
-### Configuration
-- Admin Costs % (default 10%)
-- Loan Loss Reserve % (default 20%)
-- Both adjustable per payout
-
-### Status Flow
-PENDING → APPROVED → COMPLETED
-
-### Member Visibility
-- Pending dividends on financial dashboard
-- History of past payouts (reporting)
-- Notification on payment
-
----
-
-## API Endpoints (Complete)
-
-### Auth
-- `POST /api/auth/signup` — User signup, choose cooperative
-- `POST /api/auth/signin` — Login
-- `POST /api/auth/signout` — Logout
-- `GET /api/auth/cooperatives` — List cooperatives
-- `POST /api/auth/forgot-password` — Request password reset (NEW)
-- `POST /api/auth/reset-password` — Reset password (NEW)
-
-### Member Verification
-- `GET /api/admin/members/unverified` — List unverified
-- `POST /api/admin/members/[id]/verify` — Verify member
-
-### Loans
-- `POST /api/loans/apply` — Apply for loan
-- `GET /api/loans` — List user's loans
-- `GET /api/loans/[id]` — Loan details + schedule
-- `POST /api/loans/[id]/approve` — Admin approves
-- `POST /api/loans/[id]/reject` — Admin rejects
-- `POST /api/loans/[id]/retry` — Retry rejected loan
-- `POST /api/loans/[id]/respond-as-guarantor` — Guarantor responds
-- `GET /api/admin/loans/pending` — Admin sees pending
-
-### Loan Repayments
-- `POST /api/loans/[id]/repay` — User repays
-- `GET /api/loans/[id]/repayment-schedule` — Full schedule
-- `GET /api/loans/[id]/repayment-status` — Current status
-- `POST /api/loans/[id]/record-repayment` — Treasurer records
-
-### Contributions
-- `POST /api/contributions/submit` — Submit with receipt
-- `GET /api/contributions` — List member's
-- `POST /api/contributions/[id]/verify` — Admin/Treasurer verifies
-- `POST /api/contributions/record` — Treasurer records manual
-- `GET /api/admin/contributions/pending` — Pending verifications
-
-### Financial Dashboard
-- `GET /dashboard/financial-summary` — Member's position
-- `GET /dashboard/transactions` — All transactions
-
-### Dividends
-- `POST /api/admin/dividends` — Create payout
-- `POST /api/admin/dividends/[id]/approve` — Approve
-- `POST /api/admin/dividends/[id]/process` — Process payment
-- `GET /api/admin/dividends` — List payouts
-- `GET /api/admin/dividends/[id]/members` — Member shares
-
-### Withdrawals (NEW)
-- `POST /api/withdrawals/request` — Request withdrawal
-- `GET /api/admin/withdrawals/pending` — Admin sees pending
-- `POST /api/admin/withdrawals/[id]/approve` — Approve
-- `POST /api/admin/withdrawals/[id]/reject` — Reject with reason
-- `POST /api/admin/withdrawals/[id]/mark-paid` — Mark as paid
-
-### Settings
-- `GET /api/admin/settings` — Get all
-- `POST /api/admin/settings/loan-config` — Update loan config
-- `POST /api/admin/settings/guarantor-coverage` — Toggle mode
-- `POST /api/admin/settings/currency` — Set currency
-
-### Bank Accounts
-- `GET /api/cooperative/bank-accounts` — Public list
-- `POST /api/admin/bank-accounts` — Add
-- `PUT /api/admin/bank-accounts/[id]` — Edit
-- `DELETE /api/admin/bank-accounts/[id]` — Delete
-- `POST /api/admin/bank-accounts/[id]/set-preferred` — Set preferred
-
-### Account (NEW)
-- `POST /api/account/update-name` — Change name
-- `POST /api/account/update-phone` — Change phone
-- `POST /api/account/update-password` — Change password
-
-### Admin
-- `POST /api/admin/members/import` — CSV import (NEW)
-- `POST /api/admin/invite-member` — Invite by email
-- `GET /api/admin/dashboard` — Overview
-
-### Background Jobs
-- `GET /api/cron/check-overdue-loans` — Daily overdue check
-- Config: `CRON_SECRET` env var required
-
----
-
-## Event Log (Audit Trail)
-
-Every critical action logs an Event:
 ```
+cooperative_created
+member_invited
 member_verified
-member_unverified (if needed)
-password_reset_requested
-password_reset_completed
-account_updated (name, phone, password)
+member_role_changed
+member_removed
+members_imported
+loan_application_submitted
+loan_auto_rejected
+guarantor_accepted
+guarantor_rejected
+loan_ready_for_review
+loan_application_approved
+loan_application_rejected
+loan_repayment_made
+loan_repayment_recorded
+contribution_submitted
+contribution_verified
+contribution_rejected
+contribution_recorded_by_treasurer
+dividend_payout_created
+dividend_payout_approved
+dividend_payout_processed
 withdrawal_requested
 withdrawal_approved
 withdrawal_rejected
 withdrawal_paid
-loan_application_submitted
-loan_application_rejected
-loan_application_retried
-loan_application_approved
-loan_repayment_made
-loan_repayment_recorded
-loan_repaid
-loan_marked_defaulted
-contribution_submitted
-contribution_verified
-contribution_rejected
-contribution_recorded
-notification_sent
-notification_failed
 announcement_created
-announcement_deactivated
-announcement_rsvp_submitted
-dividend_payout_created
-dividend_payout_approved
-dividend_payout_completed
 bank_account_added
 bank_account_updated
 bank_account_deleted
 setting_updated
-currency_changed
-members_imported (CSV)
+loan_settings_updated
 ```
 
 ---
 
-## Refactoring Checklist
-
-### Mobile Responsiveness
-- [ ] Tables → cards on mobile (375px+)
-- [ ] Forms full width on mobile
-- [ ] Buttons 44x44px minimum (touch)
-- [ ] Bottom nav working
-- [ ] Sidebar responsive (hamburger on mobile)
-- [ ] Cards stack vertically on mobile
-
-### Type Safety
-- [ ] No `any` types
-- [ ] Prisma queries type-safe
-- [ ] Form data types match DB
-- [ ] API response types defined
-- [ ] Server action parameters typed
-- [ ] Run: `npx tsc --noEmit` (zero errors)
-
-### Error Messages
-- [ ] All validation: "{Field}: {Error}"
-- [ ] Permission: "You don't have permission to {{action}}"
-- [ ] Not found: "{{Resource}} not found"
-- [ ] Database errors: generic message (don't expose schema)
-- [ ] Form errors: near field, not toast
-
-### Performance
-- [ ] No N+1 queries (use `include`, not loops)
-- [ ] Lists load in <2s
-- [ ] Forms submit in <1s
-- [ ] Check Network tab: no duplicates
-
-### Data Integrity
-- [ ] All queries filter `deletedAt: null`
-- [ ] Soft deletes verified
-- [ ] Multi-tenancy isolated (no cross-coop data)
-- [ ] All monetary amounts validated (> 0)
-
-### UX Polish
-- [ ] Empty states on all lists
-- [ ] Loading skeletons while fetching
-- [ ] Disabled buttons during submission
-- [ ] Success toast/message after action
-- [ ] Form validation real-time
-- [ ] Phone format validation + normalization
-- [ ] Amount inputs show currency symbol
-
-### Accessibility
-- [ ] All form inputs have labels
-- [ ] Buttons have descriptive text
-- [ ] Color contrast (WCAG AA)
-- [ ] Tab navigation works
-- [ ] Focus visible
-- [ ] ARIA labels on complex components
-
----
-
-## Horizontal Scrollbar Fix (Known Issue)
-
-**Problem:** Horizontal scrollbar appears on laptops/smaller screens but not on larger monitors.
-
-**Causes & Solutions:**
-
-1. **Tables overflowing:**
-   ```typescript
-   // Wrap in scrollable container:
-   <div className="overflow-x-auto w-full">
-     <Table>
-       {/* content */}
-     </Table>
-   </div>
-   ```
-
-2. **Fixed-width sidebars:**
-   ```typescript
-   // Use responsive classes:
-   <div className="grid grid-cols-1 md:grid-cols-[250px_1fr]">
-     <Sidebar className="hidden md:block" /> {/* Hide on mobile */}
-     <MainContent />
-   </div>
-   ```
-
-3. **Cards with no max-width:**
-   ```typescript
-   // Add max-width to prevent overflow:
-   <Card className="max-w-full md:max-w-4xl">
-     {/* content */}
-   </Card>
-   ```
-
-4. **Body overflow:**
-   ```css
-   /* In globals.css */
-   body {
-     overflow-x: hidden; /* Hide horiz scroll */
-     width: 100%;
-   }
-   
-   /* Ensure containers constrained */
-   .container {
-     max-width: 100vw;
-     overflow-x: hidden;
-   }
-   ```
-
-5. **Check layout.tsx:**
-   ```typescript
-   // Root layout should NOT have fixed width
-   export default function RootLayout({
-     children,
-   }: {
-     children: React.ReactNode
-   }) {
-     return (
-       <html lang="en">
-         <body className="w-full overflow-x-hidden">
-           {/* NO fixed width containers */}
-           {children}
-         </body>
-       </html>
-     )
-   }
-   ```
-
-6. **Mobile nav height:**
-   ```typescript
-   // Bottom nav might push content wider on small screens
-   // Ensure main content accounts for nav height:
-   <div className="pb-20"> {/* Space for bottom nav */}
-     {children}
-   </div>
-   ```
-
-**Quick Audit:**
-1. Open DevTools (F12)
-2. Toggle responsive design mode (Ctrl+Shift+M)
-3. Set width to 1024px
-4. Check if horizontal scrollbar appears
-5. Use DevTools Elements tab to find overflow culprit:
-   - Right-click element → Inspect
-   - Check `overflow-x`, `width`, `max-width`
-   - Look for `overflow-x: auto` or `scroll` on body/html
-
-**Fix All At Once:**
-```typescript
-// app/layout.tsx
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  return (
-    <html lang="en" className="overflow-x-hidden">
-      <body className="w-full overflow-x-hidden">
-        <div className="min-h-screen w-full">
-          {children}
-        </div>
-      </body>
-    </html>
-  )
-}
-```
-
-```css
-/* app/globals.css */
-* {
-  box-sizing: border-box;
-}
-
-html, body {
-  width: 100%;
-  overflow-x: hidden;
-}
-
-/* Tables must scroll internally, not page */
-.table-container {
-  @apply overflow-x-auto w-full;
-}
-
-/* Cards constrained */
-.card {
-  @apply max-w-full;
-}
-```
-
----
-
-## Implementation Timeline
-
-### ✅ Completed (Phases 1-4a)
-- Week 1-2: Auth + member verification
-- Week 2-3: Loan system + guarantors
-- Week 3-4: Notifications + financial dashboard
-- Week 4-5: Dividends + settings + bank accounts
-- Week 5: Security guards + S3 receipt uploads + announcements + advanced reporting
-
-### 🔄 In Progress (Phase 4b)
-- Week 6: Password reset + CSV import + account settings
-- Week 7: Withdrawals + refactoring + mobile fix
-
-### ✅ Ready for Test Users
-- All Phase 4 features complete
-- Mobile responsive verified
-- Type-safe codebase
-- User-friendly error messages
-- Full test checklist passed
-
----
-
-## Testing Checklist
-
-**Full Workflows:**
-- [ ] Signup → verify → contribute → borrow → repay → withdraw
-- [x] Receipt upload → S3 presign → file stored → admin sees thumbnail/PDF icon
-- [x] Announcement created → pinned banner visible → member RSVPs
-- [x] Admin cannot approve own loan / record own contribution / record own repayment
-- [x] Member verified → email + SMS notification sent
-- [x] Audit trail shows all events with type filter
-- [x] PDF export generates cooperative report + member statement
-- [ ] CSV import → 10 members created + emails sent
-- [ ] Password reset → new password works
-- [ ] Account settings → name, phone, password changes
-- [ ] Dividend creation → calculation correct → payment processed → member notified
-- [ ] Overdue loan → daily notification works
-
-**Mobile (375px):**
-- [ ] All pages responsive
-- [ ] Forms usable
-- [ ] Bottom nav works
-- [ ] NO horizontal scrollbar
-
-**Data Integrity:**
-- [ ] Soft deletes verified
-- [ ] Multi-tenancy isolated
-- [ ] Type safety checked
-- [ ] N+1 queries fixed
-- [ ] Error messages clear
-
-**Performance:**
-- [ ] Pages load <2s
-- [ ] No console errors
-- [ ] No layout shift
-
----
-
-## Success Criteria
-
-✅ **All Features:**
-1. Signup + signin
-2. Member verification (two-tier)
-3. Loan application + guarantors
-4. Loan repayment + schedule
-5. Contributions + receipt upload (S3) + verification ✅
-6. Notifications (email + SMS) ✅
-7. Financial dashboard + PDF statement download ✅
-8. Dividend distribution
-9. Announcements + RSVP + pinned banners ✅
-10. Advanced reporting + audit trail + PDF export ✅
-11. Security guards (self-approval/entry prevention) ✅
-12. **Password reset** (TODO)
-13. **CSV member import** (TODO)
-14. **Account settings** (TODO)
-15. **Withdrawal requests** (TODO)
-
-✅ **Refactoring:**
-13. Mobile responsive (verified)
-14. Type-safe (zero `any`)
-15. Error messages consistent
-16. No N+1 queries
-17. Soft deletes verified
-18. Multi-tenancy isolated
-19. UX polished
-20. Accessibility compliant
-21. Horizontal scrollbar fixed
-22. All tests passed
-
-✅ **Ready for Test Users**
-- All workflows end-to-end
-- No console errors
-- Mobile experience solid
-- Database integrity maintained
-- Performance acceptable
-
----
-
-## Notes for Implementation
-
-1. **Database:**
-   - Always run migrations: `pnpm dlx prisma@latest migrate dev --name feature_name`
-   - Verify migrations folder updated
-   - Vercel auto-runs migrations on deploy
-
-2. **Server Actions:**
-   - Use `'use server'` at file top
-   - Return JSON-serializable data
-   - Throw errors (caught by components)
-   - Always validate user session
-
-3. **Forms:**
-   - Use react-hook-form + zod
-   - shadcn/ui Form component
-   - Errors near fields, not toasts
-
-4. **Mobile:**
-   - Test at 375px (iPhone 12)
-   - Test at 412px (Galaxy S21)
-   - Test on real device if possible
-
-5. **Type Safety:**
-   - Run `npx tsc --noEmit` before commit
-   - Zero errors required
-   - Use Prisma types
-
-6. **Performance:**
-   - Check Network tab for duplicates
-   - Lighthouse >90 score
-   - No console warnings
-
----
-
-## Project Structure
+## File Structure (Actual)
 
 ```
 app/
-├── auth/
-│   ├── signin/page.tsx
-│   ├── signup/page.tsx
-│   ├── forgot-password/page.tsx (TODO)
-│   └── reset-password/page.tsx (TODO)
-├── dashboard/
-│   ├── page.tsx
-│   ├── layout.tsx (PinnedAnnouncementsBanner)
-│   ├── profile/page.tsx
-│   ├── settings/
-│   │   ├── notifications/page.tsx
-│   │   └── account/page.tsx (TODO)
-│   ├── verify-pending/page.tsx
-│   ├── financial-summary/
-│   │   ├── page.tsx
-│   │   └── DownloadStatementButton.tsx
-│   ├── transactions/page.tsx
-│   ├── withdraw/page.tsx (TODO)
-│   ├── announcements/
-│   │   └── [id]/
-│   │       ├── page.tsx
-│   │       └── RsvpForm.tsx
-│   ├── loans/
-│   │   ├── page.tsx
-│   │   ├── apply/page.tsx
-│   │   └── [id]/
-│   │       ├── page.tsx
-│   │       ├── repay/page.tsx
-│   │       └── rejected/page.tsx
-│   └── contributions/
-│       ├── page.tsx
-│       └── submit/
-│           ├── page.tsx
-│           └── ContributionSubmitForm.tsx
-├── admin/
-│   ├── dashboard/page.tsx
-│   ├── settings/page.tsx
-│   ├── dividends/page.tsx
-│   ├── notifications/page.tsx
-│   ├── members/
-│   │   ├── page.tsx
-│   │   ├── unverified/page.tsx
-│   │   ├── import/page.tsx (TODO)
-│   │   └── [id]/contribution-history/page.tsx
-│   ├── loans/
-│   │   ├── pending/page.tsx
-│   │   └── [id]/record-repayment/page.tsx
-│   ├── contributions/
-│   │   ├── page.tsx (filter tabs + receipt preview)
-│   │   ├── ContributionReviewForm.tsx
-│   │   ├── record/page.tsx
-│   │   └── history/page.tsx
-│   ├── announcements/
-│   │   ├── page.tsx
-│   │   ├── DeactivateButton.tsx
-│   │   └── new/
-│   │       ├── page.tsx
-│   │       └── NewAnnouncementForm.tsx
-│   ├── reports/
-│   │   ├── page.tsx
-│   │   ├── TabNav.tsx
-│   │   ├── AuditTrail.tsx
-│   │   └── ExportPdfButton.tsx
-│   └── withdrawals/
-│       ├── page.tsx (TODO)
-│       └── [id]/approve/page.tsx (TODO)
-├── components/
-│   ├── PinnedAnnouncementsBanner.tsx
-│   ├── layout/
-│   │   ├── BottomNav.tsx
-│   │   ├── Navbar.tsx
-│   │   └── Sidebar.tsx
-│   ├── loans/
-│   │   ├── LoanRepaymentStatus.tsx
-│   │   ├── RepaymentScheduleTable.tsx
-│   │   └── LoanApprovalDialog.tsx
-│   ├── contributions/
-│   │   ├── ContributionTable.tsx
-│   │   └── PaymentSplitForm.tsx
-│   ├── dividends/
-│   │   ├── NewDividendDialog.tsx
-│   │   ├── DividendPayoutTable.tsx
-│   │   └── DividendDistributionSummary.tsx
-│   └── admin/
-│       ├── BankAccountForm.tsx
-│       ├── MemberVerificationDialog.tsx
-│       ├── NotificationBadge.tsx
-│       └── SettingsForm.tsx
 ├── actions/
-│   ├── auth.ts (+ forgot/reset password TODO)
-│   ├── verification.ts (+ notifyMemberVerified)
-│   ├── loans.ts (+ self-approval guard)
-│   ├── repayments.ts
-│   ├── contributions.ts (+ S3 receipt fields, self-entry guard)
-│   ├── dividends.ts
+│   ├── admin.ts          (invite, import CSV, role change, remove member)
 │   ├── announcements.ts
-│   ├── account.ts (TODO - name, phone, password)
-│   ├── withdrawals.ts
-│   ├── admin.ts (+ CSV import TODO)
-│   └── reports.ts
+│   ├── auth.ts
+│   ├── contributions.ts
+│   ├── cooperative.ts    (create cooperative on signup)
+│   ├── dividends.ts
+│   ├── loans.ts
+│   ├── reports.ts        (read-only data fetchers)
+│   ├── settings.ts
+│   ├── user.ts           (notification preferences)
+│   ├── verification.ts
+│   └── withdrawals.ts
 ├── api/
-│   ├── auth/[...auth]/route.ts
-│   ├── receipts/presign/route.ts (GET — returns presigned S3 PUT URL)
+│   ├── auth/[...all]/route.ts
+│   ├── auth/cooperatives/route.ts
+│   ├── auth/signup/route.ts
+│   ├── billing/checkout/route.ts
+│   ├── billing/portal/route.ts
 │   ├── cooperative/bank-accounts/route.ts
-│   ├── admin/bank-accounts/route.ts
-│   ├── cron/check-overdue-loans/route.ts
+│   ├── cron/check-overdue/route.ts
+│   ├── receipts/presign/route.ts
+│   ├── reports/csv/route.ts
 │   └── webhooks/stripe/route.ts
-├── lib/
-│   ├── auth-helpers.ts
-│   ├── middleware.ts
-│   ├── server-actions.ts
-│   ├── loan-helpers.ts
-│   ├── notifications.ts (+ notifyMemberVerified, notifyAnnouncement)
-│   ├── s3.ts (generatePresignUrl, getPublicUrl, buildReceiptKey)
-│   ├── pdf-export.ts (exportMemberStatementPdf, exportCooperativeReportPdf)
-│   ├── email.ts (EMAIL_FROM env var)
-│   ├── csv-parser.ts (TODO)
-│   ├── prisma.ts
-│   └── auth.ts
-├── middleware.ts
-├── globals.css (fix horizontal scroll)
-└── layout.tsx (ensure no overflow)
+├── auth/
+│   ├── forgot-password/  (ForgotPasswordForm.tsx, page.tsx)
+│   ├── reset-password/   (ResetForm.tsx, page.tsx)
+│   ├── signin/
+│   └── signup/
+├── admin/
+│   ├── announcements/    (list, new)
+│   ├── contributions/    (list + review, ContributionReviewForm.tsx)
+│   ├── dividends/        (list, NewDividendForm.tsx, DividendActions.tsx)
+│   ├── loans/            (list + review, LoanReviewForm.tsx)
+│   ├── members/          (list, unverified, invite, import CSV)
+│   ├── notifications/    (sent log)
+│   ├── reports/          (tabs: overview, loans, contributions, audit trail; CSV + PDF export)
+│   ├── settings/         (loan config, guarantor mode, bank accounts)
+│   ├── treasurer/        (record contribution, record repayment)
+│   └── withdrawals/      (list + approve/reject/mark-paid)
+├── cooperatives/new/     (create cooperative form)
+├── dashboard/
+│   ├── announcements/[id]/  (member view + RSVP)
+│   ├── billing/          (Stripe subscription management)
+│   ├── contributions/    (list + submit with S3 upload)
+│   ├── cooperative-details/ (bank accounts, cooperative info)
+│   ├── financial-summary/   (stat cards + PDF statement download)
+│   ├── loans/            (list, apply, [id] detail + repay, [id]/rejected)
+│   ├── profile/
+│   ├── settings/         (name + password change, notification preferences)
+│   ├── transactions/     (unified contribution + repayment timeline)
+│   ├── verification-pending/
+│   └── withdrawals/      (request form + status list)
+├── components/
+│   ├── BottomTabBar.tsx      (exists, not currently active)
+│   ├── BottomSheet.tsx
+│   ├── ContributionSubmitSheet.tsx
+│   ├── DashboardNav.tsx
+│   ├── Header.tsx
+│   ├── HeroScene.tsx
+│   ├── InviteMemberSheet.tsx
+│   ├── LoanApplySheet.tsx
+│   ├── MobileNavDrawer.tsx
+│   ├── MobileTopBar.tsx      (exists, not currently active)
+│   ├── PinnedAnnouncementsBanner.tsx
+│   ├── ReceiptViewerDialog.tsx
+│   └── ...
+└── lib/
+    ├── auth-helpers.ts   (requireAuth, protectAdminAction, isAdminOrOwner, etc.)
+    ├── auth-client.ts
+    ├── auth.ts
+    ├── currency.ts       (getCurrencySymbol — no stored symbol column)
+    ├── email.ts
+    ├── form.ts           (getString, getOptionalString, getNumber, getInt)
+    ├── loan-helpers.ts   (calculateLoanTotals, calculateLoanHealth, generateRepaymentSchedule)
+    ├── notifications.ts
+    ├── pdf-export.ts
+    ├── prisma.ts
+    ├── s3-upload.ts      (presigned PUT URL generation)
+    ├── s3.ts
+    └── stripe.ts
 ```
 
 ---
 
-## Deliverables Checklist
+## Notes
 
-✅ When Ready for Test Users:
-- [ ] All 16 features working
-- [ ] All Phase 4 refactoring complete
-- [ ] Mobile responsive (no horiz scroll)
-- [ ] Type-safe codebase
-- [ ] Zero console errors
-- [ ] Full test checklist passed
-- [ ] Ready for closed beta
-
----
-
-## Summary
-
-This merged spec covers a **complete, production-ready MVP** with:
-
-✅ **Authentication & Security:**
-- Signup/signin + password reset
-- Member verification (two-tier)
-- Multi-tenancy isolation
-- Audit trail
-
-✅ **Loans & Guarantors:**
-- Eligibility validation
-- Guarantor coverage (configurable)
-- Repayment scheduling + tracking
-- Flexible payments
-
-✅ **Contributions:**
-- Manual receipt upload + verification
-- Treasurer manual entry (auto-verified)
-- Transaction history
-
-✅ **Member Features:**
-- Financial dashboard (real-time)
-- Account settings (name, phone, password)
-- Withdrawal requests
-- Notifications (email + SMS)
-
-✅ **Admin Features:**
-- CSV member import
-- Dividend distribution
-- Bank account management
-- Loan/contribution approval
-- Settings + configuration
-
-✅ **Refactoring & Polish:**
-- Mobile responsive
-- Type-safe
-- Optimized queries
-- User-friendly errors
-- Accessible
-
-**Ready for test user launch mid-late May 2026.**
+1. **Migrations:** `pnpm dlx prisma migrate dev --name <name>`
+2. **Type check:** `npx tsc --noEmit` (must pass before shipping)
+3. **Forms:** `useActionState` + server actions. `app/lib/form.ts` helpers replace `(formData.get("key") as string)?.trim()` boilerplate. No RHF.
+4. **Role checks:** Use `isAdminOrOwner(role)` / `isAdminTreasurerOrOwner(role)` from `auth-helpers.ts`.
+5. **Currency:** Always call `getCurrencySymbol(cooperative.currency)` — never hardcode symbols.
+6. **Mobile nav:** `BottomTabBar` and `MobileTopBar` are built but commented out in `dashboard/layout.tsx`. Can be re-enabled when ready.
+7. **Stripe:** `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` required.
+8. **S3:** `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, `AWS_BUCKET_NAME` required.

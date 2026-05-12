@@ -2,6 +2,7 @@
 
 import prisma from "@/app/lib/prisma";
 import { requireAuth, protectAdminAction } from "@/app/lib/auth-helpers";
+import { getString, getOptionalString } from "@/app/lib/form";
 import { revalidatePath } from "next/cache";
 import { notifyAnnouncement } from "@/app/lib/notifications";
 
@@ -18,20 +19,20 @@ export async function createAnnouncement(
   _prev: AnnouncementActionState,
   formData: FormData
 ): Promise<AnnouncementActionState> {
-  const cooperativeId = (formData.get("cooperativeId") as string)?.trim();
+  const cooperativeId = getString(formData, "cooperativeId");
   if (!cooperativeId) return { error: "Missing cooperative ID." };
 
   const session = await protectAdminAction(cooperativeId);
 
-  const title = (formData.get("title") as string)?.trim();
-  const message = (formData.get("message") as string)?.trim();
-  const type = (formData.get("type") as string)?.trim();
-  const recipientType = (formData.get("recipientType") as string)?.trim() || "ALL";
-  const isPinnedStr = (formData.get("isPinned") as string)?.trim();
-  const allowRsvpStr = (formData.get("allowRsvp") as string)?.trim();
-  const agmDateStr = (formData.get("agmDate") as string)?.trim();
-  const agmLocation = (formData.get("agmLocation") as string)?.trim() || null;
-  const expiresAtStr = (formData.get("expiresAt") as string)?.trim();
+  const title = getString(formData, "title");
+  const message = getString(formData, "message");
+  const type = getString(formData, "type");
+  const recipientType = getString(formData, "recipientType") || "ALL";
+  const isPinnedStr = getString(formData, "isPinned");
+  const allowRsvpStr = getString(formData, "allowRsvp");
+  const agmDateStr = getString(formData, "agmDate");
+  const agmLocation = getOptionalString(formData, "agmLocation");
+  const expiresAtStr = getString(formData, "expiresAt");
 
   if (!title || title.length < 3) return { error: "Title must be at least 3 characters." };
   if (!message || message.length < 10) return { error: "Message must be at least 10 characters." };
@@ -86,8 +87,8 @@ export async function deactivateAnnouncement(
   _prev: AnnouncementActionState,
   formData: FormData
 ): Promise<AnnouncementActionState> {
-  const cooperativeId = (formData.get("cooperativeId") as string)?.trim();
-  const announcementId = (formData.get("announcementId") as string)?.trim();
+  const cooperativeId = getString(formData, "cooperativeId");
+  const announcementId = getString(formData, "announcementId");
   if (!cooperativeId || !announcementId) return { error: "Missing required fields." };
 
   const session = await protectAdminAction(cooperativeId);
@@ -116,8 +117,8 @@ export async function rsvpAnnouncement(
   const session = await requireAuth();
   const userId = session.user.id;
 
-  const announcementId = (formData.get("announcementId") as string)?.trim();
-  const rsvpStatus = (formData.get("rsvpStatus") as string)?.trim();
+  const announcementId = getString(formData, "announcementId");
+  const rsvpStatus = getString(formData, "rsvpStatus");
 
   if (!announcementId || !rsvpStatus) return { error: "Missing required fields." };
   if (!VALID_RSVP_STATUSES.includes(rsvpStatus as typeof VALID_RSVP_STATUSES[number])) {
