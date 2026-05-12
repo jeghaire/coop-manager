@@ -18,7 +18,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -138,7 +140,7 @@ export function ContributionSubmitForm({
       )}
 
       <div className="space-y-1.5">
-        <Label htmlFor="amount">Amount ({currencySymbol ?? "₦"})</Label>
+        <Label htmlFor="amount">Amount ({currencySymbol})</Label>
         <Input
           id="amount"
           name="amount"
@@ -156,16 +158,20 @@ export function ContributionSubmitForm({
         <Select
           value={paymentMethod}
           onValueChange={(v) => setPaymentMethod(v ?? "")}
+          items={PAYMENT_METHODS}
         >
           <SelectTrigger id="paymentMethod" className="w-full">
             <SelectValue placeholder="How did you pay?" />
           </SelectTrigger>
           <SelectContent>
-            {PAYMENT_METHODS.map(({ value, label }) => (
-              <SelectItem key={value} value={value}>
-                {label}
-              </SelectItem>
-            ))}
+            <SelectGroup>
+              <SelectLabel>Payment Methods</SelectLabel>
+              {PAYMENT_METHODS.map(({ value, label }) => (
+                <SelectItem key={value} value={value}>
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
           </SelectContent>
         </Select>
       </div>

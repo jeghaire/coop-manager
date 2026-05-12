@@ -28,7 +28,12 @@ export function ReceiptViewerDialog({
   const [scale, setScale] = useState(1);
   const [translate, setTranslate] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
-  const dragRef = useRef<{ sx: number; sy: number; tx: number; ty: number } | null>(null);
+  const dragRef = useRef<{
+    sx: number;
+    sy: number;
+    tx: number;
+    ty: number;
+  } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const isHEIC = fileType ? HEIC_TYPES.has(fileType) : false;
@@ -58,7 +63,7 @@ export function ReceiptViewerDialog({
       setScale((s) => {
         const next = Math.max(
           MIN_SCALE,
-          Math.min(MAX_SCALE, s * (e.deltaY < 0 ? 1.12 : 0.88))
+          Math.min(MAX_SCALE, s * (e.deltaY < 0 ? 1.12 : 0.88)),
         );
         if (next <= MIN_SCALE) setTranslate({ x: 0, y: 0 });
         return next;
@@ -124,9 +129,8 @@ export function ReceiptViewerDialog({
       <Dialog.Root open={open} onOpenChange={setOpen}>
         <Dialog.Portal>
           <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm transition-opacity duration-200 data-ending-style:opacity-0 data-starting-style:opacity-0" />
-          <Dialog.Popup className="fixed inset-0 z-50 flex items-center justify-center p-4 data-ending-style:opacity-0 data-starting-style:opacity-0 transition-opacity duration-200 outline-none">
+          <Dialog.Popup className="fixed inset-0 z-50 flex items-center justify-center p-4 data-ending-style:opacity-0 data-starting-style:opacity-0 transition-opacity duration-200 outline-none max-h-dvh overflow-y-auto">
             <div className="relative flex flex-col bg-zinc-900 rounded-2xl shadow-2xl overflow-hidden w-full max-w-3xl max-h-[calc(100dvh-2rem)]">
-
               {/* Toolbar */}
               <div className="flex items-center justify-between gap-3 px-3 py-2.5 border-b border-white/10 shrink-0">
                 <p className="text-sm font-medium text-zinc-200 truncate min-w-0">

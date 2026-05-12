@@ -8,6 +8,7 @@ import { LoanSettingsForm } from "./LoanSettingsForm";
 import { BankAccountForm } from "./BankAccountForm";
 import { DeleteBankAccountForm, SetPreferredForm } from "./BankAccountActions";
 import { PageHeader } from "@/app/components/PageHeader";
+import { StarIcon } from "lucide-react";
 
 export default async function AdminSettingsPage() {
   const session = await getSession();
@@ -159,12 +160,10 @@ export default async function AdminSettingsPage() {
                       className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/20"
                     >
                       <td className="px-4 py-3">
-                        <p className="font-medium text-zinc-900 dark:text-zinc-100">
+                        <p className="flex items-center font-medium text-zinc-900 dark:text-zinc-100">
                           {account.accountName}
                           {account.isPreferred && (
-                            <span className="ml-2 text-xs text-emerald-600 dark:text-emerald-400">
-                              Preferred
-                            </span>
+                            <StarIcon className="ml-1.5 size-3.5 text-yellow-400 fill-current" />
                           )}
                         </p>
                       </td>

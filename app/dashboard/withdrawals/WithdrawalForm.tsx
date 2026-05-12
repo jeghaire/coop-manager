@@ -35,10 +35,10 @@ export function WithdrawalForm({
   currencySymbol: string;
 }) {
   const router = useRouter();
-  const [state, action, pending] = useActionState<WithdrawalActionState, FormData>(
-    requestWithdrawal,
-    {}
-  );
+  const [state, action, pending] = useActionState<
+    WithdrawalActionState,
+    FormData
+  >(requestWithdrawal, {});
   const [reason, setReason] = useState("");
 
   useEffect(() => {
@@ -57,15 +57,14 @@ export function WithdrawalForm({
       {state.success && (
         <Alert>
           <AlertDescription>
-            Withdrawal request submitted. You will be notified when it&apos;s reviewed.
+            Withdrawal request submitted. You will be notified when it&apos;s
+            reviewed.
           </AlertDescription>
         </Alert>
       )}
 
       <div className="space-y-1.5">
-        <Label htmlFor="amount">
-          Amount ({currencySymbol})
-        </Label>
+        <Label htmlFor="amount">Amount ({currencySymbol})</Label>
         <Input
           id="amount"
           name="amount"
@@ -77,14 +76,19 @@ export function WithdrawalForm({
           required
         />
         <p className="text-xs text-zinc-500 dark:text-zinc-400">
-          Maximum: {currencySymbol}{maxAmount.toLocaleString()}
+          Maximum: {currencySymbol}
+          {maxAmount.toLocaleString()}
         </p>
       </div>
 
       <div className="space-y-1.5">
         <Label htmlFor="reason">Reason</Label>
         <Input type="hidden" name="reason" value={reason} />
-        <Select value={reason} onValueChange={(v) => setReason(v ?? "")}>
+        <Select
+          value={reason}
+          onValueChange={(v) => setReason(v ?? "")}
+          items={REASONS}
+        >
           <SelectTrigger id="reason" className="w-full">
             <SelectValue placeholder="Select a reason" />
           </SelectTrigger>
@@ -113,11 +117,7 @@ export function WithdrawalForm({
         />
       </div>
 
-      <Button
-        type="submit"
-        className="w-full"
-        disabled={pending || !reason}
-      >
+      <Button type="submit" className="w-full" disabled={pending || !reason}>
         {pending ? "Submitting…" : "Request Withdrawal"}
       </Button>
     </Form>

@@ -6,7 +6,7 @@ import prisma from "@/app/lib/prisma";
 import { getCurrencySymbol } from "@/app/lib/currency";
 import {
   getAvailableWithdrawal,
-  getMemberWithdrawals
+  getMemberWithdrawals,
 } from "@/app/actions/withdrawals";
 import { WithdrawalForm } from "./WithdrawalForm";
 import { Badge } from "@/components/ui/badge";
@@ -21,14 +21,14 @@ const STATUS_BADGE: Record<
   REQUESTED: "secondary",
   APPROVED: "success",
   REJECTED: "destructive",
-  PAID: "outline"
+  PAID: "outline",
 };
 
 const REASON_LABEL: Record<string, string> = {
   PERSONAL: "Personal Use",
   EMERGENCY: "Emergency",
   LEAVING: "Leaving Cooperative",
-  OTHER: "Other"
+  OTHER: "Other",
 };
 
 export default async function WithdrawalsPage() {
@@ -42,8 +42,8 @@ export default async function WithdrawalsPage() {
     getAvailableWithdrawal(session.user.id, cooperativeId),
     prisma.cooperative.findUnique({
       where: { id: cooperativeId },
-      select: { currency: true }
-    })
+      select: { currency: true },
+    }),
   ]);
 
   const sym = getCurrencySymbol(cooperative?.currency ?? "NGN");
@@ -134,6 +134,7 @@ export default async function WithdrawalsPage() {
                         <div className="flex flex-col gap-1">
                           <Badge
                             variant={STATUS_BADGE[w.status] ?? "secondary"}
+                            className="w-fit"
                           >
                             {w.status}
                           </Badge>
@@ -158,4 +159,3 @@ export default async function WithdrawalsPage() {
     </div>
   );
 }
-

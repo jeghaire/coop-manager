@@ -11,6 +11,7 @@ import { AuditTrail } from "./AuditTrail";
 import Link from "next/link";
 import { ExportPdfButton } from "./ExportPdfButton";
 import prisma from "@/app/lib/prisma";
+import { getCurrencySymbol } from "@/app/lib/currency";
 import { PageHeader } from "@/app/components/PageHeader";
 
 export default async function ReportsPage({
@@ -36,9 +37,10 @@ export default async function ReportsPage({
 
   const cooperative = await prisma.cooperative.findUnique({
     where: { id: cooperativeId },
-    select: { name: true }
+    select: { name: true, currency: true }
   });
   const cooperativeName = cooperative?.name ?? "Cooperative";
+  const currencySymbol = getCurrencySymbol(cooperative?.currency);
 
   return (
     <div className="space-y-6">
@@ -129,6 +131,7 @@ export default async function ReportsPage({
           <DividendSnapshot
             cooperativeId={cooperativeId}
             distributionAmount={distributionAmount}
+            currencySymbol={currencySymbol}
           />
         )}
         {tab === "audit" && (

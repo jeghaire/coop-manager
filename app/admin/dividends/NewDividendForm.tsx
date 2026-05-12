@@ -74,7 +74,18 @@ export function NewDividendForm({
                 <Input type="hidden" name="period" value={period} />
                 <Select value={period} onValueChange={(v) => setPeriod(v ?? "Q1")}>
                   <SelectTrigger id="period" className="w-full">
-                    <SelectValue>{period}</SelectValue>
+                    <SelectValue placeholder="Select a period…">
+                      {(value: string) => {
+                        const labels: Record<string, string> = {
+                          Q1: "Q1 (Jan–Mar)",
+                          Q2: "Q2 (Apr–Jun)",
+                          Q3: "Q3 (Jul–Sep)",
+                          Q4: "Q4 (Oct–Dec)",
+                          ANNUAL: "Annual",
+                        };
+                        return labels[value] ?? null;
+                      }}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Q1">Q1 (Jan–Mar)</SelectItem>

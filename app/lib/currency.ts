@@ -12,11 +12,16 @@ const SYMBOLS: Record<string, string> = {
   XAF: "FCFA",
 };
 
-export function getCurrencySymbol(code: string): string {
+export function getCurrencySymbol(code: string | null | undefined): string {
+  if (!code) return "";
   if (SYMBOLS[code]) return SYMBOLS[code];
-  return (
-    new Intl.NumberFormat("en", { style: "currency", currency: code, minimumFractionDigits: 0 })
-      .formatToParts(0)
-      .find((p) => p.type === "currency")?.value ?? code
-  );
+  try {
+    return (
+      new Intl.NumberFormat("en", { style: "currency", currency: code, minimumFractionDigits: 0 })
+        .formatToParts(0)
+        .find((p) => p.type === "currency")?.value ?? code
+    );
+  } catch {
+    return code;
+  }
 }

@@ -13,7 +13,7 @@ export function BottomSheet({
   open,
   onClose,
   title,
-  children
+  children,
 }: BottomSheetProps) {
   useEffect(() => {
     if (open) {
@@ -42,10 +42,10 @@ export function BottomSheet({
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className={`fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-zinc-900 rounded-t-3xl shadow-2xl transition-transform duration-300 ease-out md:hidden ${
+        className={`fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-zinc-900 rounded-t-3xl shadow-2xl transition-transform duration-300 ease-out md:hidden flex flex-col overflow-hidden ${
           open ? "translate-y-0" : "translate-y-full"
         }`}
-        style={{ maxHeight: "90dvh" }}
+        style={{ height: "90dvh" }}
       >
         {/* Drag handle */}
         <div className="flex justify-center pt-3 pb-1 shrink-0">
@@ -67,12 +67,7 @@ export function BottomSheet({
         </div>
 
         {/* Scrollable content */}
-        <div
-          className="overflow-y-auto p-5"
-          style={{ maxHeight: "calc(90dvh - 96px)" }}
-        >
-          {children}
-        </div>
+        <div className="flex-1 overflow-y-auto p-5 min-h-0">{children}</div>
       </div>
     </>
   );

@@ -50,7 +50,14 @@ export function RecordRepaymentForm({ loans, currencySymbol }: Props) {
         <Input type="hidden" name="loanId" value={loanId} />
         <Select value={loanId} onValueChange={(v) => setLoanId(v ?? "")}>
           <SelectTrigger id="loanId" className="w-full">
-            <SelectValue placeholder="Select a loan…" />
+            <SelectValue placeholder="Select a loan…">
+              {(value: string) => {
+                const loan = loans.find((l) => l.id === value);
+                return loan
+                  ? `${loan.applicant.name} — ${currencySymbol}${Number(loan.amountRequested).toLocaleString()} (${currencySymbol}${loan.remaining.toLocaleString(undefined, { maximumFractionDigits: 2 })} remaining)`
+                  : null;
+              }}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             {loans.map((loan) => (

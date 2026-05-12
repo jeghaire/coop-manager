@@ -2,10 +2,19 @@ import Link from "next/link";
 import { ContributionSubmitForm } from "./ContributionSubmitForm";
 import { getSession } from "@/app/lib/auth-helpers";
 import { redirect } from "next/navigation";
+import prisma from "@/app/lib/prisma";
+import { getCurrencySymbol } from "@/app/lib/currency";
 
 export default async function SubmitContributionPage() {
   const session = await getSession();
   if (!session?.user) redirect("/auth/signin");
+
+  const cooperativeId = session.user.cooperativeId as string;
+  const cooperative = await prisma.cooperative.findUnique({
+    where: { id: cooperativeId },
+    select: { currency: true },
+  });
+  const currencySymbol = getCurrencySymbol(cooperative?.currency);
 
   return (
     <div className="max-w-lg">
@@ -26,7 +35,7 @@ export default async function SubmitContributionPage() {
       </div>
 
       <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-6">
-        <ContributionSubmitForm />
+        <ContributionSubmitForm currencySymbol={currencySymbol} />
       </div>
     </div>
   );

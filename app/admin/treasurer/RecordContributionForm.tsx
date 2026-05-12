@@ -45,7 +45,12 @@ export function RecordContributionForm({ members, currencySymbol }: Props) {
         <Input type="hidden" name="memberId" value={memberId} />
         <Select value={memberId} onValueChange={(v) => setMemberId(v ?? "")}>
           <SelectTrigger id="memberId" className="w-full">
-            <SelectValue placeholder="Select a member…" />
+            <SelectValue placeholder="Select a member…">
+              {(value: string) => {
+                const m = members.find((m) => m.id === value);
+                return m ? `${m.name} (${m.email})` : null;
+              }}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             {members.map((m) => (

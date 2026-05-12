@@ -162,6 +162,7 @@ export default async function AdminWithdrawalsPage() {
                         <div className="flex flex-col gap-1">
                           <Badge
                             variant={STATUS_BADGE[w.status] ?? "secondary"}
+                            className="w-fit text-[11px]"
                           >
                             {w.status}
                           </Badge>

@@ -12,9 +12,11 @@ const ROLE_BADGE: Record<string, "success" | "sky" | "warning" | "secondary"> =
 export async function DividendSnapshot({
   cooperativeId,
   distributionAmount,
+  currencySymbol,
 }: {
   cooperativeId: string;
   distributionAmount: number;
+  currencySymbol: string;
 }) {
   const { rows, grandTotal } = await getDividendSnapshot(cooperativeId);
 
@@ -36,7 +38,7 @@ export async function DividendSnapshot({
             Total Fund
           </p>
           <p className="text-2xl font-semibold text-emerald-800 dark:text-emerald-300">
-            {grandTotal.toLocaleString()}
+            {currencySymbol}{grandTotal.toLocaleString()}
           </p>
           <p className="text-xs text-emerald-600 dark:text-emerald-500 mt-0.5">
             Verified contributions
@@ -49,7 +51,7 @@ export async function DividendSnapshot({
               Distribution Amount
             </p>
             <p className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
-              {distributionAmount.toLocaleString()}
+              {currencySymbol}{distributionAmount.toLocaleString()}
             </p>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
               Pro-rated by contribution %
@@ -122,7 +124,7 @@ export async function DividendSnapshot({
                       </div>
                     </td>
                     <td className="px-4 py-3 text-right font-mono text-zinc-700 dark:text-zinc-300 hidden sm:table-cell">
-                      {row.totalContributed.toLocaleString()}
+                      {currencySymbol}{row.totalContributed.toLocaleString()}
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-2">
@@ -139,7 +141,7 @@ export async function DividendSnapshot({
                     </td>
                     {distributionAmount > 0 && (
                       <td className="px-5 py-3 text-right font-mono font-semibold text-emerald-700 dark:text-emerald-400">
-                        {Math.round(dividend).toLocaleString()}
+                        {currencySymbol}{Math.round(dividend).toLocaleString()}
                       </td>
                     )}
                   </tr>
@@ -156,7 +158,7 @@ export async function DividendSnapshot({
                     Total
                   </td>
                   <td className="px-5 py-3 text-right font-mono font-bold text-emerald-700 dark:text-emerald-400">
-                    {distributionAmount.toLocaleString()}
+                    {currencySymbol}{distributionAmount.toLocaleString()}
                   </td>
                 </tr>
               </tfoot>
