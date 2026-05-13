@@ -1,12 +1,40 @@
 "use client";
 
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod/v3";
 import { authClient } from "@/app/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Form } from "@/components/ui/form";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
+import { useState } from "react";
+
+const nameSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+});
+
+const passwordSchema = z
+  .object({
+    currentPw: z.string().min(1, "Current password is required"),
+    newPw: z.string().min(8, "New password must be at least 8 characters"),
+    confirmPw: z.string().min(1, "Please confirm your password"),
+  })
+  .refine((d) => d.newPw === d.confirmPw, {
+    message: "Passwords do not match",
+    path: ["confirmPw"],
+  });
+
+type NameValues = z.infer<typeof nameSchema>;
+type PasswordValues = z.infer<typeof passwordSchema>;
 
 export function SettingsForm({
   currentName,
@@ -15,68 +43,47 @@ export function SettingsForm({
   currentName: string;
   email: string;
 }) {
-  const [name, setName] = useState(currentName);
   const [nameMsg, setNameMsg] = useState("");
-  const [namePending, setNamePending] = useState(false);
-
-  const [currentPw, setCurrentPw] = useState("");
-  const [newPw, setNewPw] = useState("");
-  const [confirmPw, setConfirmPw] = useState("");
   const [pwMsg, setPwMsg] = useState("");
-  const [pwError, setPwError] = useState("");
-  const [pwPending, setPwPending] = useState(false);
 
-  async function handleNameSave(e: React.FormEvent) {
-    e.preventDefault();
+  const nameForm = useForm<NameValues>({
+    resolver: zodResolver(nameSchema),
+    defaultValues: { name: currentName },
+  });
+
+  const passwordForm = useForm<PasswordValues>({
+    resolver: zodResolver(passwordSchema),
+    defaultValues: { currentPw: "", newPw: "", confirmPw: "" },
+  });
+
+  async function onNameSubmit(values: NameValues) {
     setNameMsg("");
-    setNamePending(true);
-
-    const { error } = await authClient.updateUser({ name });
-    setNamePending(false);
-
+    const { error } = await authClient.updateUser({ name: values.name });
     if (error) {
-      setNameMsg("Failed to update name.");
+      nameForm.setError("root", { message: "Failed to update name." });
     } else {
       setNameMsg("Name updated.");
     }
   }
 
-  async function handlePasswordSave(e: React.FormEvent) {
-    e.preventDefault();
+  async function onPasswordSubmit(values: PasswordValues) {
     setPwMsg("");
-    setPwError("");
-
-    if (newPw.length < 8) {
-      setPwError("New password must be at least 8 characters.");
-      return;
-    }
-    if (newPw !== confirmPw) {
-      setPwError("Passwords do not match.");
-      return;
-    }
-
-    setPwPending(true);
-
     const { error } = await authClient.changePassword({
-      currentPassword: currentPw,
-      newPassword: newPw,
+      currentPassword: values.currentPw,
+      newPassword: values.newPw,
       revokeOtherSessions: false,
     });
 
-    setPwPending(false);
-
     if (error) {
-      setPwError(
+      const message =
         error.message?.toLowerCase().includes("incorrect") ||
-          error.message?.toLowerCase().includes("invalid")
+        error.message?.toLowerCase().includes("invalid")
           ? "Current password is incorrect."
-          : error.message || "Failed to change password."
-      );
+          : error.message || "Failed to change password.";
+      passwordForm.setError("root", { message });
     } else {
       setPwMsg("Password updated.");
-      setCurrentPw("");
-      setNewPw("");
-      setConfirmPw("");
+      passwordForm.reset();
     }
   }
 
@@ -89,35 +96,56 @@ export function SettingsForm({
         </h2>
 
         <div className="space-y-1.5">
-          <Label>Email</Label>
-          <Input value={email} disabled className="opacity-60" />
+          <Label htmlFor="email-display">Email</Label>
+          <Input
+            id="email-display"
+            value={email}
+            disabled
+            className="opacity-60"
+          />
           <p className="text-xs text-zinc-500 dark:text-zinc-400">
             Email cannot be changed.
           </p>
         </div>
 
-        <Form onSubmit={handleNameSave} className="space-y-3">
-          <div className="space-y-1.5">
-            <Label htmlFor="name">Display Name</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </div>
-          {nameMsg && (
-            <p className="text-sm text-emerald-600 dark:text-emerald-400">
-              {nameMsg}
-            </p>
-          )}
-          <Button
-            type="submit"
-            size="sm"
-            disabled={namePending || name === currentName}
+        <Form {...nameForm}>
+          <form
+            onSubmit={nameForm.handleSubmit(onNameSubmit)}
+            className="space-y-3"
           >
-            {namePending ? "Saving…" : "Save Name"}
-          </Button>
+            <FormField
+              control={nameForm.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Display Name</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {nameForm.formState.errors.root && (
+              <p className="text-sm text-destructive">
+                {nameForm.formState.errors.root.message}
+              </p>
+            )}
+            {nameMsg && (
+              <p className="text-sm text-emerald-600 dark:text-emerald-400">
+                {nameMsg}
+              </p>
+            )}
+            <Button
+              type="submit"
+              size="sm"
+              disabled={
+                nameForm.formState.isSubmitting || !nameForm.formState.isDirty
+              }
+            >
+              {nameForm.formState.isSubmitting ? "Saving…" : "Save Name"}
+            </Button>
+          </form>
         </Form>
       </div>
 
@@ -127,51 +155,80 @@ export function SettingsForm({
           Change Password
         </h2>
 
-        <Form onSubmit={handlePasswordSave} className="space-y-4">
-          {pwError && (
-            <Alert variant="destructive">
-              <AlertDescription>{pwError}</AlertDescription>
-            </Alert>
-          )}
-          {pwMsg && (
-            <p className="text-sm text-emerald-600 dark:text-emerald-400">
-              {pwMsg}
-            </p>
-          )}
-          <div className="space-y-1.5">
-            <Label htmlFor="currentPw">Current Password</Label>
-            <Input
-              id="currentPw"
-              type="password"
-              value={currentPw}
-              onChange={(e) => setCurrentPw(e.target.value)}
-              required
+        <Form {...passwordForm}>
+          <form
+            onSubmit={passwordForm.handleSubmit(onPasswordSubmit)}
+            className="space-y-4"
+          >
+            {passwordForm.formState.errors.root && (
+              <Alert variant="destructive">
+                <AlertDescription>
+                  {passwordForm.formState.errors.root.message}
+                </AlertDescription>
+              </Alert>
+            )}
+            {pwMsg && (
+              <p className="text-sm text-emerald-600 dark:text-emerald-400">
+                {pwMsg}
+              </p>
+            )}
+
+            <FormField
+              control={passwordForm.control}
+              name="currentPw"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Current Password</FormLabel>
+                  <FormControl>
+                    <Input type="password" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="newPw">New Password</Label>
-            <Input
-              id="newPw"
-              type="password"
-              value={newPw}
-              onChange={(e) => setNewPw(e.target.value)}
-              placeholder="Min. 8 characters"
-              required
+
+            <FormField
+              control={passwordForm.control}
+              name="newPw"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>New Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      placeholder="Min. 8 characters"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="confirmPw">Confirm New Password</Label>
-            <Input
-              id="confirmPw"
-              type="password"
-              value={confirmPw}
-              onChange={(e) => setConfirmPw(e.target.value)}
-              required
+
+            <FormField
+              control={passwordForm.control}
+              name="confirmPw"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Confirm New Password</FormLabel>
+                  <FormControl>
+                    <Input type="password" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          <Button type="submit" size="sm" disabled={pwPending}>
-            {pwPending ? "Saving…" : "Update Password"}
-          </Button>
+
+            <Button
+              type="submit"
+              size="sm"
+              disabled={passwordForm.formState.isSubmitting}
+            >
+              {passwordForm.formState.isSubmitting
+                ? "Saving…"
+                : "Update Password"}
+            </Button>
+          </form>
         </Form>
       </div>
     </div>

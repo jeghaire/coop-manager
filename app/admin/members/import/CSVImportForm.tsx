@@ -1,12 +1,27 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useState, startTransition } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod/v3";
 import { importMembers, type AdminActionState } from "@/app/actions/admin";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Label } from "@/components/ui/label";
-import { Form } from "@/components/ui/form";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
+
+const schema = z.object({
+  csvText: z.string().optional(),
+});
+
+type FormValues = z.infer<typeof schema>;
 
 export function CSVImportForm() {
   const [state, action, pending] = useActionState<AdminActionState, FormData>(
@@ -14,6 +29,24 @@ export function CSVImportForm() {
     {}
   );
   const [mode, setMode] = useState<"file" | "paste">("paste");
+  const form = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: { csvText: "" },
+  });
+
+  function onSubmit(values: FormValues) {
+    const fd = new FormData();
+    if (values.csvText) fd.set("csvText", values.csvText);
+    startTransition(() => action(fd));
+  }
+
+  function handleFileSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const fileInput = e.currentTarget.querySelector<HTMLInputElement>('[name="csvFile"]');
+    const fd = new FormData();
+    if (fileInput?.files?.[0]) fd.set("csvFile", fileInput.files[0]);
+    startTransition(() => action(fd));
+  }
 
   if (state.success && state.importResults) {
     const { created, skipped } = state.importResults;
@@ -54,7 +87,7 @@ export function CSVImportForm() {
   }
 
   return (
-    <Form action={action} className="space-y-5">
+    <div className="space-y-5">
       {state.error && (
         <Alert variant="destructive">
           <AlertDescription>{state.error}</AlertDescription>
@@ -90,32 +123,47 @@ export function CSVImportForm() {
       </div>
 
       {mode === "paste" ? (
-        <div className="space-y-1.5">
-          <Label htmlFor="csvText">CSV Content</Label>
-          <Textarea
-            id="csvText"
-            name="csvText"
-            rows={8}
-            placeholder={`name,email,monthly_amount\nChioma Obi,chioma@example.com,10000\nEmeka Nwosu,emeka@example.com,15000`}
-            className="font-mono text-sm"
-          />
-        </div>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="csvText"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>CSV Content</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      rows={8}
+                      placeholder={`name,email,monthly_amount\nChioma Obi,chioma@example.com,10000\nEmeka Nwosu,emeka@example.com,15000`}
+                      className="font-mono text-sm"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="submit" className="w-full" disabled={pending}>
+              {pending ? "Importing…" : "Import Members"}
+            </Button>
+          </form>
+        </Form>
       ) : (
-        <div className="space-y-1.5">
-          <Label htmlFor="csvFile">CSV File</Label>
-          <input
-            id="csvFile"
-            name="csvFile"
-            type="file"
-            accept=".csv,text/csv"
-            className="block w-full text-sm text-zinc-600 dark:text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-zinc-100 file:text-zinc-700 dark:file:bg-zinc-800 dark:file:text-zinc-300 hover:file:bg-zinc-200 dark:hover:file:bg-zinc-700 transition-colors cursor-pointer"
-          />
-        </div>
+        <form onSubmit={handleFileSubmit} className="space-y-4">
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium leading-none">CSV File</label>
+            <input
+              name="csvFile"
+              type="file"
+              accept=".csv,text/csv"
+              className="block w-full text-sm text-zinc-600 dark:text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-zinc-100 file:text-zinc-700 dark:file:bg-zinc-800 dark:file:text-zinc-300 hover:file:bg-zinc-200 dark:hover:file:bg-zinc-700 transition-colors cursor-pointer"
+            />
+          </div>
+          <Button type="submit" className="w-full" disabled={pending}>
+            {pending ? "Importing…" : "Import Members"}
+          </Button>
+        </form>
       )}
-
-      <Button type="submit" className="w-full" disabled={pending}>
-        {pending ? "Importing…" : "Import Members"}
-      </Button>
-    </Form>
+    </div>
   );
 }

@@ -32,7 +32,20 @@
       "Bash(Select-Object FullName)",
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Mavi\\\\Documents\\\\Development\\\\Web\\\\coop-manager\\\\components\" -Recurse -File)",
       "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Mavi\\\\Documents\\\\Development\\\\Web\\\\coop-manager\\\\app\" -Recurse -File 2>$null | ForEach-Object { $_.FullName })",
-      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Mavi\\\\Documents\\\\Development\\\\Web\\\\coop-manager\\\\components\" -Recurse -File 2>$null | ForEach-Object { $_.FullName })"
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Mavi\\\\Documents\\\\Development\\\\Web\\\\coop-manager\\\\components\" -Recurse -File 2>$null | ForEach-Object { $_.FullName })",
+      "Bash(ls -la \"c:\\\\Users\\\\Mavi\\\\Documents\\\\Development\\\\Web\\\\coop-manager\\\\\" 2>&1)",
+      "Read(//c/Users/Mavi/Documents/Development/Web/**)",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\Mavi\\\\AppData\\\\Local\\\\npm-cache\\\\_logs\\\\\" | Sort-Object LastWriteTime -Descending | Select-Object -First 3 | ForEach-Object { Get-Content $_.FullName | Select-Object -Last 30 })",
+      "Bash(node -e \"console.log\\(require\\('./node_modules/zod/package.json'\\).version\\)\")",
+      "Bash(node -e \"const z = require\\('./node_modules/zod'\\); const s = z.object\\({name: z.string\\(\\)}\\); console.log\\(JSON.stringify\\(s._def, null, 2\\).slice\\(0, 300\\)\\)\")",
+      "Bash(node -e \"const pkg = require\\('./node_modules/@hookform/resolvers/package.json'\\); console.log\\(Object.keys\\(pkg.exports ?? {}\\).join\\('\\\\n'\\)\\)\")",
+      "Bash(node -e \"const z = require\\('zod'\\); console.log\\('_zod:', JSON.stringify\\(z.z?._zod ?? z._zod ?? 'none'\\)\\)\")",
+      "Bash(node -e \"const z = require\\('zod'\\); const s = z.object\\({n: z.string\\(\\)}\\); console.log\\('typeName:', s._def.typeName, '_zod:', JSON.stringify\\(s._zod?.version\\)\\)\")",
+      "Bash(head -50 node_modules/zod/index.d.ts)",
+      "Bash(head -50 node_modules/zod/lib/index.d.ts)",
+      "Bash(node -e \"const pkg = require\\('./node_modules/zod/package.json'\\); console.log\\('types:', pkg.types, 'exports:', JSON.stringify\\(pkg.exports?.['.']?.types ?? pkg.exports?.['.']?.import?.types\\)\\)\")",
+      "Bash(node -e \"const d = JSON.parse\\(require\\('fs'\\).readFileSync\\('/dev/stdin','utf8'\\)\\); console.log\\(JSON.stringify\\(d.exports?.['.'], null, 2\\)\\)\")",
+      "Bash(node -e \"const p=require\\('./node_modules/zod/package.json'\\); const e=p.exports?.['.'];console.log\\(JSON.stringify\\(e,null,2\\)\\)\")"
     ]
   }
 }

@@ -1,6 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
+
+const subscribe = () => () => {};
 
 interface BottomSheetProps {
   open: boolean;
@@ -15,6 +18,8 @@ export function BottomSheet({
   title,
   children,
 }: BottomSheetProps) {
+  const mounted = useSyncExternalStore(subscribe, () => true, () => false);
+
   useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
@@ -26,7 +31,9 @@ export function BottomSheet({
     };
   }, [open]);
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <>
       {/* Backdrop */}
       <div
@@ -42,10 +49,9 @@ export function BottomSheet({
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className={`fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-zinc-900 rounded-t-3xl shadow-2xl transition-transform duration-300 ease-out md:hidden flex flex-col overflow-hidden ${
+        className={`fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-zinc-900 rounded-t-3xl shadow-2xl transition-transform duration-300 ease-out md:hidden flex flex-col overflow-hidden max-h-[90dvh] ${
           open ? "translate-y-0" : "translate-y-full"
         }`}
-        style={{ height: "90dvh" }}
       >
         {/* Drag handle */}
         <div className="flex justify-center pt-3 pb-1 shrink-0">
@@ -69,6 +75,7 @@ export function BottomSheet({
         {/* Scrollable content */}
         <div className="flex-1 overflow-y-auto p-5 min-h-0">{children}</div>
       </div>
-    </>
+    </>,
+    document.body
   );
 }

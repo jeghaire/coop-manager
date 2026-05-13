@@ -1,95 +1,147 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, startTransition } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod/v3";
 import { signUpUser, type SignUpState } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
+  SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
-import { Form } from "@/components/ui/form";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+  FormDescription,
+} from "@/components/ui/form";
 
+const schema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Enter a valid email"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  cooperativeId: z.string().min(1, "Please select a cooperative"),
+});
+
+type FormValues = z.infer<typeof schema>;
 type Cooperative = { id: string; name: string };
 
 export function SignupForm({ cooperatives }: { cooperatives: Cooperative[] }) {
-  const [state, action, pending] = useActionState<SignUpState, FormData>(
-    signUpUser,
-    {}
-  );
-  const [cooperativeId, setCooperativeId] = useState("");
+  const [state, action, pending] = useActionState<SignUpState, FormData>(signUpUser, {});
+  const form = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: { name: "", email: "", password: "", cooperativeId: "" },
+  });
+
+  function onSubmit(values: FormValues) {
+    const fd = new FormData();
+    fd.set("name", values.name);
+    fd.set("email", values.email);
+    fd.set("password", values.password);
+    fd.set("cooperativeId", values.cooperativeId);
+    startTransition(() => action(fd));
+  }
 
   return (
-    <Form action={action} className="space-y-4">
-      {state.error && (
-        <Alert variant="destructive">
-          <AlertDescription>{state.error}</AlertDescription>
-        </Alert>
-      )}
-
-      <div className="space-y-1.5">
-        <Label htmlFor="name">Full Name</Label>
-        <Input id="name" name="name" placeholder="Jane Doe" required />
-      </div>
-
-      <div className="space-y-1.5">
-        <Label htmlFor="email">Email</Label>
-        <Input
-          id="email"
-          name="email"
-          type="email"
-          placeholder="jane@example.com"
-          required
-        />
-      </div>
-
-      <div className="space-y-1.5">
-        <Label htmlFor="password">Password</Label>
-        <Input
-          id="password"
-          name="password"
-          type="password"
-          placeholder="Min. 8 characters"
-          required
-        />
-      </div>
-
-      <div className="space-y-1.5">
-        <Label htmlFor="cooperative">Cooperative</Label>
-        {/* Hidden input carries the value to FormData */}
-        <Input type="hidden" name="cooperativeId" value={cooperativeId} />
-        <Select value={cooperativeId} onValueChange={(v) => setCooperativeId(v ?? "")} required>
-          <SelectTrigger id="cooperative" className="w-full">
-            <SelectValue>
-              {cooperativeId
-                ? (cooperatives.find((c) => c.id === cooperativeId)?.name ?? "Select your cooperative")
-                : "Select your cooperative"}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {cooperatives.map((c) => (
-              <SelectItem key={c.id} value={c.id}>
-                {c.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {cooperatives.length === 0 && (
-          <p className="text-sm text-muted-foreground">
-            No cooperatives available. Contact your administrator.
-          </p>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {state.error && (
+          <Alert variant="destructive">
+            <AlertDescription>{state.error}</AlertDescription>
+          </Alert>
         )}
-      </div>
 
-      <Button type="submit" className="w-full" disabled={pending}>
-        {pending ? "Creating account…" : "Create Account"}
-      </Button>
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Full Name</FormLabel>
+              <FormControl>
+                <Input placeholder="Jane Doe" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input type="email" placeholder="jane@example.com" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="Min. 8 characters" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="cooperativeId"
+          render={({ field }) => {
+            const selectedCooperative = cooperatives.find((c) => c.id === field.value);
+
+            return (
+              <FormItem>
+                <FormLabel>Cooperative</FormLabel>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select your cooperative…">
+                        {selectedCooperative ? selectedCooperative.name : "Select your cooperative…"}
+                      </SelectValue>
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {cooperatives.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {cooperatives.length === 0 && (
+                  <FormDescription>
+                    No cooperatives available. Contact your administrator.
+                  </FormDescription>
+                )}
+                <FormMessage />
+              </FormItem>
+            );
+          }}
+        />
+
+        <Button type="submit" className="w-full" disabled={pending}>
+          {pending ? "Creating account…" : "Create Account"}
+        </Button>
+      </form>
     </Form>
   );
 }

@@ -1,46 +1,59 @@
 "use client";
 
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod/v3";
 import { authClient } from "@/app/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
 import Link from "next/link";
-import { Form } from "@/components/ui/form";
+
+const schema = z.object({
+  email: z.string().email("Enter a valid email"),
+});
+
+type FormValues = z.infer<typeof schema>;
 
 export function ForgotPasswordForm() {
-  const [email, setEmail] = useState("");
-  const [pending, setPending] = useState(false);
-  const [sent, setSent] = useState(false);
-  const [error, setError] = useState("");
+  const [sentTo, setSentTo] = useState<string | null>(null);
+  const form = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: { email: "" },
+  });
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-    setPending(true);
+  const { isSubmitting } = form.formState;
 
+  async function onSubmit(values: FormValues) {
     const { error } = await authClient.requestPasswordReset({
-      email,
+      email: values.email,
       redirectTo: "/auth/reset-password",
     });
 
-    setPending(false);
-
     if (error) {
-      setError(error.message || "Something went wrong. Please try again.");
+      form.setError("root", {
+        message: error.message || "Something went wrong. Please try again.",
+      });
     } else {
-      setSent(true);
+      setSentTo(values.email);
     }
   }
 
-  if (sent) {
+  if (sentTo) {
     return (
       <div className="space-y-4">
         <Alert>
           <AlertDescription>
-            Reset link sent to <strong>{email}</strong>. Check your inbox (and
-            spam).
+            Reset link sent to <strong>{sentTo}</strong>. Check your inbox (and spam).
           </AlertDescription>
         </Alert>
         <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center">
@@ -56,34 +69,41 @@ export function ForgotPasswordForm() {
   }
 
   return (
-    <Form onSubmit={handleSubmit} className="space-y-4">
-      {error && (
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-      <div className="space-y-1.5">
-        <Label htmlFor="email">Email</Label>
-        <Input
-          id="email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="jane@example.com"
-          required
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {form.formState.errors.root && (
+          <Alert variant="destructive">
+            <AlertDescription>{form.formState.errors.root.message}</AlertDescription>
+          </Alert>
+        )}
+
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input type="email" placeholder="jane@example.com" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
-      <Button type="submit" className="w-full" disabled={pending}>
-        {pending ? "Sending…" : "Send Reset Link"}
-      </Button>
-      <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center">
-        <Link
-          href="/auth/signin"
-          className="text-emerald-600 dark:text-emerald-400 hover:underline underline-offset-4"
-        >
-          Back to sign in
-        </Link>
-      </p>
+
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? "Sending…" : "Send Reset Link"}
+        </Button>
+
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center">
+          <Link
+            href="/auth/signin"
+            className="text-emerald-600 dark:text-emerald-400 hover:underline underline-offset-4"
+          >
+            Back to sign in
+          </Link>
+        </p>
+      </form>
     </Form>
   );
 }

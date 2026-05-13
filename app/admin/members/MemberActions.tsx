@@ -16,8 +16,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState } from "react";
-import { Form } from "@/components/ui/form";
-
 const ROLES = [
   { value: "MEMBER", label: "Member" },
   { value: "TREASURER", label: "Treasurer" },
@@ -46,7 +44,7 @@ export function RoleChangeForm({
   }
 
   return (
-    <Form action={action} className="flex items-center gap-2">
+    <form action={action} className="flex items-center gap-2">
       <Input type="hidden" name="memberId" value={memberId} />
       <Input type="hidden" name="newRole" value={role} />
       <Select value={role} onValueChange={(v) => setRole(v ?? currentRole)}>
@@ -66,7 +64,7 @@ export function RoleChangeForm({
           {pending ? "…" : "Save"}
         </Button>
       )}
-    </Form>
+    </form>
   );
 }
 
@@ -84,7 +82,7 @@ export function RemoveMemberForm({ memberId }: { memberId: string }) {
   }
 
   return (
-    <Form action={action}>
+    <form action={action}>
       <Input type="hidden" name="memberId" value={memberId} />
       {confirm ? (
         <div className="flex items-center gap-1.5">
@@ -111,6 +109,6 @@ export function RemoveMemberForm({ memberId }: { memberId: string }) {
           Remove
         </Button>
       )}
-    </Form>
+    </form>
   );
 }

@@ -113,7 +113,7 @@ export default async function ReportsPage({
         </Link>
       </div> */}
 
-      <TabNav />
+      <TabNav role={role} />
 
       <Suspense
         key={tab + (eventType ?? "")}
@@ -134,7 +134,7 @@ export default async function ReportsPage({
             currencySymbol={currencySymbol}
           />
         )}
-        {tab === "audit" && (
+        {tab === "audit" && (role === "ADMIN" || role === "OWNER") && (
           <AuditTrail cooperativeId={cooperativeId} eventType={eventType} />
         )}
       </Suspense>

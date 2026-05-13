@@ -21,15 +21,15 @@ export default async function DividendsPage() {
   const [cooperative, payouts] = await Promise.all([
     prisma.cooperative.findUnique({
       where: { id: cooperativeId },
-      select: { currency: true }
+      select: { currency: true },
     }),
     prisma.dividendPayout.findMany({
       where: { cooperativeId },
       orderBy: { createdAt: "desc" },
       include: {
-        memberDividends: { select: { id: true, amount: true, status: true } }
-      }
-    })
+        memberDividends: { select: { id: true, amount: true, status: true } },
+      },
+    }),
   ]);
 
   if (!cooperative) redirect("/dashboard");
@@ -119,11 +119,11 @@ export default async function DividendsPage() {
                         />
                       )}
                       {payout.status === "PAID" && (
-                        <span className="text-xs text-zinc-400">
+                        <Badge className="text-[10px] text-zinc-400">
                           {payout.paidAt
                             ? `Paid ${payout.paidAt.toLocaleDateString()}`
                             : "Paid"}
-                        </span>
+                        </Badge>
                       )}
                     </td>
                   </tr>
@@ -140,7 +140,11 @@ export default async function DividendsPage() {
 function StatusBadge({ status }: { status: string }) {
   switch (status) {
     case "PENDING":
-      return <Badge variant="outline">Pending</Badge>;
+      return (
+        <Badge variant="outline" className="text-[10px]">
+          Pending
+        </Badge>
+      );
     case "APPROVED":
       return (
         <Badge className="bg-sky-100 text-sky-800 dark:bg-sky-500/20 dark:text-sky-400 hover:bg-sky-100 dark:hover:bg-sky-500/20">
@@ -148,13 +152,12 @@ function StatusBadge({ status }: { status: string }) {
         </Badge>
       );
     case "PAID":
+      return <Badge className="text-[10px]">Paid</Badge>;
+    default:
       return (
-        <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500/20">
-          Paid
+        <Badge variant="secondary" className="text-[10px]">
+          {status}
         </Badge>
       );
-    default:
-      return <Badge variant="secondary">{status}</Badge>;
   }
 }
-

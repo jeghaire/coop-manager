@@ -4,9 +4,7 @@ import { useActionState, useState } from "react";
 import { verifyMember, type VerificationActionState } from "@/app/actions/verification";
 import { BadgeCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Form } from "@/components/ui/form";
 
 export function VerifyMemberForm({
   memberId,
@@ -43,8 +41,11 @@ export function VerifyMemberForm({
       <p className="text-xs text-zinc-600 dark:text-zinc-400 text-right">
         Verify {memberName}?
       </p>
-      <Form action={action} className="flex gap-2">
-        <Input type="hidden" name="memberId" value={memberId} />
+      <form
+        action={action}
+        className="flex gap-2"
+      >
+        <input type="hidden" name="memberId" value={memberId} />
         <Button
           type="button"
           size="sm"
@@ -57,7 +58,7 @@ export function VerifyMemberForm({
         <Button type="submit" size="sm" disabled={pending}>
           {pending ? "Verifying…" : "Confirm"}
         </Button>
-      </Form>
+      </form>
     </div>
   );
 }

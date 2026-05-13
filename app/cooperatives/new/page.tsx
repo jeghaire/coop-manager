@@ -10,7 +10,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Link from "next/link";
-import { Form } from "@/components/ui/form";
 
 export default function NewCooperativePage() {
   const [state, action, pending] = useActionState<CreateCoopState, FormData>(
@@ -38,7 +37,7 @@ export default function NewCooperativePage() {
             Create your cooperative
           </h1>
 
-          <Form action={action} className="space-y-5">
+          <form action={action} className="space-y-5">
             {state.error && (
               <Alert variant="destructive">
                 <AlertDescription>{state.error}</AlertDescription>
@@ -100,7 +99,7 @@ export default function NewCooperativePage() {
             <Button type="submit" className="w-full" disabled={pending}>
               {pending ? "Setting up…" : "Create Cooperative"}
             </Button>
-          </Form>
+          </form>
         </div>
 
         <p className="text-center text-sm text-zinc-500 dark:text-zinc-400 mt-5">

@@ -1,10 +1,12 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, startTransition } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod/v3";
 import { applyForLoan, type LoanActionState } from "@/app/actions/loans";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Select,
@@ -15,9 +17,24 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { Form } from "@/components/ui/form";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormDescription,
+  FormMessage,
+} from "@/components/ui/form";
 
+const schema = z.object({
+  amount: z.coerce.number().min(1000, "Minimum amount is 1,000"),
+  purpose: z.string().optional(),
+  guarantor1Id: z.string().min(1, "Please select a first guarantor"),
+  guarantor2Id: z.string().min(1, "Please select a second guarantor"),
+});
+
+type FormValues = z.infer<typeof schema>;
 type Member = { id: string; name: string };
 
 export function LoanApplicationForm({
@@ -40,8 +57,15 @@ export function LoanApplicationForm({
     applyForLoan,
     {}
   );
-  const [guarantor1Id, setGuarantor1Id] = useState(defaultValues?.guarantor1Id ?? "");
-  const [guarantor2Id, setGuarantor2Id] = useState(defaultValues?.guarantor2Id ?? "");
+  const form = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      amount: defaultValues?.amount ? Number(defaultValues.amount) : undefined,
+      purpose: "",
+      guarantor1Id: defaultValues?.guarantor1Id ?? "",
+      guarantor2Id: defaultValues?.guarantor2Id ?? "",
+    },
+  });
 
   useEffect(() => {
     if (state.success) {
@@ -50,6 +74,8 @@ export function LoanApplicationForm({
     }
   }, [state.success, router, onSuccess]);
 
+  const guarantor1Id = form.watch("guarantor1Id");
+  const guarantor2Id = form.watch("guarantor2Id");
   const availableFor1 = members.filter((m) => m.id !== guarantor2Id);
   const availableFor2 = members.filter((m) => m.id !== guarantor1Id);
 
@@ -60,92 +86,130 @@ export function LoanApplicationForm({
       ? "Each guarantor must individually have contributions ≥ loan amount."
       : "No guarantor coverage check required.";
 
+  function onSubmit(values: FormValues) {
+    const fd = new FormData();
+    fd.set("amount", String(values.amount));
+    if (values.purpose) fd.set("purpose", values.purpose);
+    fd.set("guarantor1Id", values.guarantor1Id);
+    fd.set("guarantor2Id", values.guarantor2Id);
+    startTransition(() => action(fd));
+  }
+
   return (
-    <Form action={action} className="space-y-5">
-      {state.error && (
-        <Alert variant="destructive">
-          <AlertDescription>{state.error}</AlertDescription>
-        </Alert>
-      )}
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+        {state.error && (
+          <Alert variant="destructive">
+            <AlertDescription>{state.error}</AlertDescription>
+          </Alert>
+        )}
 
-      <div className="space-y-1.5">
-        <Label htmlFor="amount">Amount ({currencySymbol})</Label>
-        <Input
-          id="amount"
+        <FormField
+          control={form.control}
           name="amount"
-          type="number"
-          min="1000"
-          max={borrowingCapacity}
-          step="500"
-          placeholder="e.g. 50000"
-          defaultValue={defaultValues?.amount}
-          required
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Amount ({currencySymbol})</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  min="1000"
+                  max={borrowingCapacity}
+                  step="500"
+                  placeholder="e.g. 50000"
+                  {...field}
+                  value={field.value ?? ""}
+                />
+              </FormControl>
+              <FormDescription>
+                Maximum: {currencySymbol}{borrowingCapacity.toLocaleString()}
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-        <p className="text-xs text-zinc-500 dark:text-zinc-400">
-          Maximum: {currencySymbol}{borrowingCapacity.toLocaleString()}
-        </p>
-      </div>
 
-      <div className="space-y-1.5">
-        <Label htmlFor="purpose">Purpose (optional)</Label>
-        <Textarea
-          id="purpose"
+        <FormField
+          control={form.control}
           name="purpose"
-          placeholder="What is this loan for?"
-          rows={2}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Purpose (optional)</FormLabel>
+              <FormControl>
+                <Textarea placeholder="What is this loan for?" rows={2} {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
 
-      <div className="space-y-1.5">
-        <Label htmlFor="guarantor1">First Guarantor</Label>
-        <Input type="hidden" name="guarantor1Id" value={guarantor1Id} />
-        <Select value={guarantor1Id} onValueChange={(v) => setGuarantor1Id(v ?? "")}>
-          <SelectTrigger id="guarantor1" className="w-full">
-            <SelectValue>
-              {guarantor1Id
-                ? (members.find((m) => m.id === guarantor1Id)?.name ?? "Select a verified member")
-                : "Select a verified member"}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {availableFor1.map((m) => (
-              <SelectItem key={m.id} value={m.id}>
-                {m.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+        <FormField
+          control={form.control}
+          name="guarantor1Id"
+          render={({ field }) => {
+            const selectedGuarantor = availableFor1.find((m) => m.id === field.value);
 
-      <div className="space-y-1.5">
-        <Label htmlFor="guarantor2">Second Guarantor</Label>
-        <Input type="hidden" name="guarantor2Id" value={guarantor2Id} />
-        <Select value={guarantor2Id} onValueChange={(v) => setGuarantor2Id(v ?? "")}>
-          <SelectTrigger id="guarantor2" className="w-full">
-            <SelectValue>
-              {guarantor2Id
-                ? (members.find((m) => m.id === guarantor2Id)?.name ?? "Select a verified member")
-                : "Select a verified member"}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {availableFor2.map((m) => (
-              <SelectItem key={m.id} value={m.id}>
-                {m.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <p className="text-xs text-zinc-500 dark:text-zinc-400">{coverageLabel}</p>
-      </div>
+            return (
+              <FormItem>
+                <FormLabel>First Guarantor</FormLabel>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a verified member…">
+                        {selectedGuarantor ? selectedGuarantor.name : "Select a verified member…"}
+                      </SelectValue>
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {availableFor1.map((m) => (
+                      <SelectItem key={m.id} value={m.id}>
+                        {m.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            );
+          }}
+        />
 
-      <Button
-        type="submit"
-        className="w-full"
-        disabled={pending || !guarantor1Id || !guarantor2Id}
-      >
-        {pending ? "Submitting…" : "Submit Application"}
-      </Button>
+        <FormField
+          control={form.control}
+          name="guarantor2Id"
+          render={({ field }) => {
+            const selectedGuarantor = availableFor2.find((m) => m.id === field.value);
+
+            return (
+              <FormItem>
+                <FormLabel>Second Guarantor</FormLabel>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a verified member…">
+                        {selectedGuarantor ? selectedGuarantor.name : "Select a verified member…"}
+                      </SelectValue>
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {availableFor2.map((m) => (
+                      <SelectItem key={m.id} value={m.id}>
+                        {m.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormDescription>{coverageLabel}</FormDescription>
+                <FormMessage />
+              </FormItem>
+            );
+          }}
+        />
+
+        <Button type="submit" className="w-full" disabled={pending}>
+          {pending ? "Submitting…" : "Submit Application"}
+        </Button>
+      </form>
     </Form>
   );
 }

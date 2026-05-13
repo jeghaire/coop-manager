@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Form } from "@/components/ui/form";
 
 export function ApproveForm({ withdrawalId }: { withdrawalId: string }) {
   const [state, action, pending] = useActionState<WithdrawalActionState, FormData>(
@@ -20,7 +19,7 @@ export function ApproveForm({ withdrawalId }: { withdrawalId: string }) {
   );
 
   return (
-    <Form action={action}>
+    <form action={action}>
       <Input type="hidden" name="withdrawalId" value={withdrawalId} />
       {state.error && (
         <p className="text-xs text-red-600 dark:text-red-400 mb-1">{state.error}</p>
@@ -28,7 +27,7 @@ export function ApproveForm({ withdrawalId }: { withdrawalId: string }) {
       <Button type="submit" size="sm" disabled={pending}>
         {pending ? "Approving…" : "Approve"}
       </Button>
-    </Form>
+    </form>
   );
 }
 
@@ -53,7 +52,7 @@ export function RejectForm({ withdrawalId }: { withdrawalId: string }) {
   }
 
   return (
-    <Form action={action} className="space-y-2">
+    <form action={action} className="space-y-2">
       <Input type="hidden" name="withdrawalId" value={withdrawalId} />
       {state.error && (
         <Alert variant="destructive">
@@ -85,7 +84,7 @@ export function RejectForm({ withdrawalId }: { withdrawalId: string }) {
           Cancel
         </Button>
       </div>
-    </Form>
+    </form>
   );
 }
 
@@ -96,7 +95,7 @@ export function MarkPaidForm({ withdrawalId }: { withdrawalId: string }) {
   );
 
   return (
-    <Form action={action}>
+    <form action={action}>
       <Input type="hidden" name="withdrawalId" value={withdrawalId} />
       {state.error && (
         <p className="text-xs text-red-600 dark:text-red-400 mb-1">{state.error}</p>
@@ -104,6 +103,6 @@ export function MarkPaidForm({ withdrawalId }: { withdrawalId: string }) {
       <Button type="submit" size="sm" variant="outline" disabled={pending}>
         {pending ? "Processing…" : "Mark Paid"}
       </Button>
-    </Form>
+    </form>
   );
 }

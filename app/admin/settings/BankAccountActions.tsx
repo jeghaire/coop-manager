@@ -8,7 +8,6 @@ import {
 } from "@/app/actions/settings";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Form } from "@/components/ui/form";
 
 export function SetPreferredForm({
   accountId,
@@ -23,13 +22,13 @@ export function SetPreferredForm({
   );
 
   return (
-    <Form action={action}>
+    <form action={action}>
       <Input type="hidden" name="accountId" value={accountId} />
       <Input type="hidden" name="cooperativeId" value={cooperativeId} />
       <Button type="submit" size="sm" variant="outline" disabled={pending}>
         {pending ? "…" : "Set preferred"}
       </Button>
-    </Form>
+    </form>
   );
 }
 
@@ -59,7 +58,7 @@ export function DeleteBankAccountForm({
   }
 
   return (
-    <Form action={action} className="flex items-center gap-2">
+    <form action={action} className="flex items-center gap-2">
       <Input type="hidden" name="accountId" value={accountId} />
       <Input type="hidden" name="cooperativeId" value={cooperativeId} />
       <Button type="submit" size="sm" variant="destructive" disabled={pending}>
@@ -68,6 +67,6 @@ export function DeleteBankAccountForm({
       <Button type="button" size="sm" variant="ghost" onClick={() => setConfirm(false)}>
         Cancel
       </Button>
-    </Form>
+    </form>
   );
 }

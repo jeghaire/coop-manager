@@ -38,7 +38,8 @@ export async function DividendSnapshot({
             Total Fund
           </p>
           <p className="text-2xl font-semibold text-emerald-800 dark:text-emerald-300">
-            {currencySymbol}{grandTotal.toLocaleString()}
+            {currencySymbol}
+            {grandTotal.toLocaleString()}
           </p>
           <p className="text-xs text-emerald-600 dark:text-emerald-500 mt-0.5">
             Verified contributions
@@ -51,7 +52,8 @@ export async function DividendSnapshot({
               Distribution Amount
             </p>
             <p className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
-              {currencySymbol}{distributionAmount.toLocaleString()}
+              {currencySymbol}
+              {distributionAmount.toLocaleString()}
             </p>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
               Pro-rated by contribution %
@@ -108,7 +110,7 @@ export async function DividendSnapshot({
                           {i + 1}
                         </span>
                         <div>
-                          <p className="font-medium text-zinc-900 dark:text-zinc-100">
+                          <p className="font-medium text-zinc-900 dark:text-zinc-100 text-base">
                             {row.name}
                           </p>
                           <p className="text-xs text-zinc-500 dark:text-zinc-400 hidden sm:block">
@@ -117,31 +119,33 @@ export async function DividendSnapshot({
                         </div>
                         <Badge
                           variant={ROLE_BADGE[row.role] ?? "secondary"}
-                          className="hidden md:inline-flex"
+                          className="hidden md:inline-flex text-[10px] ml-auto"
                         >
                           {row.role}
                         </Badge>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-right font-mono text-zinc-700 dark:text-zinc-300 hidden sm:table-cell">
-                      {currencySymbol}{row.totalContributed.toLocaleString()}
+                    <td className="px-4 py-3 text-right text-zinc-700 dark:text-zinc-300 hidden sm:table-cell">
+                      {currencySymbol}
+                      {row.totalContributed.toLocaleString()}
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <div className="w-20 bg-zinc-100 dark:bg-zinc-800 rounded-full h-1.5 hidden sm:block">
+                        <div className="w-20 bg-zinc-100 dark:bg-zinc-800 rounded-full h-1 hidden sm:block">
                           <div
-                            className="bg-emerald-500 h-1.5 rounded-full"
+                            className="bg-emerald-500 h-1 rounded-full"
                             style={{ width: `${row.percentage}%` }}
                           />
                         </div>
-                        <span className="text-zinc-700 dark:text-zinc-300 font-mono text-sm tabular-nums">
+                        <span className="text-zinc-700 dark:text-zinc-300 text-sm tabular-nums">
                           {row.percentage.toFixed(1)}%
                         </span>
                       </div>
                     </td>
                     {distributionAmount > 0 && (
                       <td className="px-5 py-3 text-right font-mono font-semibold text-emerald-700 dark:text-emerald-400">
-                        {currencySymbol}{Math.round(dividend).toLocaleString()}
+                        {currencySymbol}
+                        {Math.round(dividend).toLocaleString()}
                       </td>
                     )}
                   </tr>
@@ -158,7 +162,8 @@ export async function DividendSnapshot({
                     Total
                   </td>
                   <td className="px-5 py-3 text-right font-mono font-bold text-emerald-700 dark:text-emerald-400">
-                    {currencySymbol}{distributionAmount.toLocaleString()}
+                    {currencySymbol}
+                    {distributionAmount.toLocaleString()}
                   </td>
                 </tr>
               </tfoot>

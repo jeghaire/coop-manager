@@ -9,7 +9,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Form } from "@/components/ui/form";
 
 export function ApproveButton({
   payoutId,
@@ -23,14 +22,14 @@ export function ApproveButton({
     {}
   );
   return (
-    <Form action={action}>
+    <form action={action}>
       <Input type="hidden" name="payoutId" value={payoutId} />
       <Input type="hidden" name="cooperativeId" value={cooperativeId} />
       {state.error && <p className="text-xs text-red-500 mb-1">{state.error}</p>}
       <Button type="submit" size="sm" variant="outline" disabled={pending}>
         {pending ? "Approving…" : "Approve"}
       </Button>
-    </Form>
+    </form>
   );
 }
 
@@ -46,7 +45,7 @@ export function ProcessButton({
     {}
   );
   return (
-    <Form action={action}>
+    <form action={action}>
       <Input type="hidden" name="payoutId" value={payoutId} />
       <Input type="hidden" name="cooperativeId" value={cooperativeId} />
       {state.error && (
@@ -57,6 +56,6 @@ export function ProcessButton({
       <Button type="submit" size="sm" disabled={pending}>
         {pending ? "Processing…" : "Pay Out"}
       </Button>
-    </Form>
+    </form>
   );
 }

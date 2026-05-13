@@ -1,10 +1,12 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, startTransition } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod/v3";
 import { inviteMember, type AdminActionState } from "@/app/actions/admin";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Select,
@@ -13,20 +15,55 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Form } from "@/components/ui/form";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormDescription,
+  FormMessage,
+} from "@/components/ui/form";
+
+const schema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Enter a valid email"),
+  monthlyAmount: z.coerce.number().min(0, "Must be 0 or more"),
+  role: z.enum(["MEMBER", "TREASURER", "ADMIN"]),
+});
+
+type FormValues = z.infer<typeof schema>;
 
 const ROLES = [
-  { value: "MEMBER", label: "Member" },
-  { value: "TREASURER", label: "Treasurer" },
-  { value: "ADMIN", label: "Admin" },
+  { value: "MEMBER" as const, label: "Member" },
+  { value: "TREASURER" as const, label: "Treasurer" },
+  { value: "ADMIN" as const, label: "Admin" },
 ];
 
-export function InviteMemberForm({ isOwner, currencySymbol = "₦" }: { isOwner: boolean; currencySymbol?: string }) {
+export function InviteMemberForm({
+  isOwner,
+  currencySymbol = "₦",
+}: {
+  isOwner: boolean;
+  currencySymbol?: string;
+}) {
   const [state, action, pending] = useActionState<AdminActionState, FormData>(
     inviteMember,
     {}
   );
-  const [role, setRole] = useState("MEMBER");
+  const form = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: { name: "", email: "", monthlyAmount: 0, role: "MEMBER" },
+  });
+
+  function onSubmit(values: FormValues) {
+    const fd = new FormData();
+    fd.set("name", values.name);
+    fd.set("email", values.email);
+    fd.set("monthlyAmount", String(values.monthlyAmount));
+    fd.set("role", values.role);
+    startTransition(() => action(fd));
+  }
 
   if (state.success) {
     return (
@@ -62,67 +99,96 @@ export function InviteMemberForm({ isOwner, currencySymbol = "₦" }: { isOwner:
   }
 
   return (
-    <Form action={action} className="space-y-5">
-      {state.error && (
-        <Alert variant="destructive">
-          <AlertDescription>{state.error}</AlertDescription>
-        </Alert>
-      )}
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+        {state.error && (
+          <Alert variant="destructive">
+            <AlertDescription>{state.error}</AlertDescription>
+          </Alert>
+        )}
 
-      <div className="space-y-1.5">
-        <Label htmlFor="name">Full Name</Label>
-        <Input id="name" name="name" placeholder="Adaeze Okonkwo" required />
-      </div>
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Full Name</FormLabel>
+              <FormControl>
+                <Input placeholder="Adaeze Okonkwo" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      <div className="space-y-1.5">
-        <Label htmlFor="email">Email Address</Label>
-        <Input
-          id="email"
+        <FormField
+          control={form.control}
           name="email"
-          type="email"
-          placeholder="adaeze@example.com"
-          required
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email Address</FormLabel>
+              <FormControl>
+                <Input type="email" placeholder="adaeze@example.com" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
 
-      <div className="space-y-1.5">
-        <Label htmlFor="monthlyAmount">Monthly Contribution ({currencySymbol})</Label>
-        <Input
-          id="monthlyAmount"
+        <FormField
+          control={form.control}
           name="monthlyAmount"
-          type="number"
-          min="0"
-          step="500"
-          placeholder="e.g. 10000"
-          defaultValue="0"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Monthly Contribution ({currencySymbol})</FormLabel>
+              <FormControl>
+                <Input type="number" min="0" step="500" placeholder="e.g. 10000" {...field} />
+              </FormControl>
+              <FormDescription>
+                Their agreed monthly contribution amount, if fixed.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-        <p className="text-xs text-zinc-500 dark:text-zinc-400">
-          Their agreed monthly contribution amount, if fixed.
-        </p>
-      </div>
 
-      {isOwner && (
-        <div className="space-y-1.5">
-          <Label htmlFor="role">Role</Label>
-          <Input type="hidden" name="role" value={role} />
-          <Select value={role} onValueChange={(v) => setRole(v ?? "MEMBER")}>
-            <SelectTrigger id="role" className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {ROLES.map(({ value, label }) => (
-                <SelectItem key={value} value={value}>
-                  {label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
+        {isOwner && (
+          <FormField
+            control={form.control}
+            name="role"
+            render={({ field }) => {
+              const selectedRole = ROLES.find((r) => r.value === field.value);
 
-      <Button type="submit" className="w-full" disabled={pending}>
-        {pending ? "Sending invite…" : "Send Invite"}
-      </Button>
+              return (
+                <FormItem>
+                  <FormLabel>Role</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a role…">
+                          {selectedRole ? selectedRole.label : "Select a role…"}
+                        </SelectValue>
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {ROLES.map(({ value, label }) => (
+                        <SelectItem key={value} value={value}>
+                          {label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
+          />
+        )}
+
+        <Button type="submit" className="w-full" disabled={pending}>
+          {pending ? "Sending invite…" : "Send Invite"}
+        </Button>
+      </form>
     </Form>
   );
 }

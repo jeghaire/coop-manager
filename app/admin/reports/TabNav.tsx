@@ -5,19 +5,21 @@ import { useSearchParams } from "next/navigation";
 import { cn } from "@/app/lib/utils";
 
 const TABS = [
-  { id: "financial", label: "Financial Summary" },
-  { id: "loans", label: "Loan Decisions" },
-  { id: "dividends", label: "Dividend Snapshot" },
-  { id: "audit", label: "Audit Trail" },
+  { id: "financial", label: "Financial Summary", adminOnly: false },
+  { id: "loans", label: "Loan Decisions", adminOnly: false },
+  { id: "dividends", label: "Dividend Snapshot", adminOnly: false },
+  { id: "audit", label: "Audit Trail", adminOnly: true },
 ];
 
-export function TabNav() {
+export function TabNav({ role }: { role: string }) {
   const searchParams = useSearchParams();
   const active = searchParams.get("tab") ?? "financial";
+  const isAdmin = role === "ADMIN" || role === "OWNER";
+  const visibleTabs = TABS.filter((t) => !t.adminOnly || isAdmin);
 
   return (
     <div className="flex gap-1 border-b border-zinc-200 dark:border-zinc-800">
-      {TABS.map(({ id, label }) => (
+      {visibleTabs.map(({ id, label }) => (
         <Link
           key={id}
           href={`?tab=${id}`}

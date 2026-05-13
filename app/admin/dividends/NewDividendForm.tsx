@@ -1,10 +1,12 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useState, startTransition } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod/v3";
 import { createDividendPayout, type DividendActionState } from "@/app/actions/dividends";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Select,
@@ -13,7 +15,33 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Form } from "@/components/ui/form";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormDescription,
+  FormMessage,
+} from "@/components/ui/form";
+
+const schema = z.object({
+  period: z.enum(["Q1", "Q2", "Q3", "Q4", "ANNUAL"]),
+  year: z.coerce.number().int().min(2000).max(2100),
+  totalProfit: z.coerce.number().min(1, "Total profit must be greater than 0"),
+  adminCostsPct: z.coerce.number().min(0).max(100),
+  loanLossReservePct: z.coerce.number().min(0).max(100),
+});
+
+type FormValues = z.infer<typeof schema>;
+
+const PERIOD_LABELS: Record<string, string> = {
+  Q1: "Q1 (Jan–Mar)",
+  Q2: "Q2 (Apr–Jun)",
+  Q3: "Q3 (Jul–Sep)",
+  Q4: "Q4 (Oct–Dec)",
+  ANNUAL: "Annual",
+};
 
 export function NewDividendForm({
   cooperativeId,
@@ -27,17 +55,38 @@ export function NewDividendForm({
     {}
   );
   const [open, setOpen] = useState(false);
-  const [period, setPeriod] = useState("Q1");
-  const [totalProfit, setTotalProfit] = useState("");
-  const [adminPct, setAdminPct] = useState("10");
-  const [reservePct, setReservePct] = useState("20");
+  const form = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      period: "Q1",
+      year: new Date().getFullYear(),
+      totalProfit: 0,
+      adminCostsPct: 10,
+      loanLossReservePct: 20,
+    },
+  });
 
-  const profit = parseFloat(totalProfit) || 0;
-  const admin = profit * (parseFloat(adminPct) / 100 || 0);
-  const reserve = profit * (parseFloat(reservePct) / 100 || 0);
+  const totalProfit = form.watch("totalProfit") || 0;
+  const adminCostsPct = form.watch("adminCostsPct") || 0;
+  const loanLossReservePct = form.watch("loanLossReservePct") || 0;
+
+  const profit = Number(totalProfit) || 0;
+  const admin = profit * (Number(adminCostsPct) / 100);
+  const reserve = profit * (Number(loanLossReservePct) / 100);
   const pool = Math.max(0, profit - admin - reserve);
 
   if (state.success && open) setOpen(false);
+
+  function onSubmit(values: FormValues) {
+    const fd = new FormData();
+    fd.set("cooperativeId", cooperativeId);
+    fd.set("period", values.period);
+    fd.set("year", String(values.year));
+    fd.set("totalProfit", String(values.totalProfit));
+    fd.set("adminCostsPct", String(values.adminCostsPct));
+    fd.set("loanLossReservePct", String(values.loanLossReservePct));
+    startTransition(() => action(fd));
+  }
 
   return (
     <div>
@@ -65,123 +114,138 @@ export function NewDividendForm({
             </Alert>
           )}
 
-          <Form action={action} className="space-y-4">
-            <Input type="hidden" name="cooperativeId" value={cooperativeId} />
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="period"
+                  render={({ field }) => {
+                    const selectedPeriod = PERIOD_LABELS[field.value] ?? field.value;
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="period">Period</Label>
-                <Input type="hidden" name="period" value={period} />
-                <Select value={period} onValueChange={(v) => setPeriod(v ?? "Q1")}>
-                  <SelectTrigger id="period" className="w-full">
-                    <SelectValue placeholder="Select a period…">
-                      {(value: string) => {
-                        const labels: Record<string, string> = {
-                          Q1: "Q1 (Jan–Mar)",
-                          Q2: "Q2 (Apr–Jun)",
-                          Q3: "Q3 (Jul–Sep)",
-                          Q4: "Q4 (Oct–Dec)",
-                          ANNUAL: "Annual",
-                        };
-                        return labels[value] ?? null;
-                      }}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Q1">Q1 (Jan–Mar)</SelectItem>
-                    <SelectItem value="Q2">Q2 (Apr–Jun)</SelectItem>
-                    <SelectItem value="Q3">Q3 (Jul–Sep)</SelectItem>
-                    <SelectItem value="Q4">Q4 (Oct–Dec)</SelectItem>
-                    <SelectItem value="ANNUAL">Annual</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="year">Year</Label>
-                <Input
-                  id="year"
+                    return (
+                      <FormItem>
+                        <FormLabel>Period</FormLabel>
+                        <Select value={field.value} onValueChange={field.onChange}>
+                          <FormControl>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select a period…">
+                                {selectedPeriod}
+                              </SelectValue>
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {Object.entries(PERIOD_LABELS).map(([value, label]) => (
+                              <SelectItem key={value} value={value}>
+                                {label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
+                />
+
+                <FormField
+                  control={form.control}
                   name="year"
-                  type="number"
-                  defaultValue={new Date().getFullYear()}
-                  required
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Year</FormLabel>
+                      <FormControl>
+                        <Input type="number" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
-            </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="totalProfit">Total Profit ({currencySymbol})</Label>
-              <Input
-                id="totalProfit"
+              <FormField
+                control={form.control}
                 name="totalProfit"
-                type="number"
-                min="1"
-                step="any"
-                value={totalProfit}
-                onChange={(e) => setTotalProfit(e.target.value)}
-                placeholder="e.g. 500000"
-                required
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Total Profit ({currencySymbol})</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min="1"
+                        step="any"
+                        placeholder="e.g. 500000"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="adminCostsPct">Admin Costs %</Label>
-                <Input
-                  id="adminCostsPct"
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
                   name="adminCostsPct"
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="0.1"
-                  value={adminPct}
-                  onChange={(e) => setAdminPct(e.target.value)}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Admin Costs %</FormLabel>
+                      <FormControl>
+                        <Input type="number" min="0" max="100" step="0.1" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        {currencySymbol}
+                        {admin.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                  {currencySymbol}{admin.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                </p>
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="loanLossReservePct">Loan Loss Reserve %</Label>
-                <Input
-                  id="loanLossReservePct"
+
+                <FormField
+                  control={form.control}
                   name="loanLossReservePct"
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="0.1"
-                  value={reservePct}
-                  onChange={(e) => setReservePct(e.target.value)}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Loan Loss Reserve %</FormLabel>
+                      <FormControl>
+                        <Input type="number" min="0" max="100" step="0.1" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        {currencySymbol}
+                        {reserve.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                  {currencySymbol}{reserve.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                </p>
               </div>
-            </div>
 
-            {/* Summary */}
-            <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-lg p-4 space-y-2 text-sm">
-              <p className="font-medium text-zinc-900 dark:text-zinc-100">Distribution Preview</p>
-              <div className="flex justify-between text-zinc-600 dark:text-zinc-400">
-                <span>Total profit</span>
-                <span>{currencySymbol}{profit.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+              {/* Summary */}
+              <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-lg p-4 space-y-2 text-sm">
+                <p className="font-medium text-zinc-900 dark:text-zinc-100">Distribution Preview</p>
+                <div className="flex justify-between text-zinc-600 dark:text-zinc-400">
+                  <span>Total profit</span>
+                  <span>{currencySymbol}{profit.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                </div>
+                <div className="flex justify-between text-zinc-500 dark:text-zinc-500">
+                  <span>Admin costs ({adminCostsPct}%)</span>
+                  <span>−{currencySymbol}{admin.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                </div>
+                <div className="flex justify-between text-zinc-500 dark:text-zinc-500">
+                  <span>Reserve ({loanLossReservePct}%)</span>
+                  <span>−{currencySymbol}{reserve.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                </div>
+                <div className="flex justify-between font-semibold text-emerald-700 dark:text-emerald-400 border-t border-emerald-200 dark:border-emerald-500/30 pt-2 mt-1">
+                  <span>Dividend pool</span>
+                  <span>{currencySymbol}{pool.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                </div>
               </div>
-              <div className="flex justify-between text-zinc-500 dark:text-zinc-500">
-                <span>Admin costs ({adminPct}%)</span>
-                <span>−{currencySymbol}{admin.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
-              </div>
-              <div className="flex justify-between text-zinc-500 dark:text-zinc-500">
-                <span>Reserve ({reservePct}%)</span>
-                <span>−{currencySymbol}{reserve.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
-              </div>
-              <div className="flex justify-between font-semibold text-emerald-700 dark:text-emerald-400 border-t border-emerald-200 dark:border-emerald-500/30 pt-2 mt-1">
-                <span>Dividend pool</span>
-                <span>{currencySymbol}{pool.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
-              </div>
-            </div>
 
-            <Button type="submit" className="w-full" disabled={pending || pool <= 0}>
-              {pending ? "Creating…" : "Create Payout"}
-            </Button>
+              <Button type="submit" className="w-full" disabled={pending || pool <= 0}>
+                {pending ? "Creating…" : "Create Payout"}
+              </Button>
+            </form>
           </Form>
         </div>
       )}
