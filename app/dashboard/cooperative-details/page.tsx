@@ -47,7 +47,7 @@ export default async function CooperativeDetailsPage() {
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-5">
-          <p className="text-xs font-mono font-medium text-zinc-400 dark:text-zinc-600 uppercase tracking-wider mb-2">
+          <p className="text-xs font-mono font-medium text-muted-foreground uppercase tracking-wider mb-2">
             Total Members
           </p>
           <p className="text-3xl font-semibold text-zinc-900 dark:text-zinc-100">
@@ -55,7 +55,7 @@ export default async function CooperativeDetailsPage() {
           </p>
         </div>
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-5">
-          <p className="text-xs font-mono font-medium text-zinc-400 dark:text-zinc-600 uppercase tracking-wider mb-2">
+          <p className="text-xs font-mono font-medium text-muted-foreground uppercase tracking-wider mb-2">
             Verified Members
           </p>
           <p className="text-3xl font-semibold text-zinc-900 dark:text-zinc-100">
@@ -63,7 +63,7 @@ export default async function CooperativeDetailsPage() {
           </p>
         </div>
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-5">
-          <p className="text-xs font-mono font-medium text-zinc-400 dark:text-zinc-600 uppercase tracking-wider mb-2">
+          <p className="text-xs font-mono font-medium text-muted-foreground uppercase tracking-wider mb-2">
             Total Contributions
           </p>
           <p className="text-3xl font-semibold text-zinc-900 dark:text-zinc-100">

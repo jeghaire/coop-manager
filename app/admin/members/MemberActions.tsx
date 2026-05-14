@@ -31,7 +31,7 @@ export function RoleChangeForm({
 }) {
   const [state, action, pending] = useActionState<AdminActionState, FormData>(
     updateMemberRole,
-    {}
+    {},
   );
   const [role, setRole] = useState(currentRole);
 
@@ -71,14 +71,12 @@ export function RoleChangeForm({
 export function RemoveMemberForm({ memberId }: { memberId: string }) {
   const [state, action, pending] = useActionState<AdminActionState, FormData>(
     removeMember,
-    {}
+    {},
   );
   const [confirm, setConfirm] = useState(false);
 
   if (state.success) {
-    return (
-      <span className="text-xs text-zinc-400 dark:text-zinc-600">Removed</span>
-    );
+    return <span className="text-xs text-muted-foreground">Removed</span>;
   }
 
   return (
@@ -86,7 +84,12 @@ export function RemoveMemberForm({ memberId }: { memberId: string }) {
       <Input type="hidden" name="memberId" value={memberId} />
       {confirm ? (
         <div className="flex items-center gap-1.5">
-          <Button type="submit" size="xs" variant="destructive" disabled={pending}>
+          <Button
+            type="submit"
+            size="xs"
+            variant="destructive"
+            disabled={pending}
+          >
             {pending ? "…" : "Confirm"}
           </Button>
           <Button

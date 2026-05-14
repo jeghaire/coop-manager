@@ -53,10 +53,10 @@ export function WithdrawalForm({
   currencySymbol: string;
 }) {
   const router = useRouter();
-  const [state, action, pending] = useActionState<WithdrawalActionState, FormData>(
-    requestWithdrawal,
-    {}
-  );
+  const [state, action, pending] = useActionState<
+    WithdrawalActionState,
+    FormData
+  >(requestWithdrawal, {});
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { amount: undefined, reason: "", notes: "" },
@@ -87,7 +87,8 @@ export function WithdrawalForm({
         {state.success && (
           <Alert>
             <AlertDescription>
-              Withdrawal request submitted. You will be notified when it&apos;s reviewed.
+              Withdrawal request submitted. You will be notified when it&apos;s
+              reviewed.
             </AlertDescription>
           </Alert>
         )}
@@ -110,7 +111,8 @@ export function WithdrawalForm({
                 />
               </FormControl>
               <FormDescription>
-                Maximum: {currencySymbol}{maxAmount.toLocaleString()}
+                Maximum: {currencySymbol}
+                {maxAmount.toLocaleString()}
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -130,7 +132,9 @@ export function WithdrawalForm({
                   <FormControl>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select a reason…">
-                        {selectedReason ? selectedReason.label : "Select a reason…"}
+                        {selectedReason
+                          ? selectedReason.label
+                          : "Select a reason…"}
                       </SelectValue>
                     </SelectTrigger>
                   </FormControl>
@@ -155,10 +159,16 @@ export function WithdrawalForm({
             <FormItem>
               <FormLabel>
                 Notes{" "}
-                <span className="text-zinc-400 dark:text-zinc-600 font-normal">(optional)</span>
+                <span className="text-muted-foreground font-normal">
+                  (optional)
+                </span>
               </FormLabel>
               <FormControl>
-                <Textarea placeholder="Any additional context…" rows={3} {...field} />
+                <Textarea
+                  placeholder="Any additional context…"
+                  rows={3}
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

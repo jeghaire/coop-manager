@@ -803,7 +803,7 @@ function HowItWorks() {
     >
       <div className="max-w-7xl mx-auto px-6 w-full">
         <ScrollReveal direction="up" className="mb-16 max-w-xl">
-          <p className="text-xs font-mono uppercase tracking-wider text-zinc-400 dark:text-zinc-600 mb-4">
+          <p className="text-xs font-mono uppercase tracking-wider text-muted-foreground mb-4">
             How it works
           </p>
           <h2 className="text-3xl md:text-4xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight leading-[1.1] mb-4">

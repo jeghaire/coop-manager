@@ -45,53 +45,62 @@ export default async function LoansPage() {
   const userId = session.user.id;
   const cooperativeId = session.user.cooperativeId as string;
 
-  const [myLoans, guarantorRequests, cooperative, eligibleMembers, verifiedContributions] =
-    await Promise.all([
-      prisma.loanApplication.findMany({
-        where: { userId, cooperativeId, deletedAt: null },
-        include: {
-          guarantors: {
-            where: { deletedAt: null },
-            include: { guarantor: { select: { name: true } } },
+  const [
+    myLoans,
+    guarantorRequests,
+    cooperative,
+    eligibleMembers,
+    verifiedContributions,
+  ] = await Promise.all([
+    prisma.loanApplication.findMany({
+      where: { userId, cooperativeId, deletedAt: null },
+      include: {
+        guarantors: {
+          where: { deletedAt: null },
+          include: { guarantor: { select: { name: true } } },
+        },
+      },
+      orderBy: { appliedAt: "desc" },
+    }),
+    prisma.loanGuarantor.findMany({
+      where: { guarantorId: userId, deletedAt: null },
+      include: {
+        loan: {
+          include: {
+            applicant: { select: { name: true } },
           },
         },
-        orderBy: { appliedAt: "desc" },
-      }),
-      prisma.loanGuarantor.findMany({
-        where: { guarantorId: userId, deletedAt: null },
-        include: {
-          loan: {
-            include: {
-              applicant: { select: { name: true } },
-            },
-          },
-        },
-        orderBy: { createdAt: "desc" },
-      }),
-      prisma.cooperative.findUnique({
-        where: { id: cooperativeId },
-        select: { borrowingMultiplier: true, guarantorCoverageMode: true, currency: true },
-      }),
-      prisma.user.findMany({
-        where: {
-          cooperativeId,
-          deletedAt: null,
-          id: { not: userId },
-          role: { notIn: ["ADMIN", "OWNER"] },
-          verifiedAt: { not: null },
-        },
-        select: { id: true, name: true },
-        orderBy: { name: "asc" },
-      }),
-      prisma.contribution.findMany({
-        where: { userId, cooperativeId, status: "VERIFIED", deletedAt: null },
-        select: { amount: true },
-      }),
-    ]);
+      },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.cooperative.findUnique({
+      where: { id: cooperativeId },
+      select: {
+        borrowingMultiplier: true,
+        guarantorCoverageMode: true,
+        currency: true,
+      },
+    }),
+    prisma.user.findMany({
+      where: {
+        cooperativeId,
+        deletedAt: null,
+        id: { not: userId },
+        role: { notIn: ["ADMIN", "OWNER"] },
+        verifiedAt: { not: null },
+      },
+      select: { id: true, name: true },
+      orderBy: { name: "asc" },
+    }),
+    prisma.contribution.findMany({
+      where: { userId, cooperativeId, status: "VERIFIED", deletedAt: null },
+      select: { amount: true },
+    }),
+  ]);
 
   const totalContributed = verifiedContributions.reduce(
     (sum, c) => sum + Number(c.amount),
-    0
+    0,
   );
   const borrowingCapacity = cooperative
     ? totalContributed * cooperative.borrowingMultiplier
@@ -100,10 +109,10 @@ export default async function LoansPage() {
   const sym = getCurrencySymbol(cooperative?.currency ?? "NGN");
 
   const pendingGuarantorRequests = guarantorRequests.filter(
-    (g) => g.status === "PENDING" && g.loan.status === "PENDING_GUARANTORS"
+    (g) => g.status === "PENDING" && g.loan.status === "PENDING_GUARANTORS",
   );
   const pastGuarantorRequests = guarantorRequests.filter(
-    (g) => g.status !== "PENDING" || g.loan.status !== "PENDING_GUARANTORS"
+    (g) => g.status !== "PENDING" || g.loan.status !== "PENDING_GUARANTORS",
   );
 
   return (
@@ -115,7 +124,9 @@ export default async function LoansPage() {
           <LoanApplySheet
             members={eligibleMembers}
             borrowingCapacity={borrowingCapacity}
-            guarantorCoverageMode={cooperative?.guarantorCoverageMode ?? "COMBINED"}
+            guarantorCoverageMode={
+              cooperative?.guarantorCoverageMode ?? "COMBINED"
+            }
             currencySymbol={sym}
             canApply={canApply}
           />
@@ -145,10 +156,11 @@ export default async function LoansPage() {
                     <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
                       Requesting{" "}
                       <span className="font-semibold text-zinc-700 dark:text-zinc-300">
-                        {sym}{Number(g.loan.amountRequested).toLocaleString()}
+                        {sym}
+                        {Number(g.loan.amountRequested).toLocaleString()}
                       </span>
                     </p>
-                    <p className="text-xs text-zinc-400 dark:text-zinc-600 mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       Applied{" "}
                       {new Date(g.loan.appliedAt).toLocaleDateString("en-GB", {
                         day: "numeric",
@@ -188,11 +200,12 @@ export default async function LoansPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 flex-wrap">
                       <span className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-                        {sym}{Number(loan.amountRequested).toLocaleString()}
+                        {sym}
+                        {Number(loan.amountRequested).toLocaleString()}
                       </span>
                       {loanStatusBadge(loan.status)}
                     </div>
-                    <p className="text-xs text-zinc-400 dark:text-zinc-600 mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       Applied{" "}
                       {new Date(loan.appliedAt).toLocaleDateString("en-GB", {
                         day: "numeric",
@@ -204,7 +217,10 @@ export default async function LoansPage() {
                     {loan.guarantors.length > 0 && (
                       <div className="mt-3 flex flex-wrap gap-2">
                         {loan.guarantors.map((g) => (
-                          <div key={g.id} className="flex items-center gap-1.5 text-xs">
+                          <div
+                            key={g.id}
+                            className="flex items-center gap-1.5 text-xs"
+                          >
                             <span className="text-zinc-500 dark:text-zinc-400">
                               {g.guarantor.name}:
                             </span>
@@ -214,7 +230,8 @@ export default async function LoansPage() {
                       </div>
                     )}
 
-                    {(loan.status === "APPROVED" || loan.status === "REPAID") && (
+                    {(loan.status === "APPROVED" ||
+                      loan.status === "REPAID") && (
                       <div className="mt-2">
                         <Link
                           href={`/dashboard/loans/${loan.id}`}
@@ -265,7 +282,8 @@ export default async function LoansPage() {
                       {g.loan.applicant.name}
                     </p>
                     <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                      {sym}{Number(g.loan.amountRequested).toLocaleString()} •{" "}
+                      {sym}
+                      {Number(g.loan.amountRequested).toLocaleString()} •{" "}
                       {new Date(g.createdAt).toLocaleDateString("en-GB", {
                         day: "numeric",
                         month: "short",

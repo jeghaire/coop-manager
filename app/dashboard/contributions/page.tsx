@@ -71,7 +71,8 @@ export default async function ContributionsPage() {
           Total Verified
         </p>
         <p className="text-3xl font-semibold text-emerald-800 dark:text-emerald-300">
-          {sym}{verifiedTotal.toLocaleString()}
+          {sym}
+          {verifiedTotal.toLocaleString()}
         </p>
       </div>
 
@@ -93,14 +94,15 @@ export default async function ContributionsPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 flex-wrap">
                     <span className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-                      {sym}{Number(c.amount).toLocaleString()}
+                      {sym}
+                      {Number(c.amount).toLocaleString()}
                     </span>
                     {statusBadge(c.status)}
-                    <span className="text-xs text-zinc-400 dark:text-zinc-600">
+                    <span className="text-xs text-muted-foreground">
                       {PAYMENT_METHOD_LABEL[c.paymentMethod] ?? c.paymentMethod}
                     </span>
                   </div>
-                  <p className="text-xs text-zinc-400 dark:text-zinc-600 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     Submitted{" "}
                     {new Date(c.submittedAt).toLocaleDateString("en-GB", {
                       day: "numeric",

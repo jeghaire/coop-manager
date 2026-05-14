@@ -71,7 +71,7 @@ export default async function VerificationPendingPage() {
         </dl>
       </div>
 
-      <p className="text-xs text-zinc-400 dark:text-zinc-600">
+      <p className="text-xs text-muted-foreground">
         You can still view your{" "}
         <a
           href="/dashboard/profile"

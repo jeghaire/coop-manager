@@ -62,7 +62,7 @@ export function ContributionSubmitForm({
   const router = useRouter();
   const [state, formAction] = useActionState<ContributionActionState, FormData>(
     submitContribution,
-    {}
+    {},
   );
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -102,7 +102,7 @@ export function ContributionSubmitForm({
       try {
         const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
         const res = await fetch(
-          `/api/receipts/presign?ext=${encodeURIComponent(ext)}&type=${encodeURIComponent(file.type)}`
+          `/api/receipts/presign?ext=${encodeURIComponent(ext)}&type=${encodeURIComponent(file.type)}`,
         );
         if (!res.ok) {
           const body = await res.json().catch(() => ({}));
@@ -165,7 +165,14 @@ export function ContributionSubmitForm({
             <FormItem>
               <FormLabel>Amount ({currencySymbol})</FormLabel>
               <FormControl>
-                <Input type="number" min="1" step="0.01" placeholder="e.g. 10000" {...field} value={field.value ?? ""} />
+                <Input
+                  type="number"
+                  min="1"
+                  step="0.01"
+                  placeholder="e.g. 10000"
+                  {...field}
+                  value={field.value ?? ""}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -176,7 +183,9 @@ export function ContributionSubmitForm({
           control={form.control}
           name="paymentMethod"
           render={({ field }) => {
-            const selectedMethod = PAYMENT_METHODS.find((m) => m.value === field.value);
+            const selectedMethod = PAYMENT_METHODS.find(
+              (m) => m.value === field.value,
+            );
 
             return (
               <FormItem>
@@ -185,7 +194,9 @@ export function ContributionSubmitForm({
                   <FormControl>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="How did you pay?">
-                        {selectedMethod ? selectedMethod.label : "How did you pay?"}
+                        {selectedMethod
+                          ? selectedMethod.label
+                          : "How did you pay?"}
                       </SelectValue>
                     </SelectTrigger>
                   </FormControl>
@@ -209,7 +220,9 @@ export function ContributionSubmitForm({
         <div className="space-y-1.5">
           <Label htmlFor="receipt">
             Receipt{" "}
-            <span className="text-zinc-400 dark:text-zinc-600 font-normal">(optional)</span>
+            <span className="text-muted-foreground font-normal">
+              (optional)
+            </span>
           </Label>
           <Input
             id="receipt"
@@ -219,10 +232,14 @@ export function ContributionSubmitForm({
             className="cursor-pointer file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:font-medium file:bg-zinc-100 file:text-zinc-700 dark:file:bg-zinc-800 dark:file:text-zinc-300"
           />
           {file && !fileError && (
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">{file.name}</p>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              {file.name}
+            </p>
           )}
           {fileError && (
-            <p className="text-xs text-red-600 dark:text-red-400">{fileError}</p>
+            <p className="text-xs text-red-600 dark:text-red-400">
+              {fileError}
+            </p>
           )}
           {!fileError && !file && (
             <p className="text-xs text-zinc-500 dark:text-zinc-400">

@@ -109,7 +109,7 @@ export async function AuditTrail({
             <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
               Audit Trail
             </p>
-            <p className="text-xs text-zinc-400 dark:text-zinc-600">
+            <p className="text-xs text-muted-foreground">
               {events.length} event{events.length !== 1 ? "s" : ""}
               {events.length === 500 ? " (limit)" : ""}
             </p>
@@ -167,9 +167,7 @@ export async function AuditTrail({
                       </td>
                       <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300 hidden sm:table-cell">
                         {event.actorName ?? (
-                          <span className="text-zinc-400 dark:text-zinc-600">
-                            System
-                          </span>
+                          <span className="text-muted-foreground">System</span>
                         )}
                       </td>
                       <td className="px-5 py-3 text-zinc-500 dark:text-zinc-400 text-xs hidden md:table-cell">
@@ -177,16 +175,14 @@ export async function AuditTrail({
                           <span>
                             {formatEventType(event.entityType)}
                             {event.entityId != null && (
-                              <span className="text-zinc-400 dark:text-zinc-600">
+                              <span className="text-muted-foreground">
                                 {" "}
                                 #{event.entityId}
                               </span>
                             )}
                           </span>
                         ) : (
-                          <span className="text-zinc-400 dark:text-zinc-600">
-                            -
-                          </span>
+                          <span className="text-muted-foreground">-</span>
                         )}
                       </td>
                     </tr>

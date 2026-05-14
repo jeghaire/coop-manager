@@ -1,4 +1,9 @@
-﻿import { getDividendSnapshot } from "./data";
+﻿import {
+  Progress,
+  ProgressLabel,
+  ProgressValue,
+} from "@/components/ui/progress";
+import { getDividendSnapshot } from "./data";
 import { Badge } from "@/components/ui/badge";
 
 const ROLE_BADGE: Record<string, "success" | "sky" | "warning" | "secondary"> =
@@ -48,7 +53,7 @@ export async function DividendSnapshot({
 
         {distributionAmount > 0 && (
           <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-4 flex-1 min-w-50">
-            <p className="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-600 mb-1">
+            <p className="text-xs font-mono font-semibold uppercase tracking-wider text-muted-foreground mb-1">
               Distribution Amount
             </p>
             <p className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
@@ -106,11 +111,11 @@ export async function DividendSnapshot({
                   >
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-zinc-400 dark:text-zinc-600 w-5 text-right shrink-0">
+                        <span className="text-xs text-muted-foreground w-5 text-right shrink-0">
                           {i + 1}
                         </span>
                         <div>
-                          <p className="font-medium text-zinc-900 dark:text-zinc-100 text-base">
+                          <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">
                             {row.name}
                           </p>
                           <p className="text-xs text-zinc-500 dark:text-zinc-400 hidden sm:block">
@@ -131,12 +136,10 @@ export async function DividendSnapshot({
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <div className="w-20 bg-zinc-100 dark:bg-zinc-800 rounded-full h-1 hidden sm:block">
-                          <div
-                            className="bg-emerald-500 h-1 rounded-full"
-                            style={{ width: `${row.percentage}%` }}
-                          />
-                        </div>
+                        <Progress
+                          value={row.percentage}
+                          className="w-full max-w-25"
+                        ></Progress>
                         <span className="text-zinc-700 dark:text-zinc-300 text-sm tabular-nums">
                           {row.percentage.toFixed(1)}%
                         </span>

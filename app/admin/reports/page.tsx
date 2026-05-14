@@ -15,7 +15,7 @@ import { getCurrencySymbol } from "@/app/lib/currency";
 import { PageHeader } from "@/app/components/PageHeader";
 
 export default async function ReportsPage({
-  searchParams
+  searchParams,
 }: {
   searchParams: Promise<{
     tab?: string;
@@ -37,7 +37,7 @@ export default async function ReportsPage({
 
   const cooperative = await prisma.cooperative.findUnique({
     where: { id: cooperativeId },
-    select: { name: true, currency: true }
+    select: { name: true, currency: true },
   });
   const cooperativeName = cooperative?.name ?? "Cooperative";
   const currencySymbol = getCurrencySymbol(cooperative?.currency);
@@ -118,7 +118,7 @@ export default async function ReportsPage({
       <Suspense
         key={tab + (eventType ?? "")}
         fallback={
-          <div className="py-12 text-center text-sm text-zinc-400 dark:text-zinc-600">
+          <div className="py-12 text-center text-sm text-muted-foreground">
             Loading…
           </div>
         }

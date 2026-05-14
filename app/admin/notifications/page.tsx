@@ -19,21 +19,27 @@ export default async function AdminNotificationsPage() {
 
   const cooperativeId = session.user.cooperativeId as string;
 
-  const [pendingLoans, cooperative] = await Promise.all([prisma.loanApplication.findMany({
-    where: {
-      cooperativeId,
-      status: "PENDING_ADMIN_REVIEW",
-      deletedAt: null
-    },
-    include: {
-      applicant: { select: { name: true, email: true } },
-      guarantors: {
-        where: { deletedAt: null },
-        include: { guarantor: { select: { name: true } } }
-      }
-    },
-    orderBy: { appliedAt: "desc" }
-  }), prisma.cooperative.findUnique({ where: { id: cooperativeId }, select: { currency: true } })]);
+  const [pendingLoans, cooperative] = await Promise.all([
+    prisma.loanApplication.findMany({
+      where: {
+        cooperativeId,
+        status: "PENDING_ADMIN_REVIEW",
+        deletedAt: null,
+      },
+      include: {
+        applicant: { select: { name: true, email: true } },
+        guarantors: {
+          where: { deletedAt: null },
+          include: { guarantor: { select: { name: true } } },
+        },
+      },
+      orderBy: { appliedAt: "desc" },
+    }),
+    prisma.cooperative.findUnique({
+      where: { id: cooperativeId },
+      select: { currency: true },
+    }),
+  ]);
   const sym = getCurrencySymbol(cooperative?.currency ?? "NGN");
 
   return (
@@ -69,7 +75,8 @@ export default async function AdminNotificationsPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 flex-wrap">
                     <span className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-                      {sym}{Number(loan.amountRequested).toLocaleString()}
+                      {sym}
+                      {Number(loan.amountRequested).toLocaleString()}
                     </span>
                     <Badge variant="warning">Needs Review</Badge>
                   </div>
@@ -79,12 +86,12 @@ export default async function AdminNotificationsPage() {
                   <p className="text-xs text-zinc-500 dark:text-zinc-400">
                     {loan.applicant.email}
                   </p>
-                  <p className="text-xs text-zinc-400 dark:text-zinc-600 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     Applied{" "}
                     {new Date(loan.appliedAt).toLocaleDateString("en-GB", {
                       day: "numeric",
                       month: "short",
-                      year: "numeric"
+                      year: "numeric",
                     })}
                   </p>
                   <div className="mt-2 flex flex-wrap gap-2">

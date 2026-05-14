@@ -16,7 +16,7 @@ const TYPE_BADGE: Record<
   AGM: "sky",
   MAINTENANCE: "warning",
   RULE_CHANGE: "destructive",
-  GENERAL: "secondary"
+  GENERAL: "secondary",
 };
 
 export default async function AdminAnnouncementsPage() {
@@ -31,7 +31,7 @@ export default async function AdminAnnouncementsPage() {
   const announcements = await prisma.announcement.findMany({
     where: { cooperativeId },
     orderBy: { createdAt: "desc" },
-    include: { _count: { select: { rsvps: true } } }
+    include: { _count: { select: { rsvps: true } } },
   });
 
   return (
@@ -81,7 +81,7 @@ export default async function AdminAnnouncementsPage() {
                   {ann.message}
                 </p>
                 <div className="flex flex-wrap items-center gap-3 mt-2">
-                  <span className="text-xs text-zinc-400 dark:text-zinc-600">
+                  <span className="text-xs text-muted-foreground">
                     {new Date(ann.createdAt).toLocaleDateString()}
                   </span>
                   {ann.allowRsvp && (
@@ -89,7 +89,7 @@ export default async function AdminAnnouncementsPage() {
                       {ann._count.rsvps} RSVP{ann._count.rsvps !== 1 ? "s" : ""}
                     </span>
                   )}
-                  <span className="text-xs text-zinc-400 dark:text-zinc-600 uppercase">
+                  <span className="text-xs text-muted-foreground uppercase">
                     {ann.recipientType}
                   </span>
                 </div>

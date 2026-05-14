@@ -16,15 +16,13 @@ export function DeactivateButton({
   cooperativeId: string;
 }) {
   const [confirm, setConfirm] = useState(false);
-  const [state, action, pending] = useActionState<AnnouncementActionState, FormData>(
-    deactivateAnnouncement,
-    {}
-  );
+  const [state, action, pending] = useActionState<
+    AnnouncementActionState,
+    FormData
+  >(deactivateAnnouncement, {});
 
   if (state.success) {
-    return (
-      <span className="text-xs text-zinc-400 dark:text-zinc-600">Deactivated</span>
-    );
+    return <span className="text-xs text-muted-foreground">Deactivated</span>;
   }
 
   if (!confirm) {

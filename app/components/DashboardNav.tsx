@@ -83,7 +83,7 @@ export function DashboardNav({
 
   return (
     <nav className="flex flex-col gap-0.5">
-      <p className="px-3 mb-1 text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-600">
+      <p className="px-3 mb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
         Member
       </p>
       {memberLinks.map(({ href, label }) => (
@@ -94,7 +94,7 @@ export function DashboardNav({
 
       {(isAdmin || isTreasurer) && (
         <>
-          <p className="px-3 mt-4 mb-1 text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-600">
+          <p className="px-3 mt-4 mb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             {isTreasurer ? "Treasurer" : "Admin"}
           </p>
           {(isAdmin ? adminLinks(pendingLoans) : treasurerLinks).map(

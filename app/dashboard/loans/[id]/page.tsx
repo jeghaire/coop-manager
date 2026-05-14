@@ -6,8 +6,16 @@ import prisma from "@/app/lib/prisma";
 import { getCurrencySymbol } from "@/app/lib/currency";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import { generateRepaymentSchedule, calculateLoanHealth } from "@/app/lib/loan-helpers";
+import {
+  generateRepaymentSchedule,
+  calculateLoanHealth,
+} from "@/app/lib/loan-helpers";
 import { RepaymentForm } from "./RepaymentForm";
+import {
+  Progress,
+  ProgressLabel,
+  ProgressValue,
+} from "@/components/ui/progress";
 
 function statusBadge(status: string) {
   switch (status) {
@@ -71,7 +79,8 @@ export default async function LoanDetailsPage({
     }),
   ]);
 
-  if (!loan || loan.cooperativeId !== cooperativeId) redirect("/dashboard/loans");
+  if (!loan || loan.cooperativeId !== cooperativeId)
+    redirect("/dashboard/loans");
   if (!isAdmin && loan.userId !== userId) redirect("/dashboard/loans");
 
   const isOwn = loan.userId === userId;
@@ -140,7 +149,12 @@ export default async function LoanDetailsPage({
 
   const health =
     totalDue && repaymentMonths && loan.approvedAt
-      ? calculateLoanHealth(totalDue, totalPaid, loan.approvedAt, repaymentMonths)
+      ? calculateLoanHealth(
+          totalDue,
+          totalPaid,
+          loan.approvedAt,
+          repaymentMonths,
+        )
       : null;
 
   return (
@@ -190,42 +204,68 @@ export default async function LoanDetailsPage({
       <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-6 space-y-5">
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           <div>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider font-medium">Principal</p>
-            <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mt-0.5">{fmt(principal)}</p>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider font-medium">
+              Principal
+            </p>
+            <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mt-0.5">
+              {fmt(principal)}
+            </p>
           </div>
           {interestRate !== null && (
             <div>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider font-medium">Interest Rate</p>
-              <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mt-0.5">{interestRate}%</p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider font-medium">
+                Interest Rate
+              </p>
+              <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mt-0.5">
+                {interestRate}%
+              </p>
               {totalDue !== null && (
-                <p className="text-xs text-zinc-400 dark:text-zinc-600">{fmt(totalDue - principal)} interest</p>
+                <p className="text-xs text-muted-foreground">
+                  {fmt(totalDue - principal)} interest
+                </p>
               )}
             </div>
           )}
           {totalDue !== null && (
             <div>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider font-medium">Total Due</p>
-              <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mt-0.5">{fmt(totalDue)}</p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider font-medium">
+                Total Due
+              </p>
+              <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mt-0.5">
+                {fmt(totalDue)}
+              </p>
               {repaymentMonths && (
-                <p className="text-xs text-zinc-400 dark:text-zinc-600">over {repaymentMonths} months</p>
+                <p className="text-xs text-muted-foreground">
+                  over {repaymentMonths} months
+                </p>
               )}
             </div>
           )}
           {totalDue !== null && (
             <div>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider font-medium">Amount Paid</p>
-              <p className="text-lg font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5">{fmt(totalPaid)}</p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider font-medium">
+                Amount Paid
+              </p>
+              <p className="text-lg font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5">
+                {fmt(totalPaid)}
+              </p>
             </div>
           )}
           {remaining !== null && (
             <div>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider font-medium">Remaining</p>
-              <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mt-0.5">{fmt(remaining)}</p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider font-medium">
+                Remaining
+              </p>
+              <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mt-0.5">
+                {fmt(remaining)}
+              </p>
             </div>
           )}
           {totalDue !== null && repaymentMonths && (
             <div>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider font-medium">Monthly Due</p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider font-medium">
+                Monthly Due
+              </p>
               <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mt-0.5">
                 {fmt(totalDue / repaymentMonths)}
               </p>
@@ -234,45 +274,60 @@ export default async function LoanDetailsPage({
         </div>
 
         {totalDue !== null && (
-          <div className="space-y-1.5">
-            <div className="flex justify-between text-xs text-zinc-500 dark:text-zinc-400">
-              <span>Payment progress</span>
-              <span>{progressPct.toFixed(1)}%</span>
-            </div>
-            <div className="w-full bg-zinc-100 dark:bg-zinc-800 rounded-full h-2 overflow-hidden">
-              <div
-                className="h-full bg-emerald-500 rounded-full transition-all"
-                style={{ width: `${progressPct}%` }}
-              />
-            </div>
-          </div>
+          <Progress value={progressPct} className="w-full">
+            <ProgressLabel>Payment progress</ProgressLabel>
+            <ProgressValue />
+          </Progress>
         )}
       </div>
 
       {/* Member repayment form */}
-      {isOwn && isActive && totalDue !== null && remaining !== null && remaining > 0 && (
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-6">
-          <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-4">Make a Payment</h2>
-          <RepaymentForm loanId={loan.id} remaining={remaining} currencySymbol={sym} />
-        </div>
-      )}
+      {isOwn &&
+        isActive &&
+        totalDue !== null &&
+        remaining !== null &&
+        remaining > 0 && (
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-6">
+            <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
+              Make a Payment
+            </h2>
+            <RepaymentForm
+              loanId={loan.id}
+              remaining={remaining}
+              currencySymbol={sym}
+            />
+          </div>
+        )}
 
       {/* Admin/treasurer repayment entry */}
-      {isAdmin && isActive && totalDue !== null && remaining !== null && remaining > 0 && (
-        <div className="bg-white dark:bg-zinc-900 border border-amber-200 dark:border-amber-500/20 rounded-xl p-6">
-          <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-1">Record Repayment</h2>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-4">
-            Manually record a payment on behalf of {loan.applicant.name}.
-          </p>
-          <RepaymentForm loanId={loan.id} remaining={remaining} currencySymbol={sym} adminMode />
-        </div>
-      )}
+      {isAdmin &&
+        isActive &&
+        totalDue !== null &&
+        remaining !== null &&
+        remaining > 0 && (
+          <div className="bg-white dark:bg-zinc-900 border border-amber-200 dark:border-amber-500/20 rounded-xl p-6">
+            <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-1">
+              Record Repayment
+            </h2>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-4">
+              Manually record a payment on behalf of {loan.applicant.name}.
+            </p>
+            <RepaymentForm
+              loanId={loan.id}
+              remaining={remaining}
+              currencySymbol={sym}
+              adminMode
+            />
+          </div>
+        )}
 
       {/* Repayment schedule table */}
       {scheduleRows.length > 0 && (
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl overflow-hidden">
           <div className="px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
-            <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Repayment Schedule</h2>
+            <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+              Repayment Schedule
+            </h2>
           </div>
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
@@ -308,7 +363,9 @@ export default async function LoanDetailsPage({
                         : ""
                     }
                   >
-                    <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300 font-medium">{row.month}</td>
+                    <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300 font-medium">
+                      {row.month}
+                    </td>
                     <td className="px-4 py-3 text-zinc-500 dark:text-zinc-400 hidden sm:table-cell">
                       {row.dueDate.toLocaleDateString("en-GB", {
                         day: "numeric",
@@ -325,7 +382,9 @@ export default async function LoanDetailsPage({
                     <td className="px-4 py-3 text-right text-zinc-500 dark:text-zinc-400 hidden md:table-cell">
                       {fmt(row.runningBalance)}
                     </td>
-                    <td className="px-4 py-3 text-right">{monthStatusBadge(row.status)}</td>
+                    <td className="px-4 py-3 text-right">
+                      {monthStatusBadge(row.status)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -338,15 +397,22 @@ export default async function LoanDetailsPage({
       {loan.repayments.length > 0 && (
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl overflow-hidden">
           <div className="px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
-            <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Payment History</h2>
+            <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+              Payment History
+            </h2>
           </div>
           <ul className="divide-y divide-zinc-100 dark:divide-zinc-800">
             {loan.repayments.map((r) => (
-              <li key={r.id} className="px-5 py-3 flex items-center justify-between gap-4">
+              <li
+                key={r.id}
+                className="px-5 py-3 flex items-center justify-between gap-4"
+              >
                 <div>
-                  <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">{fmt(Number(r.amount))}</p>
+                  <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                    {fmt(Number(r.amount))}
+                  </p>
                   {r.note && (
-                    <p className="text-xs text-zinc-400 dark:text-zinc-600">{r.note}</p>
+                    <p className="text-xs text-muted-foreground">{r.note}</p>
                   )}
                 </div>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400 shrink-0">
@@ -370,7 +436,10 @@ export default async function LoanDetailsPage({
           </h2>
           <ul className="space-y-2">
             {loan.guarantors.map((g) => (
-              <li key={g.id} className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300">
+              <li
+                key={g.id}
+                className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300"
+              >
                 <span className="w-1.5 h-1.5 rounded-full bg-zinc-300 dark:bg-zinc-600 shrink-0" />
                 {g.guarantor.name}
               </li>

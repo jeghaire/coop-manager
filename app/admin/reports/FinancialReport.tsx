@@ -1,6 +1,12 @@
 import { getFinancialSummary } from "./data";
 import prisma from "@/app/lib/prisma";
 import { getCurrencySymbol } from "@/app/lib/currency";
+import { Progress as ProgressRoot } from "@base-ui/react/progress";
+import {
+  ProgressLabel,
+  ProgressTrack,
+  ProgressIndicator,
+} from "@/components/ui/progress";
 
 function Stat({
   label,
@@ -21,7 +27,7 @@ function Stat({
           : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800/60"
       }`}
     >
-      <p className="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-600 mb-2">
+      <p className="text-sm font-mono font-semibold text-muted-foreground mb-2">
         {label}
       </p>
       <p
@@ -47,7 +53,10 @@ export async function FinancialReport({
 }) {
   const [data, cooperative] = await Promise.all([
     getFinancialSummary(cooperativeId),
-    prisma.cooperative.findUnique({ where: { id: cooperativeId }, select: { currency: true } }),
+    prisma.cooperative.findUnique({
+      where: { id: cooperativeId },
+      select: { currency: true },
+    }),
   ]);
   const sym = getCurrencySymbol(cooperative?.currency ?? "NGN");
   const fmt = (n: number) => `${sym}${n.toLocaleString()}`;
@@ -90,7 +99,7 @@ export async function FinancialReport({
       </div>
 
       <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-5">
-        <p className="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-600 mb-4">
+        <p className="text-sm font-semibold font-mono text-muted-foreground mb-5">
           Fund Health
         </p>
         <div className="space-y-3">
@@ -149,24 +158,17 @@ function FundBar({
   }[color];
 
   return (
-    <div>
-      <div className="flex justify-between text-xs mb-1.5">
-        <span className="text-zinc-600 dark:text-zinc-400 font-medium">
-          {label}
-        </span>
-        <span className="text-zinc-900 dark:text-zinc-100 font-semibold">
-          {sym}{amount.toLocaleString()}{" "}
-          <span className="text-zinc-400 dark:text-zinc-600 font-normal">
-            ({pct.toFixed(1)}%)
-          </span>
+    <ProgressRoot.Root value={pct} className="w-full flex flex-col gap-1.5">
+      <div className="flex items-center justify-between">
+        <ProgressLabel>{label}</ProgressLabel>
+        <span className="text-sm font-medium tabular-nums text-muted-foreground">
+          {sym}
+          {amount.toLocaleString()}
         </span>
       </div>
-      <div className={`h-2 rounded-full w-full ${trackColor}`}>
-        <div
-          className={`h-2 rounded-full ${barColor} transition-all`}
-          style={{ width: `${pct}%` }}
-        />
-      </div>
-    </div>
+      <ProgressTrack className={`h-2 ${trackColor}`}>
+        <ProgressIndicator className={barColor} />
+      </ProgressTrack>
+    </ProgressRoot.Root>
   );
 }

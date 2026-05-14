@@ -23,7 +23,7 @@ export async function LoanDecisions({
       {/* Top-line stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-4">
-          <p className="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-600 mb-1">
+          <p className="text-xs font-mono font-semibold uppercase tracking-wider text-muted-foreground mb-1">
             Total Decided
           </p>
           <p className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
@@ -50,7 +50,7 @@ export async function LoanDecisions({
           </p>
         </div>
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-4">
-          <p className="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-600 mb-1">
+          <p className="text-xs font-mono font-semibold uppercase tracking-wider text-muted-foreground mb-1">
             Total Approved Amount
           </p>
           <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
@@ -174,7 +174,7 @@ export async function LoanDecisions({
                   <td className="px-5 py-3 font-medium text-zinc-900 dark:text-zinc-100">
                     {loan.applicant.name}
                     {loan.status === "REJECTED" && loan.rejectionReason && (
-                      <p className="text-xs text-zinc-400 dark:text-zinc-600 font-normal truncate max-w-50">
+                      <p className="text-xs text-muted-foreground font-normal truncate max-w-50">
                         {loan.rejectionReason}
                       </p>
                     )}

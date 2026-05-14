@@ -53,7 +53,7 @@ export default async function AnnouncementDetailPage({
         <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight">
           {announcement.title}
         </h1>
-        <p className="text-xs text-zinc-400 dark:text-zinc-600 mt-1">
+        <p className="text-xs text-muted-foreground mt-1">
           {new Date(announcement.createdAt).toLocaleDateString()}
         </p>
       </div>
@@ -66,7 +66,7 @@ export default async function AnnouncementDetailPage({
         {announcement.type === "AGM" &&
           (announcement.agmDate || announcement.agmLocation) && (
             <div className="border-t border-zinc-100 dark:border-zinc-800 pt-4 space-y-1">
-              <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-600 mb-2">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
                 AGM Details
               </p>
               {announcement.agmDate && (
@@ -91,7 +91,7 @@ export default async function AnnouncementDetailPage({
             <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
               Your RSVP
             </p>
-            <span className="text-xs text-zinc-400 dark:text-zinc-600">
+            <span className="text-xs text-muted-foreground">
               {rsvpCounts} response{rsvpCounts !== 1 ? "s" : ""}
             </span>
           </div>

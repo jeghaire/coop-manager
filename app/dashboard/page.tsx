@@ -21,38 +21,42 @@ export default async function DashboardPage() {
   const cooperativeId = user.cooperativeId as string;
 
   // Summary counts
-  const [myActiveLoans, myPendingGuarantorRequests, verifiedContributions, cooperative] =
-    await Promise.all([
-      prisma.loanApplication.count({
-        where: {
-          userId: user.id,
-          cooperativeId,
-          status: { in: ["PENDING_GUARANTORS", "PENDING_ADMIN_REVIEW"] },
-          deletedAt: null,
-        },
-      }),
-      prisma.loanGuarantor.count({
-        where: {
-          guarantorId: user.id,
-          status: "PENDING",
-          deletedAt: null,
-          loan: { status: "PENDING_GUARANTORS" },
-        },
-      }),
-      prisma.contribution.findMany({
-        where: {
-          userId: user.id,
-          cooperativeId,
-          status: "VERIFIED",
-          deletedAt: null,
-        },
-        select: { amount: true },
-      }),
-      prisma.cooperative.findUnique({
-        where: { id: cooperativeId },
-        select: { currency: true },
-      }),
-    ]);
+  const [
+    myActiveLoans,
+    myPendingGuarantorRequests,
+    verifiedContributions,
+    cooperative,
+  ] = await Promise.all([
+    prisma.loanApplication.count({
+      where: {
+        userId: user.id,
+        cooperativeId,
+        status: { in: ["PENDING_GUARANTORS", "PENDING_ADMIN_REVIEW"] },
+        deletedAt: null,
+      },
+    }),
+    prisma.loanGuarantor.count({
+      where: {
+        guarantorId: user.id,
+        status: "PENDING",
+        deletedAt: null,
+        loan: { status: "PENDING_GUARANTORS" },
+      },
+    }),
+    prisma.contribution.findMany({
+      where: {
+        userId: user.id,
+        cooperativeId,
+        status: "VERIFIED",
+        deletedAt: null,
+      },
+      select: { amount: true },
+    }),
+    prisma.cooperative.findUnique({
+      where: { id: cooperativeId },
+      select: { currency: true },
+    }),
+  ]);
 
   const verifiedTotal = verifiedContributions.reduce(
     (sum, c) => sum + Number(c.amount),
@@ -100,11 +104,12 @@ export default async function DashboardPage() {
       {/* Quick stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-5">
-          <p className="text-xs font-mono font-medium text-zinc-400 dark:text-zinc-600 uppercase tracking-wider mb-2">
+          <p className="text-xs font-mono font-medium text-muted-foreground uppercase tracking-wider mb-2">
             Total Contributed
           </p>
           <p className="text-3xl font-semibold text-zinc-900 dark:text-zinc-100">
-            {sym}{verifiedTotal.toLocaleString()}
+            {sym}
+            {verifiedTotal.toLocaleString()}
           </p>
           <Link
             href="/dashboard/contributions"
@@ -118,7 +123,7 @@ export default async function DashboardPage() {
         </div>
 
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-5">
-          <p className="text-xs font-mono font-medium text-zinc-400 dark:text-zinc-600 uppercase tracking-wider mb-2">
+          <p className="text-xs font-mono font-medium text-muted-foreground uppercase tracking-wider mb-2">
             Active Loans
           </p>
           <p className="text-3xl font-semibold text-zinc-900 dark:text-zinc-100">
@@ -136,7 +141,7 @@ export default async function DashboardPage() {
         </div>
 
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-5">
-          <p className="text-xs font-mono font-medium text-zinc-400 dark:text-zinc-600 uppercase tracking-wider mb-2">
+          <p className="text-xs font-mono font-medium text-muted-foreground uppercase tracking-wider mb-2">
             Guarantor Requests
           </p>
           <p className="text-3xl font-semibold text-zinc-900 dark:text-zinc-100">

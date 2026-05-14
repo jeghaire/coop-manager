@@ -65,7 +65,7 @@ export default async function AdminWithdrawalsPage() {
 
       {pending.length > 0 && (
         <section className="space-y-3">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-600">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
             Pending Review
           </h2>
           <div className="space-y-3">
@@ -85,7 +85,7 @@ export default async function AdminWithdrawalsPage() {
                     </div>
                     <p className="text-sm text-zinc-600 dark:text-zinc-400">
                       {w.user.name}{" "}
-                      <span className="text-zinc-400 dark:text-zinc-600">
+                      <span className="text-muted-foreground">
                         ({w.user.email})
                       </span>
                     </p>
@@ -97,7 +97,7 @@ export default async function AdminWithdrawalsPage() {
                         Notes: {w.notes}
                       </p>
                     )}
-                    <p className="text-xs text-zinc-400 dark:text-zinc-600 mt-2">
+                    <p className="text-xs text-muted-foreground mt-2">
                       Requested {new Date(w.createdAt).toLocaleDateString()}
                     </p>
                   </div>
@@ -114,7 +114,7 @@ export default async function AdminWithdrawalsPage() {
 
       {others.length > 0 && (
         <section className="space-y-3">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-600">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
             History
           </h2>
           <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">

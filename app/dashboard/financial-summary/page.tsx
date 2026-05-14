@@ -242,7 +242,7 @@ function StatCard({
   };
   return (
     <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-5">
-      <p className="text-xs font-mono font-medium text-zinc-400 dark:text-zinc-600 uppercase tracking-wider mb-2">
+      <p className="text-xs font-mono font-medium text-muted-foreground uppercase tracking-wider mb-2">
         {label}
       </p>
       <p className={`text-2xl font-semibold ${colors[color]}`}>{value}</p>

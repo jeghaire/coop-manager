@@ -111,7 +111,7 @@ export function MobileNavDrawer({
 
         <nav className="flex-1 overflow-y-auto px-3 py-4 flex flex-col gap-5">
           <div className="flex flex-col gap-0.5">
-            <p className="px-3 mb-1 text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-600">
+            <p className="px-3 mb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
               Member
             </p>
             {memberLinks.map(({ href, label }) => (
@@ -128,7 +128,7 @@ export function MobileNavDrawer({
 
           {(isAdmin || isTreasurer) && (
             <div className="flex flex-col gap-0.5">
-              <p className="px-3 mb-1 text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-600">
+              <p className="px-3 mb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                 {isTreasurer ? "Treasurer" : "Admin"}
               </p>
               {(isAdmin ? adminLinks(pendingLoans) : treasurerLinks).map(

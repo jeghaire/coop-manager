@@ -7,9 +7,11 @@ import { getPublicUrl } from "@/app/lib/s3-upload";
 import { ReceiptViewerDialog } from "@/app/components/ReceiptViewerDialog";
 
 function isViewableImage(fileType: string | null): boolean {
-  return !!fileType?.startsWith("image/") &&
+  return (
+    !!fileType?.startsWith("image/") &&
     fileType !== "image/heic" &&
-    fileType !== "image/heif";
+    fileType !== "image/heif"
+  );
 }
 import { Badge } from "@/components/ui/badge";
 import { ContributionReviewForm } from "./ContributionReviewForm";
@@ -21,14 +23,14 @@ const PAYMENT_METHOD_LABEL: Record<string, string> = {
   BANK_TRANSFER: "Bank Transfer",
   MOBILE_MONEY: "Mobile Money",
   CASH: "Cash",
-  DIRECT_PAYMENT: "Direct Payment"
+  DIRECT_PAYMENT: "Direct Payment",
 };
 
 const STATUS_FILTER = [
   "ALL",
   "PENDING_VERIFICATION",
   "VERIFIED",
-  "REJECTED"
+  "REJECTED",
 ] as const;
 type StatusFilter = (typeof STATUS_FILTER)[number];
 
@@ -36,11 +38,11 @@ const STATUS_LABEL: Record<StatusFilter, string> = {
   ALL: "All",
   PENDING_VERIFICATION: "Pending",
   VERIFIED: "Verified",
-  REJECTED: "Rejected"
+  REJECTED: "Rejected",
 };
 
 export default async function AdminContributionsPage({
-  searchParams
+  searchParams,
 }: {
   searchParams: Promise<{ status?: string }>;
 }) {
@@ -55,7 +57,7 @@ export default async function AdminContributionsPage({
   const cooperativeId = session.user.cooperativeId as string;
   const { status: rawStatus } = await searchParams;
   const activeFilter: StatusFilter = STATUS_FILTER.includes(
-    rawStatus as StatusFilter
+    rawStatus as StatusFilter,
   )
     ? (rawStatus as StatusFilter)
     : "PENDING_VERIFICATION";
@@ -72,12 +74,12 @@ export default async function AdminContributionsPage({
     where: {
       cooperativeId,
       deletedAt: null,
-      ...(activeFilter !== "ALL" && { status: activeFilter })
+      ...(activeFilter !== "ALL" && { status: activeFilter }),
     },
     include: {
-      user: { select: { name: true, email: true } }
+      user: { select: { name: true, email: true } },
     },
-    orderBy: { submittedAt: "desc" }
+    orderBy: { submittedAt: "desc" },
   });
 
   const contributions = raw.map((c) => ({
@@ -88,7 +90,7 @@ export default async function AdminContributionsPage({
   const counts = await prisma.contribution.groupBy({
     by: ["status"],
     where: { cooperativeId, deletedAt: null },
-    _count: true
+    _count: true,
   });
 
   const countMap: Record<string, number> = { ALL: 0 };
@@ -145,7 +147,8 @@ export default async function AdminContributionsPage({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 flex-wrap">
                     <span className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
-                      {sym}{Number(c.amount).toLocaleString()}
+                      {sym}
+                      {Number(c.amount).toLocaleString()}
                     </span>
                     {c.status === "PENDING_VERIFICATION" && (
                       <Badge variant="warning">Pending</Badge>
@@ -156,7 +159,7 @@ export default async function AdminContributionsPage({
                     {c.status === "REJECTED" && (
                       <Badge variant="destructive">Rejected</Badge>
                     )}
-                    <span className="text-xs text-zinc-400 dark:text-zinc-600">
+                    <span className="text-xs text-muted-foreground">
                       {PAYMENT_METHOD_LABEL[c.paymentMethod] ?? c.paymentMethod}
                     </span>
                   </div>
@@ -168,12 +171,12 @@ export default async function AdminContributionsPage({
                     <p className="text-xs text-zinc-500 dark:text-zinc-400">
                       {c.user.email}
                     </p>
-                    <p className="text-xs text-zinc-400 dark:text-zinc-600">
+                    <p className="text-xs text-muted-foreground">
                       Submitted{" "}
                       {new Date(c.submittedAt).toLocaleDateString("en-GB", {
                         day: "numeric",
                         month: "short",
-                        year: "numeric"
+                        year: "numeric",
                       })}
                     </p>
                   </div>
@@ -186,7 +189,12 @@ export default async function AdminContributionsPage({
                       className="mt-2 inline-flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-400 hover:underline"
                     >
                       {c.receiptFileType === "application/pdf" && (
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 shrink-0">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          className="w-4 h-4 shrink-0"
+                        >
                           <path d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0016.5 9h-1.875a1.875 1.875 0 01-1.875-1.875V5.25A3.75 3.75 0 009 1.5H5.625z" />
                           <path d="M12.971 1.816A5.23 5.23 0 0114.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 013.434 1.279 9.768 9.768 0 00-6.963-6.963z" />
                         </svg>
@@ -208,7 +216,7 @@ export default async function AdminContributionsPage({
                       {new Date(c.verifiedAt).toLocaleDateString("en-GB", {
                         day: "numeric",
                         month: "short",
-                        year: "numeric"
+                        year: "numeric",
                       })}
                     </p>
                   )}

@@ -35,21 +35,25 @@ export default async function AdminLoansPage() {
       where: {
         cooperativeId,
         status: "PENDING_ADMIN_REVIEW",
-        deletedAt: null
+        deletedAt: null,
       },
       include: {
         applicant: { select: { id: true, name: true, email: true } },
         guarantors: {
           where: { deletedAt: null },
-          include: { guarantor: { select: { id: true, name: true } } }
-        }
+          include: { guarantor: { select: { id: true, name: true } } },
+        },
       },
-      orderBy: { appliedAt: "asc" }
+      orderBy: { appliedAt: "asc" },
     }),
     prisma.cooperative.findUnique({
       where: { id: cooperativeId },
-      select: { borrowingMultiplier: true, guarantorCoverageMode: true, currency: true }
-    })
+      select: {
+        borrowingMultiplier: true,
+        guarantorCoverageMode: true,
+        currency: true,
+      },
+    }),
   ]);
 
   // Fetch contribution totals for all involved users
@@ -64,7 +68,7 @@ export default async function AdminLoansPage() {
     pendingLoans.map(async (loan) => {
       const [applicantTotal, ...guarantorTotals] = await Promise.all([
         getTotalContributed(loan.applicant.id),
-        ...loan.guarantors.map((g) => getTotalContributed(g.guarantor.id))
+        ...loan.guarantors.map((g) => getTotalContributed(g.guarantor.id)),
       ]);
 
       const capacity = applicantTotal * (cooperative?.borrowingMultiplier ?? 3);
@@ -74,14 +78,14 @@ export default async function AdminLoansPage() {
       const guarantorContributions = loan.guarantors.map((g, i) => ({
         id: g.guarantor.id,
         name: g.guarantor.name,
-        total: guarantorTotals[i]
+        total: guarantorTotals[i],
       }));
 
       let covered = true;
       if (mode === "COMBINED") {
         const combined = guarantorContributions.reduce(
           (s, g) => s + g.total,
-          0
+          0,
         );
         covered = combined >= amount;
       } else if (mode === "INDIVIDUAL") {
@@ -93,9 +97,9 @@ export default async function AdminLoansPage() {
         applicantContribution: applicantTotal,
         borrowingCapacity: capacity,
         guarantorContributions,
-        covered
+        covered,
       };
-    })
+    }),
   );
 
   const sym = getCurrencySymbol(cooperative?.currency ?? "NGN");
@@ -126,7 +130,8 @@ export default async function AdminLoansPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 flex-wrap">
                       <span className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
-                        {sym}{amount.toLocaleString()}
+                        {sym}
+                        {amount.toLocaleString()}
                       </span>
                       <Badge variant="sky">Pending Review</Badge>
                       {loan.covered ? (
@@ -143,20 +148,22 @@ export default async function AdminLoansPage() {
                     <div className="mt-3 space-y-1">
                       <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                         {loan.applicant.name}
-                        <span className="text-xs text-zinc-400 dark:text-zinc-600 font-normal ml-2">
+                        <span className="text-xs text-muted-foreground font-normal ml-2">
                           {loan.applicant.email}
                         </span>
                       </p>
                       <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                        Contributed: {sym}{loan.applicantContribution.toLocaleString()} ·
-                        Capacity: {sym}{loan.borrowingCapacity.toLocaleString()}
+                        Contributed: {sym}
+                        {loan.applicantContribution.toLocaleString()} ·
+                        Capacity: {sym}
+                        {loan.borrowingCapacity.toLocaleString()}
                       </p>
-                      <p className="text-xs text-zinc-400 dark:text-zinc-600">
+                      <p className="text-xs text-muted-foreground">
                         Applied{" "}
                         {new Date(loan.appliedAt).toLocaleDateString("en-GB", {
                           day: "numeric",
                           month: "short",
-                          year: "numeric"
+                          year: "numeric",
                         })}
                       </p>
                     </div>
@@ -165,7 +172,7 @@ export default async function AdminLoansPage() {
                     <div className="mt-3 space-y-1.5">
                       {loan.guarantors.map((g) => {
                         const contrib = loan.guarantorContributions.find(
-                          (gc) => gc.id === g.guarantor.id
+                          (gc) => gc.id === g.guarantor.id,
                         );
                         return (
                           <div
@@ -177,15 +184,16 @@ export default async function AdminLoansPage() {
                             </span>
                             {guarantorStatusBadge(g.status)}
                             {contrib && (
-                              <span className="text-zinc-400 dark:text-zinc-600">
-                                {sym}{contrib.total.toLocaleString()} contributed
+                              <span className="text-muted-foreground">
+                                {sym}
+                                {contrib.total.toLocaleString()} contributed
                               </span>
                             )}
                           </div>
                         );
                       })}
                       {cooperative && (
-                        <p className="text-xs text-zinc-400 dark:text-zinc-600 italic">
+                        <p className="text-xs text-muted-foreground italic">
                           Coverage mode: {cooperative.guarantorCoverageMode}
                         </p>
                       )}

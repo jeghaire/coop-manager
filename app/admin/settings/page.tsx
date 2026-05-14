@@ -70,11 +70,11 @@ export default async function AdminSettingsPage() {
               <div className="border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-500 bg-zinc-50 dark:bg-zinc-800">
                 {cooperative.borrowingMultiplier}x
               </div>
-              <span className="text-xs text-zinc-400 dark:text-zinc-600 italic">
+              <span className="text-xs text-muted-foreground italic">
                 Coming soon
               </span>
             </div>
-            <p className="text-xs text-zinc-400 dark:text-zinc-600">
+            <p className="text-xs text-muted-foreground">
               Members can borrow up to {cooperative.borrowingMultiplier}x their
               total contributions.
             </p>

@@ -94,7 +94,7 @@ export default async function AdminMembersPage() {
                       <p className="font-medium text-zinc-900 dark:text-zinc-100">
                         {m.name}
                         {!m.emailVerified && (
-                          <span className="ml-2 text-xs text-zinc-400 dark:text-zinc-600">
+                          <span className="ml-2 text-xs text-muted-foreground">
                             (unverified)
                           </span>
                         )}
