@@ -27,9 +27,7 @@ function Stat({
           : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800/60"
       }`}
     >
-      <p className="text-sm font-mono font-semibold text-muted-foreground mb-2">
-        {label}
-      </p>
+      <p className="text-sm font-medium text-muted-foreground mb-2">{label}</p>
       <p
         className={`text-2xl font-semibold tracking-tight ${
           accent
@@ -99,7 +97,7 @@ export async function FinancialReport({
       </div>
 
       <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-5">
-        <p className="text-sm font-semibold font-mono text-muted-foreground mb-5">
+        <p className="text-sm font-medium text-muted-foreground mb-5">
           Fund Health
         </p>
         <div className="space-y-3">

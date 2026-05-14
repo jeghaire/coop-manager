@@ -23,20 +23,20 @@ export default async function TreasurerPage() {
     prisma.user.findMany({
       where: { cooperativeId, deletedAt: null, id: { not: session.user.id } },
       select: { id: true, name: true, email: true },
-      orderBy: { name: "asc" }
+      orderBy: { name: "asc" },
     }),
     prisma.loanApplication.findMany({
       where: { cooperativeId, status: "APPROVED", deletedAt: null },
       include: {
         applicant: { select: { name: true } },
-        repayments: { select: { amount: true } }
+        repayments: { select: { amount: true } },
       },
-      orderBy: { approvedAt: "desc" }
+      orderBy: { approvedAt: "desc" },
     }),
     prisma.cooperative.findUnique({
       where: { id: cooperativeId },
-      select: { currency: true }
-    })
+      select: { currency: true },
+    }),
   ]);
 
   const sym = getCurrencySymbol(cooperative?.currency ?? "NGN");

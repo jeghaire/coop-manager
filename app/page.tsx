@@ -9,11 +9,14 @@ import {
   Lock,
   CreditCard,
   ChevronRight,
+  Quote,
 } from "lucide-react";
 import { Header } from "./components/Header";
 import { ScrollReveal } from "./components/ScrollReveal";
 import { TiltCard } from "./components/TiltCard";
 import { HeroScene } from "./components/HeroScene";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function Home() {
   return (
@@ -21,6 +24,7 @@ export default function Home() {
       <Header />
       <main className="flex-1">
         <Hero />
+        <StatsBar />
         <ContributionsFeature />
         <LoansFeature />
         <MembersFeature />
@@ -469,6 +473,58 @@ function AuditLogMockup() {
   );
 }
 
+// ─── Stats bar ────────────────────────────────────────────────────────────────
+
+function StatsBar() {
+  const stats = [
+    {
+      value: "4",
+      label: "Permission roles",
+      desc: "Owner · Admin · Treasurer · Member",
+    },
+    {
+      value: "Multi-tenant",
+      label: "Data isolation",
+      desc: "Zero cross-cooperative data leakage",
+    },
+    {
+      value: "100%",
+      label: "Audit coverage",
+      desc: "Every financial action timestamped",
+    },
+    {
+      value: "Free",
+      label: "Get started",
+      desc: "No credit card or contract needed",
+    },
+  ];
+  return (
+    <section className="py-12 bg-zinc-50 dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800/60">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {stats.map((s, i) => (
+            <ScrollReveal key={s.label} direction="up" delay={i * 60}>
+              <Card className="bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 shadow-none">
+                <CardContent className="pt-5 pb-5">
+                  <p className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50 tracking-tight mb-1">
+                    {s.value}
+                  </p>
+                  <p className="text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+                    {s.label}
+                  </p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-500 leading-relaxed">
+                    {s.desc}
+                  </p>
+                </CardContent>
+              </Card>
+            </ScrollReveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // ─── Hero ─────────────────────────────────────────────────────────────────────
 
 function Hero() {
@@ -604,10 +660,10 @@ function ContributionsFeature() {
       <div className="max-w-7xl mx-auto px-6 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           <ScrollReveal direction="up">
-            <div className="inline-flex items-center gap-2 text-xs font-mono font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 px-3 py-1.5 rounded-full mb-6">
+            <Badge variant="success" className="gap-1.5 font-mono mb-6 px-3 py-1.5 rounded-full text-xs">
               <CreditCard className="w-3 h-3" />
               Contribution Tracking
-            </div>
+            </Badge>
             <h2 className="text-3xl md:text-4xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight leading-[1.1] mb-5">
               Every payment,
               <br />
@@ -672,10 +728,10 @@ function LoansFeature() {
           </ScrollReveal>
 
           <ScrollReveal direction="up" delay={60}>
-            <div className="inline-flex items-center gap-2 text-xs font-mono font-medium text-sky-700 dark:text-sky-400 bg-sky-50 dark:bg-sky-500/10 border border-sky-200 dark:border-sky-500/20 px-3 py-1.5 rounded-full mb-6">
+            <Badge variant="sky" className="gap-1.5 font-mono mb-6 px-3 py-1.5 rounded-full text-xs">
               <FileText className="w-3 h-3" />
               Loan Administration
-            </div>
+            </Badge>
             <h2 className="text-3xl md:text-4xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight leading-[1.1] mb-5">
               From application
               <br />
@@ -722,10 +778,10 @@ function MembersFeature() {
       <div className="max-w-7xl mx-auto px-6 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           <ScrollReveal direction="up">
-            <div className="inline-flex items-center gap-2 text-xs font-mono font-medium text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 px-3 py-1.5 rounded-full mb-6">
+            <Badge variant="warning" className="gap-1.5 font-mono mb-6 px-3 py-1.5 rounded-full text-xs">
               <Users className="w-3 h-3" />
               Member Management
-            </div>
+            </Badge>
             <h2 className="text-3xl md:text-4xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight leading-[1.1] mb-5">
               Everyone in their lane,
               <br />
@@ -818,25 +874,29 @@ function HowItWorks() {
           </p>
         </ScrollReveal>
 
-        <div className="space-y-0">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {steps.map((step, i) => (
-            <ScrollReveal key={step.number} direction="flip" delay={i * 120}>
-              <div className="grid grid-cols-1 md:grid-cols-[160px_1fr] gap-8 md:gap-16 py-12 border-t border-zinc-100 dark:border-zinc-800/60 first:border-t-0">
-                <div className="flex md:flex-col md:items-start items-center gap-4">
-                  <span className="text-5xl md:text-6xl font-semibold font-mono text-zinc-100 dark:text-zinc-900 select-none leading-none">
-                    {step.number}
-                  </span>
-                  <div className="hidden md:block w-8 h-px bg-emerald-500/40 mt-4" />
-                </div>
-                <div className="max-w-xl pt-1">
-                  <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3 leading-snug">
-                    {step.title}
-                  </h3>
-                  <p className="text-base text-zinc-500 dark:text-zinc-400 leading-relaxed">
-                    {step.body}
-                  </p>
-                </div>
-              </div>
+            <ScrollReveal key={step.number} direction="up" delay={i * 120}>
+              <Card className="bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 shadow-none h-full">
+                <CardContent className="pt-6 pb-6 flex flex-col gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-emerald-500/10 dark:bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
+                      <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400 font-mono">
+                        {step.number}
+                      </span>
+                    </div>
+                    <div className="h-px flex-1 bg-zinc-100 dark:bg-zinc-800" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-100 mb-2 leading-snug">
+                      {step.title}
+                    </h3>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                      {step.body}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
             </ScrollReveal>
           ))}
         </div>
@@ -872,10 +932,10 @@ function Security() {
           </ScrollReveal>
 
           <ScrollReveal direction="up" delay={60}>
-            <div className="inline-flex items-center gap-2 text-xs font-mono font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 px-3 py-1.5 rounded-full mb-6">
+            <Badge variant="success" className="gap-1.5 font-mono mb-6 px-3 py-1.5 rounded-full text-xs">
               <Lock className="w-3 h-3" />
               Security by default
-            </div>
+            </Badge>
             <h2 className="text-3xl md:text-4xl font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight leading-[1.1] mb-5">
               Built for institutions
               <br />
@@ -922,10 +982,10 @@ function CtaBanner() {
 
       <div className="relative max-w-3xl mx-auto px-6 text-center">
         <ScrollReveal direction="up">
-          <div className="inline-flex items-center gap-2 text-xs font-mono font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-full mb-8">
+          <Badge variant="success" className="gap-1.5 font-mono mb-8 px-3 py-1.5 rounded-full text-xs bg-emerald-500/10 text-emerald-400 ring-emerald-500/20">
             <Shield className="w-3 h-3" />
             Trusted with cooperative finances
-          </div>
+          </Badge>
           <h2 className="text-3xl md:text-5xl font-semibold text-white tracking-tight leading-[1.1] mb-6">
             Your cooperative deserves
             <br />
@@ -935,6 +995,23 @@ function CtaBanner() {
             Stop managing contributions in spreadsheets and loans in WhatsApp
             threads. Give your cooperative a platform built for the work.
           </p>
+
+          <div className="mb-10 max-w-lg mx-auto">
+            <Card className="bg-zinc-800/60 border-zinc-700/60 shadow-none text-left">
+              <CardContent className="pt-5 pb-5">
+                <Quote className="w-5 h-5 text-emerald-500/60 mb-3" />
+                <p className="text-sm text-zinc-300 leading-relaxed mb-3 italic">
+                  &ldquo;We used to track everything in a spreadsheet. Now our treasurer
+                  can verify 40+ contributions in minutes — and every decision
+                  has a paper trail.&rdquo;
+                </p>
+                <p className="text-xs text-zinc-500">
+                  Treasurer, Abuja Civil Servants Cooperative
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               href="/auth/signup"
@@ -960,31 +1037,75 @@ function CtaBanner() {
 
 function Footer() {
   return (
-    <footer className="bg-zinc-950 border-t border-zinc-800/60 py-10">
-      <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-2.5">
-          <div className="w-6 h-6 bg-emerald-500 rounded-md flex items-center justify-center">
-            <Building2 className="w-3.5 h-3.5 text-zinc-950" strokeWidth={2} />
+    <footer className="bg-zinc-950 border-t border-zinc-800/60">
+      <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-[1fr_auto_auto_auto] gap-10 md:gap-16">
+        {/* Brand */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-6 h-6 bg-emerald-500 rounded-md flex items-center justify-center">
+              <Building2 className="w-3.5 h-3.5 text-zinc-950" strokeWidth={2} />
+            </div>
+            <span className="text-sm font-semibold text-zinc-100 tracking-tight">
+              Cooperative Manager
+            </span>
           </div>
-          <span className="text-sm font-semibold text-zinc-100 tracking-tight">
-            Cooperative Manager
-          </span>
+          <p className="text-xs text-zinc-600 leading-relaxed max-w-[220px]">
+            Purpose-built for savings cooperatives. Contributions, loans, and members — all in one place.
+          </p>
         </div>
-        <div className="flex items-center gap-6 text-xs text-zinc-600">
-          <Link
-            href="/auth/signin"
-            className="hover:text-zinc-400 transition-colors"
-          >
-            Sign in
-          </Link>
-          <Link
-            href="/auth/signup"
-            className="hover:text-zinc-400 transition-colors"
-          >
-            Sign up
-          </Link>
-          <span>&copy; {new Date().getFullYear()} Cooperative Manager</span>
+
+        {/* Platform */}
+        <div className="space-y-3">
+          <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Platform</p>
+          <ul className="space-y-2 text-xs text-zinc-600">
+            <li>
+              <a href="#how-it-works" className="hover:text-zinc-400 transition-colors">
+                How it works
+              </a>
+            </li>
+            <li>
+              <a href="#security" className="hover:text-zinc-400 transition-colors">
+                Security
+              </a>
+            </li>
+          </ul>
         </div>
+
+        {/* Account */}
+        <div className="space-y-3">
+          <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Account</p>
+          <ul className="space-y-2 text-xs text-zinc-600">
+            <li>
+              <Link href="/auth/signin" className="hover:text-zinc-400 transition-colors">
+                Sign in
+              </Link>
+            </li>
+            <li>
+              <Link href="/auth/signup" className="hover:text-zinc-400 transition-colors">
+                Create account
+              </Link>
+            </li>
+          </ul>
+        </div>
+
+        {/* Legal */}
+        <div className="space-y-3">
+          <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Legal</p>
+          <ul className="space-y-2 text-xs text-zinc-600">
+            <li>
+              <span className="cursor-default">Privacy policy</span>
+            </li>
+            <li>
+              <span className="cursor-default">Terms of service</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 py-5 border-t border-zinc-800/60">
+        <p className="text-xs text-zinc-700 text-center md:text-left">
+          &copy; {new Date().getFullYear()} Cooperative Manager. All rights reserved.
+        </p>
       </div>
     </footer>
   );

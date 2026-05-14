@@ -31,6 +31,22 @@ export async function Header({ pendingLoans = 0 }: { pendingLoans?: number }) {
         </div>
 
         <div className="flex items-center gap-2">
+          {!user && (
+            <nav className="hidden md:flex items-center gap-1 mr-1">
+              <a
+                href="#how-it-works"
+                className="text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors px-3 py-1.5"
+              >
+                How it works
+              </a>
+              <a
+                href="#security"
+                className="text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors px-3 py-1.5"
+              >
+                Security
+              </a>
+            </nav>
+          )}
           <ThemeToggle />
           <Separator
             orientation="vertical"
