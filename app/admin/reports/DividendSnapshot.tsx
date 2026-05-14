@@ -1,10 +1,19 @@
-﻿import {
+import {
   Progress,
   ProgressLabel,
   ProgressValue,
 } from "@/components/ui/progress";
 import { getDividendSnapshot } from "./data";
 import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 const ROLE_BADGE: Record<string, "success" | "sky" | "warning" | "secondary"> =
   {
@@ -78,101 +87,87 @@ export async function DividendSnapshot({
       )}
 
       <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead>
-              <tr className="border-b border-zinc-100 dark:border-zinc-800">
-                <th className="text-left px-5 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                  Member
-                </th>
-                <th className="text-right px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider hidden sm:table-cell">
-                  Contributed
-                </th>
-                <th className="text-right px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                  Share %
-                </th>
-                {distributionAmount > 0 && (
-                  <th className="text-right px-5 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                    Dividend
-                  </th>
-                )}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-              {rows.map((row, i) => {
-                const dividend =
-                  distributionAmount > 0
-                    ? (row.percentage / 100) * distributionAmount
-                    : 0;
-                return (
-                  <tr
-                    key={row.id}
-                    className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/20"
-                  >
-                    <td className="px-5 py-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground w-5 text-right shrink-0">
-                          {i + 1}
-                        </span>
-                        <div>
-                          <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">
-                            {row.name}
-                          </p>
-                          <p className="text-xs text-zinc-500 dark:text-zinc-400 hidden sm:block">
-                            {row.email}
-                          </p>
-                        </div>
-                        <Badge
-                          variant={ROLE_BADGE[row.role] ?? "secondary"}
-                          className="hidden md:inline-flex text-[10px] ml-auto"
-                        >
-                          {row.role}
-                        </Badge>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Member</TableHead>
+              <TableHead className="text-right hidden sm:table-cell">
+                Contributed
+              </TableHead>
+              <TableHead className="text-right">Share %</TableHead>
+              {distributionAmount > 0 && (
+                <TableHead className="text-right">Dividend</TableHead>
+              )}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {rows.map((row, i) => {
+              const dividend =
+                distributionAmount > 0
+                  ? (row.percentage / 100) * distributionAmount
+                  : 0;
+              return (
+                <TableRow key={row.id}>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground w-5 text-right shrink-0">
+                        {i + 1}
+                      </span>
+                      <div>
+                        <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">
+                          {row.name}
+                        </p>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 hidden sm:block">
+                          {row.email}
+                        </p>
                       </div>
-                    </td>
-                    <td className="px-4 py-3 text-right text-zinc-700 dark:text-zinc-300 hidden sm:table-cell">
-                      {currencySymbol}
-                      {row.totalContributed.toLocaleString()}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Progress
-                          value={row.percentage}
-                          className="w-full max-w-25"
-                        ></Progress>
-                        <span className="text-zinc-700 dark:text-zinc-300 text-sm tabular-nums">
-                          {row.percentage.toFixed(1)}%
-                        </span>
-                      </div>
-                    </td>
-                    {distributionAmount > 0 && (
-                      <td className="px-5 py-3 text-right font-mono font-semibold text-emerald-700 dark:text-emerald-400">
-                        {currencySymbol}
-                        {Math.round(dividend).toLocaleString()}
-                      </td>
-                    )}
-                  </tr>
-                );
-              })}
-            </tbody>
-            {distributionAmount > 0 && (
-              <tfoot>
-                <tr className="border-t-2 border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/50">
-                  <td
-                    colSpan={3}
-                    className="px-5 py-3 text-sm font-semibold text-zinc-900 dark:text-zinc-100"
-                  >
-                    Total
-                  </td>
-                  <td className="px-5 py-3 text-right font-mono font-bold text-emerald-700 dark:text-emerald-400">
+                      <Badge
+                        variant={ROLE_BADGE[row.role] ?? "secondary"}
+                        className="hidden md:inline-flex text-[10px] ml-auto"
+                      >
+                        {row.role}
+                      </Badge>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right text-zinc-700 dark:text-zinc-300 hidden sm:table-cell">
                     {currencySymbol}
-                    {distributionAmount.toLocaleString()}
-                  </td>
-                </tr>
-              </tfoot>
-            )}
-          </table>
-        </div>
+                    {row.totalContributed.toLocaleString()}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      <Progress
+                        value={row.percentage}
+                        className="flex-1 max-w-25"
+                      ></Progress>
+                      <span className="w-14 shrink-0 text-right text-zinc-700 dark:text-zinc-300 text-sm tabular-nums">
+                        {row.percentage.toFixed(1)}%
+                      </span>
+                    </div>
+                  </TableCell>
+                  {distributionAmount > 0 && (
+                    <TableCell className="text-right font-mono font-semibold text-emerald-700 dark:text-emerald-400">
+                      {currencySymbol}
+                      {Math.round(dividend).toLocaleString()}
+                    </TableCell>
+                  )}
+                </TableRow>
+              );
+            })}
+          </TableBody>
+          {distributionAmount > 0 && (
+            <TableFooter>
+              <TableRow>
+                <TableCell colSpan={3} className="font-semibold text-zinc-900 dark:text-zinc-100">
+                  Total
+                </TableCell>
+                <TableCell className="text-right font-mono font-bold text-emerald-700 dark:text-emerald-400">
+                  {currencySymbol}
+                  {distributionAmount.toLocaleString()}
+                </TableCell>
+              </TableRow>
+            </TableFooter>
+          )}
+        </Table>
       </div>
     </div>
   );

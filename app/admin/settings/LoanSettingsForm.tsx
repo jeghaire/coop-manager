@@ -146,7 +146,7 @@ export function LoanSettingsForm({
           />
         </div>
 
-        <Button type="submit" size="sm" disabled={pending}>
+        <Button type="submit" size="sm" disabled={pending || !form.formState.isDirty}>
           {pending ? "Saving…" : "Save Loan Settings"}
         </Button>
       </form>

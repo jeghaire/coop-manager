@@ -1,4 +1,4 @@
-﻿export const dynamic = "force-dynamic";
+export const dynamic = "force-dynamic";
 
 import { getSession } from "@/app/lib/auth-helpers";
 import { redirect } from "next/navigation";
@@ -13,6 +13,14 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { PageHeader } from "@/app/components/PageHeader";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 const STATUS_BADGE: Record<
   string,
@@ -53,7 +61,7 @@ export default async function WithdrawalsPage() {
     <div className="space-y-8">
       <PageHeader
         title="Withdrawals"
-        description="  Request a withdrawal from your contributions balance"
+        description="Request a withdrawal from your contributions balance"
       />
 
       <div className="grid gap-6 md:grid-cols-2">
@@ -102,57 +110,47 @@ export default async function WithdrawalsPage() {
             Request History
           </h2>
           <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-sm">
-                <thead>
-                  <tr className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900">
-                    <th className="text-left px-4 py-3 font-medium text-zinc-500 dark:text-zinc-400">
-                      Amount
-                    </th>
-                    <th className="text-left px-4 py-3 font-medium text-zinc-500 dark:text-zinc-400">
-                      Reason
-                    </th>
-                    <th className="text-left px-4 py-3 font-medium text-zinc-500 dark:text-zinc-400">
-                      Status
-                    </th>
-                    <th className="text-left px-4 py-3 font-medium text-zinc-500 dark:text-zinc-400">
-                      Date
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800 bg-white dark:bg-zinc-950">
-                  {withdrawals.map((w) => (
-                    <tr key={w.id}>
-                      <td className="px-4 py-3 font-medium text-zinc-900 dark:text-zinc-100">
-                        {sym}
-                        {Number(w.amount).toLocaleString()}
-                      </td>
-                      <td className="px-4 py-3 text-zinc-600 dark:text-zinc-400">
-                        {REASON_LABEL[w.reason] ?? w.reason}
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex flex-col gap-1">
-                          <Badge
-                            variant={STATUS_BADGE[w.status] ?? "secondary"}
-                            className="w-fit"
-                          >
-                            {w.status}
-                          </Badge>
-                          {w.status === "REJECTED" && w.rejectionReason && (
-                            <p className="text-xs text-red-600 dark:text-red-400">
-                              {w.rejectionReason}
-                            </p>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-zinc-500 dark:text-zinc-400">
-                        {new Date(w.createdAt).toLocaleDateString()}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Reason</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Date</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {withdrawals.map((w) => (
+                  <TableRow key={w.id}>
+                    <TableCell className="font-medium text-zinc-900 dark:text-zinc-100">
+                      {sym}
+                      {Number(w.amount).toLocaleString()}
+                    </TableCell>
+                    <TableCell className="text-zinc-600 dark:text-zinc-400">
+                      {REASON_LABEL[w.reason] ?? w.reason}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col gap-1">
+                        <Badge
+                          variant={STATUS_BADGE[w.status] ?? "secondary"}
+                          className="w-fit"
+                        >
+                          {w.status}
+                        </Badge>
+                        {w.status === "REJECTED" && w.rejectionReason && (
+                          <p className="text-xs text-red-600 dark:text-red-400">
+                            {w.rejectionReason}
+                          </p>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-zinc-500 dark:text-zinc-400">
+                      {new Date(w.createdAt).toLocaleDateString()}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
         </div>
       )}

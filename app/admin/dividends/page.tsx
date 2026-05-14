@@ -1,4 +1,4 @@
-﻿export const dynamic = "force-dynamic";
+export const dynamic = "force-dynamic";
 
 import { getSession } from "@/app/lib/auth-helpers";
 import { redirect } from "next/navigation";
@@ -8,6 +8,14 @@ import { Badge } from "@/components/ui/badge";
 import { NewDividendForm } from "./NewDividendForm";
 import { ApproveButton, ProcessButton } from "./DividendActions";
 import { PageHeader } from "@/app/components/PageHeader";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export default async function DividendsPage() {
   const session = await getSession();
@@ -58,79 +66,62 @@ export default async function DividendsPage() {
               Payout History
             </h2>
           </div>
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead className="bg-zinc-50 dark:bg-zinc-800/50 border-b border-zinc-200 dark:border-zinc-800">
-                <tr>
-                  <th className="px-4 py-3 text-left font-medium text-zinc-500 dark:text-zinc-400">
-                    Period
-                  </th>
-                  <th className="px-4 py-3 text-right font-medium text-zinc-500 dark:text-zinc-400">
-                    Total Profit
-                  </th>
-                  <th className="px-4 py-3 text-right font-medium text-zinc-500 dark:text-zinc-400">
-                    Pool
-                  </th>
-                  <th className="px-4 py-3 text-center font-medium text-zinc-500 dark:text-zinc-400">
-                    Members
-                  </th>
-                  <th className="px-4 py-3 text-left font-medium text-zinc-500 dark:text-zinc-400">
-                    Status
-                  </th>
-                  <th className="px-4 py-3 text-left font-medium text-zinc-500 dark:text-zinc-400">
-                    Action
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-                {payouts.map((payout) => (
-                  <tr
-                    key={payout.id}
-                    className="hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors"
-                  >
-                    <td className="px-4 py-3 font-medium text-zinc-900 dark:text-zinc-100">
-                      {payout.period} {payout.year}
-                    </td>
-                    <td className="px-4 py-3 text-right text-zinc-600 dark:text-zinc-400">
-                      {sym}
-                      {Number(payout.totalProfit).toLocaleString()}
-                    </td>
-                    <td className="px-4 py-3 text-right font-semibold text-emerald-600 dark:text-emerald-400">
-                      {sym}
-                      {Number(payout.dividendPool).toLocaleString()}
-                    </td>
-                    <td className="px-4 py-3 text-center text-zinc-600 dark:text-zinc-400">
-                      {payout.totalMembers}
-                    </td>
-                    <td className="px-4 py-3">
-                      <StatusBadge status={payout.status} />
-                    </td>
-                    <td className="px-4 py-3">
-                      {payout.status === "PENDING" && (
-                        <ApproveButton
-                          payoutId={payout.id}
-                          cooperativeId={cooperativeId}
-                        />
-                      )}
-                      {payout.status === "APPROVED" && (
-                        <ProcessButton
-                          payoutId={payout.id}
-                          cooperativeId={cooperativeId}
-                        />
-                      )}
-                      {payout.status === "PAID" && (
-                        <Badge className="text-[10px] text-zinc-400">
-                          {payout.paidAt
-                            ? `Paid ${payout.paidAt.toLocaleDateString()}`
-                            : "Paid"}
-                        </Badge>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Period</TableHead>
+                <TableHead className="text-right">Total Profit</TableHead>
+                <TableHead className="text-right">Pool</TableHead>
+                <TableHead className="text-center">Members</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {payouts.map((payout) => (
+                <TableRow key={payout.id}>
+                  <TableCell className="font-medium text-zinc-900 dark:text-zinc-100">
+                    {payout.period} {payout.year}
+                  </TableCell>
+                  <TableCell className="text-right text-zinc-600 dark:text-zinc-400">
+                    {sym}
+                    {Number(payout.totalProfit).toLocaleString()}
+                  </TableCell>
+                  <TableCell className="text-right font-semibold text-emerald-600 dark:text-emerald-400">
+                    {sym}
+                    {Number(payout.dividendPool).toLocaleString()}
+                  </TableCell>
+                  <TableCell className="text-center text-zinc-600 dark:text-zinc-400">
+                    {payout.totalMembers}
+                  </TableCell>
+                  <TableCell>
+                    <StatusBadge status={payout.status} />
+                  </TableCell>
+                  <TableCell>
+                    {payout.status === "PENDING" && (
+                      <ApproveButton
+                        payoutId={payout.id}
+                        cooperativeId={cooperativeId}
+                      />
+                    )}
+                    {payout.status === "APPROVED" && (
+                      <ProcessButton
+                        payoutId={payout.id}
+                        cooperativeId={cooperativeId}
+                      />
+                    )}
+                    {payout.status === "PAID" && (
+                      <Badge className="text-[10px] text-zinc-400">
+                        {payout.paidAt
+                          ? `Paid ${payout.paidAt.toLocaleDateString()}`
+                          : "Paid"}
+                      </Badge>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       )}
     </div>
@@ -146,11 +137,7 @@ function StatusBadge({ status }: { status: string }) {
         </Badge>
       );
     case "APPROVED":
-      return (
-        <Badge className="bg-sky-100 text-sky-800 dark:bg-sky-500/20 dark:text-sky-400 hover:bg-sky-100 dark:hover:bg-sky-500/20">
-          Approved
-        </Badge>
-      );
+      return <Badge variant="sky">Approved</Badge>;
     case "PAID":
       return <Badge className="text-[10px]">Paid</Badge>;
     default:

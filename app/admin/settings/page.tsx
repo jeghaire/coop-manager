@@ -1,4 +1,4 @@
-﻿export const dynamic = "force-dynamic";
+export const dynamic = "force-dynamic";
 
 import { getSession } from "@/app/lib/auth-helpers";
 import { redirect } from "next/navigation";
@@ -9,6 +9,14 @@ import { BankAccountForm } from "./BankAccountForm";
 import { DeleteBankAccountForm, SetPreferredForm } from "./BankAccountActions";
 import { PageHeader } from "@/app/components/PageHeader";
 import { StarIcon } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export default async function AdminSettingsPage() {
   const session = await getSession();
@@ -135,66 +143,53 @@ export default async function AdminSettingsPage() {
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-sm">
-                <thead>
-                  <tr className="border-b border-zinc-100 dark:border-zinc-800">
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                      Account
-                    </th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider hidden md:table-cell">
-                      Number
-                    </th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider hidden sm:table-cell">
-                      Bank
-                    </th>
-                    <th className="text-right px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-                  {bankAccounts.map((account) => (
-                    <tr
-                      key={account.id}
-                      className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/20"
-                    >
-                      <td className="px-4 py-3">
-                        <p className="flex items-center font-medium text-zinc-900 dark:text-zinc-100">
-                          {account.accountName}
-                          {account.isPreferred && (
-                            <StarIcon className="ml-1.5 size-3.5 text-yellow-400 fill-current" />
-                          )}
-                        </p>
-                      </td>
-                      <td className="px-4 py-3 text-zinc-500 dark:text-zinc-400 font-mono text-xs hidden md:table-cell">
-                        {account.accountNumber}
-                      </td>
-                      <td className="px-4 py-3 text-zinc-500 dark:text-zinc-400 hidden sm:table-cell">
-                        {account.bankName}
-                      </td>
-                      {isOwner && (
-                        <td className="px-4 py-3">
-                          <div className="flex justify-end gap-2">
-                            {!account.isPreferred && (
-                              <SetPreferredForm
-                                accountId={account.id}
-                                cooperativeId={cooperativeId}
-                              />
-                            )}
-                            <DeleteBankAccountForm
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Account</TableHead>
+                  <TableHead className="hidden md:table-cell">Number</TableHead>
+                  <TableHead className="hidden sm:table-cell">Bank</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {bankAccounts.map((account) => (
+                  <TableRow key={account.id}>
+                    <TableCell>
+                      <p className="flex items-center font-medium text-zinc-900 dark:text-zinc-100">
+                        {account.accountName}
+                        {account.isPreferred && (
+                          <StarIcon className="ml-1.5 size-3.5 text-yellow-400 fill-current" />
+                        )}
+                      </p>
+                    </TableCell>
+                    <TableCell className="text-zinc-500 dark:text-zinc-400 font-mono text-xs hidden md:table-cell">
+                      {account.accountNumber}
+                    </TableCell>
+                    <TableCell className="text-zinc-500 dark:text-zinc-400 hidden sm:table-cell">
+                      {account.bankName}
+                    </TableCell>
+                    {isOwner && (
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          {!account.isPreferred && (
+                            <SetPreferredForm
                               accountId={account.id}
                               cooperativeId={cooperativeId}
                             />
-                          </div>
-                        </td>
-                      )}
-                      {!isOwner && <td />}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                          )}
+                          <DeleteBankAccountForm
+                            accountId={account.id}
+                            cooperativeId={cooperativeId}
+                          />
+                        </div>
+                      </TableCell>
+                    )}
+                    {!isOwner && <TableCell />}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           )}
         </div>
 

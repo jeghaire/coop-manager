@@ -101,9 +101,11 @@ export function ContributionSubmitForm({
       setFileError(null);
       try {
         const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
-        const res = await fetch(
-          `/api/receipts/presign?ext=${encodeURIComponent(ext)}&type=${encodeURIComponent(file.type)}`,
-        );
+        const res = await fetch("/api/receipts/presign", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ext, type: file.type, size: file.size }),
+        });
         if (!res.ok) {
           const body = await res.json().catch(() => ({}));
           setFileError(body.error ?? "Failed to get upload URL.");

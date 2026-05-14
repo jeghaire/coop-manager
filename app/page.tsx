@@ -745,7 +745,7 @@ function LoansFeature() {
             </p>
             <ul className="space-y-3">
               {[
-                "Multi-step workflow: apply → guarantors → admin review",
+                <span className="inline-flex items-center gap-1">Multi-step workflow: apply <ArrowRight className="size-3" /> guarantors <ArrowRight className="size-3" /> admin review</span>,
                 "Guarantors accept or reject with optional reasons",
                 "Admins approve or reject with documented decisions",
                 "Rejection reasons preserved for transparency and appeals",

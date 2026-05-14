@@ -1,10 +1,13 @@
 import { auth } from "./auth";
 import prisma from "./prisma";
 import { headers } from "next/headers";
+import { cache } from "react";
 
-export async function getSession() {
+// cache() deduplicates this call within a single request render tree,
+// so layouts and pages both calling getSession() hits the DB only once.
+export const getSession = cache(async () => {
   return auth.api.getSession({ headers: await headers() });
-}
+});
 
 export async function requireAuth() {
   const session = await getSession();

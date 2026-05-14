@@ -7,6 +7,55 @@ import { notifyContributionVerified, notifyContributionRejected } from "@/app/li
 import { getPublicUrl } from "@/app/lib/s3-upload";
 import { revalidatePath } from "next/cache";
 
+export type ContributionItem = {
+  id: string;
+  amount: number;
+  submittedAt: string;
+  status: string;
+  paymentMethod: string;
+  receiptUrl: string | null;
+  receiptFileType: string | null;
+  receiptFileName: string | null;
+  rejectionReason: string | null;
+};
+
+export async function loadMoreContributions(cursor: {
+  submittedAt: string;
+  id: string;
+}): Promise<ContributionItem[]> {
+  const session = await requireAuth();
+  const userId = session.user.id;
+  const cooperativeId = session.user.cooperativeId as string;
+
+  const cursorDate = new Date(cursor.submittedAt);
+
+  const rows = await prisma.contribution.findMany({
+    where: {
+      userId,
+      cooperativeId,
+      deletedAt: null,
+      OR: [
+        { submittedAt: { lt: cursorDate } },
+        { submittedAt: cursorDate, id: { lt: cursor.id } },
+      ],
+    },
+    orderBy: [{ submittedAt: "desc" }, { id: "desc" }],
+    take: 7,
+  });
+
+  return rows.map((c) => ({
+    id: c.id,
+    amount: Number(c.amount),
+    submittedAt: c.submittedAt.toISOString(),
+    status: c.status,
+    paymentMethod: c.paymentMethod,
+    receiptUrl: c.receiptKey ? getPublicUrl(c.receiptKey) : (c.receiptUrl ?? null),
+    receiptFileType: c.receiptFileType ?? null,
+    receiptFileName: c.receiptFileName ?? null,
+    rejectionReason: c.rejectionReason ?? null,
+  }));
+}
+
 export type ContributionActionState = {
   error?: string;
   success?: boolean;

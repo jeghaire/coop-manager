@@ -116,7 +116,7 @@ export default async function ReportsPage({
       <TabNav role={role} />
 
       <Suspense
-        key={tab + (eventType ?? "")}
+        key={tab}
         fallback={
           <div className="py-12 text-center text-sm text-muted-foreground">
             Loading…
@@ -135,7 +135,7 @@ export default async function ReportsPage({
           />
         )}
         {tab === "audit" && (role === "ADMIN" || role === "OWNER") && (
-          <AuditTrail cooperativeId={cooperativeId} eventType={eventType} />
+          <AuditTrail cooperativeId={cooperativeId} />
         )}
       </Suspense>
     </div>

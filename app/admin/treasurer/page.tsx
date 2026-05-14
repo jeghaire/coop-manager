@@ -45,7 +45,12 @@ export default async function TreasurerPage() {
     const totalDue = Number(loan.totalAmountDue ?? loan.amountRequested);
     const totalPaid = loan.repayments.reduce((s, r) => s + Number(r.amount), 0);
     const remaining = Math.max(0, totalDue - totalPaid);
-    return { ...loan, remaining };
+    return {
+      id: loan.id,
+      amountRequested: Number(loan.amountRequested),
+      applicant: loan.applicant,
+      remaining,
+    };
   });
 
   return (

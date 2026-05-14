@@ -5,9 +5,10 @@ import { redirect } from "next/navigation";
 import prisma from "@/app/lib/prisma";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
 import { PageHeader } from "@/app/components/PageHeader";
-import { Users } from "lucide-react";
 import { getCurrencySymbol } from "@/app/lib/currency";
 
 export default async function DashboardPage() {
@@ -103,115 +104,92 @@ export default async function DashboardPage() {
 
       {/* Quick stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-5">
-          <p className="text-xs font-mono font-medium text-muted-foreground uppercase tracking-wider mb-2">
-            Total Contributed
-          </p>
-          <p className="text-3xl font-semibold text-zinc-900 dark:text-zinc-100">
-            {sym}
-            {verifiedTotal.toLocaleString()}
-          </p>
-          <Link
-            href="/dashboard/contributions"
-            className={
-              buttonVariants({ size: "sm", variant: "ghost" }) +
-              " mt-3 -ml-2 text-emerald-600 dark:text-emerald-400"
-            }
+        {[
+          {
+            label: "Total Contributed",
+            value: `${sym}${verifiedTotal.toLocaleString()}`,
+            href: "/dashboard/contributions",
+            cta: "View history",
+          },
+          {
+            label: "Active Loans",
+            value: myActiveLoans,
+            href: "/dashboard/loans",
+            cta: "View loans",
+          },
+          {
+            label: "Guarantor Requests",
+            value: myPendingGuarantorRequests,
+            href: "/dashboard/loans",
+            cta: "Respond",
+          },
+        ].map((s) => (
+          <Card
+            key={s.label}
+            className="bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800/60 shadow-none"
           >
-            View history →
-          </Link>
-        </div>
-
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-5">
-          <p className="text-xs font-mono font-medium text-muted-foreground uppercase tracking-wider mb-2">
-            Active Loans
-          </p>
-          <p className="text-3xl font-semibold text-zinc-900 dark:text-zinc-100">
-            {myActiveLoans}
-          </p>
-          <Link
-            href="/dashboard/loans"
-            className={
-              buttonVariants({ size: "sm", variant: "ghost" }) +
-              " mt-3 -ml-2 text-emerald-600 dark:text-emerald-400"
-            }
-          >
-            View loans →
-          </Link>
-        </div>
-
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-5">
-          <p className="text-xs font-mono font-medium text-muted-foreground uppercase tracking-wider mb-2">
-            Guarantor Requests
-          </p>
-          <p className="text-3xl font-semibold text-zinc-900 dark:text-zinc-100">
-            {myPendingGuarantorRequests}
-          </p>
-          <Link
-            href="/dashboard/loans"
-            className={
-              buttonVariants({ size: "sm", variant: "ghost" }) +
-              " mt-3 -ml-2 text-emerald-600 dark:text-emerald-400"
-            }
-          >
-            Respond →
-          </Link>
-        </div>
+            <CardContent className="">
+              <p className="text-sm font-medium text-muted-foreground mb-2">
+                {s.label}
+              </p>
+              <p className="text-3xl font-semibold text-zinc-900 dark:text-zinc-100 tabular-nums">
+                {s.value}
+              </p>
+              <Link
+                href={s.href}
+                className={
+                  buttonVariants({ size: "sm", variant: "ghost" }) +
+                  " mt-3 -ml-2 text-emerald-600 dark:text-emerald-400"
+                }
+              >
+                {s.cta} <ArrowRight className="size-3.5" />
+              </Link>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       {/* Quick actions */}
       <div>
-        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-3">
+        <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
           Quick Actions
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <Link
-            href="/dashboard/financial-summary"
-            className="group bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 hover:border-emerald-300 dark:hover:border-emerald-500/30 rounded-xl p-5 transition-colors"
-          >
-            <p className="font-medium text-zinc-900 dark:text-zinc-100 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
-              Financial Summary →
-            </p>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-              Your full financial position at a glance
-            </p>
-          </Link>
-
-          <Link
-            href="/dashboard/contributions/submit"
-            className="group bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 hover:border-emerald-300 dark:hover:border-emerald-500/30 rounded-xl p-5 transition-colors"
-          >
-            <p className="font-medium text-zinc-900 dark:text-zinc-100 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
-              Submit Contribution →
-            </p>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-              Record a payment for admin verification
-            </p>
-          </Link>
-
-          <Link
-            href="/dashboard/loans/apply"
-            className="group bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 hover:border-emerald-300 dark:hover:border-emerald-500/30 rounded-xl p-5 transition-colors"
-          >
-            <p className="font-medium text-zinc-900 dark:text-zinc-100 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
-              Apply for a Loan →
-            </p>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-              Submit an application with two guarantors
-            </p>
-          </Link>
-
-          <Link
-            href="/dashboard/loans"
-            className="group bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 hover:border-emerald-300 dark:hover:border-emerald-500/30 rounded-xl p-5 transition-colors"
-          >
-            <p className="font-medium text-zinc-900 dark:text-zinc-100 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
-              My Loans →
-            </p>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-              Track your applications and guarantor status
-            </p>
-          </Link>
+          {[
+            {
+              href: "/dashboard/financial-summary",
+              title: "Financial Summary",
+              desc: "Your full financial position at a glance",
+            },
+            {
+              href: "/dashboard/contributions/submit",
+              title: "Submit Contribution",
+              desc: "Record a payment for admin verification",
+            },
+            {
+              href: "/dashboard/loans/apply",
+              title: "Apply for a Loan",
+              desc: "Submit an application with two guarantors",
+            },
+            {
+              href: "/dashboard/loans",
+              title: "My Loans",
+              desc: "Track your applications and guarantor status",
+            },
+          ].map((action) => (
+            <Link key={action.href} href={action.href} className="group block">
+              <Card className="bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800/60 shadow-none h-full transition-colors group-hover:border-emerald-300 dark:group-hover:border-emerald-500/30">
+                <CardContent className="pt-5 pb-5">
+                  <p className="font-medium text-zinc-900 dark:text-zinc-100 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors flex items-center gap-1.5">
+                    {action.title} <ArrowRight className="size-3.5" />
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {action.desc}
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
         </div>
       </div>
     </div>

@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
+import Stripe from "stripe";
 import { stripe, STRIPE_WEBHOOK_SECRET } from "@/app/lib/stripe";
 import prisma from "@/app/lib/prisma";
+
+const COOPERATIVE_STATUS_MAP: Record<string, "ACTIVE" | "PAST_DUE" | "CANCELED"> = {
+  active: "ACTIVE",
+  trialing: "ACTIVE",
+  past_due: "PAST_DUE",
+  unpaid: "PAST_DUE",
+  canceled: "CANCELED",
+};
 
 export async function POST(request: NextRequest) {
   const body = await request.text();
@@ -10,28 +19,22 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Webhook secret not configured" }, { status: 500 });
   }
 
-  let event;
+  let event: Stripe.Event;
   try {
     event = stripe.webhooks.constructEvent(body, sig, STRIPE_WEBHOOK_SECRET);
   } catch {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
-  const cooperativeStatusMap: Record<string, "ACTIVE" | "PAST_DUE" | "CANCELED"> = {
-    active: "ACTIVE",
-    past_due: "PAST_DUE",
-    canceled: "CANCELED",
-    unpaid: "PAST_DUE",
-    trialing: "ACTIVE",
-  };
-
   switch (event.type) {
     case "customer.subscription.created":
     case "customer.subscription.updated": {
-      const sub = event.data.object as any;
-      const customerId = sub.customer as string;
-      const status = cooperativeStatusMap[sub.status] ?? "PAST_DUE";
-      const billingCycleEnd = new Date(sub.current_period_end * 1000);
+      const sub = event.data.object as Stripe.Subscription;
+      const customerId = typeof sub.customer === "string" ? sub.customer : sub.customer.id;
+      const status = COOPERATIVE_STATUS_MAP[sub.status] ?? "PAST_DUE";
+      // current_period_end was moved to subscription items in Stripe API v2024-09-30+
+      const periodEnd = (sub as unknown as Record<string, unknown>)["current_period_end"] as number | undefined;
+      const billingCycleEnd = periodEnd ? new Date(periodEnd * 1000) : null;
 
       await prisma.cooperative.updateMany({
         where: { stripeCustomerId: customerId },
@@ -45,20 +48,24 @@ export async function POST(request: NextRequest) {
     }
 
     case "customer.subscription.deleted": {
-      const sub = event.data.object as any;
+      const sub = event.data.object as Stripe.Subscription;
+      const customerId = typeof sub.customer === "string" ? sub.customer : sub.customer.id;
       await prisma.cooperative.updateMany({
-        where: { stripeCustomerId: sub.customer as string },
+        where: { stripeCustomerId: customerId },
         data: { subscriptionStatus: "CANCELED", billingCycleEnd: null },
       });
       break;
     }
 
     case "invoice.payment_failed": {
-      const invoice = event.data.object as any;
-      await prisma.cooperative.updateMany({
-        where: { stripeCustomerId: invoice.customer as string },
-        data: { subscriptionStatus: "PAST_DUE" },
-      });
+      const invoice = event.data.object as Stripe.Invoice;
+      const customerId = typeof invoice.customer === "string" ? invoice.customer : invoice.customer?.id;
+      if (customerId) {
+        await prisma.cooperative.updateMany({
+          where: { stripeCustomerId: customerId },
+          data: { subscriptionStatus: "PAST_DUE" },
+        });
+      }
       break;
     }
   }

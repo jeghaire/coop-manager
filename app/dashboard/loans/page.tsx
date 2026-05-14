@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import prisma from "@/app/lib/prisma";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { ArrowRight } from "lucide-react";
 import { GuarantorResponseForm } from "./GuarantorResponseForm";
 import { PageHeader } from "@/app/components/PageHeader";
 import { LoanApplySheet } from "@/app/components/LoanApplySheet";
@@ -235,9 +236,9 @@ export default async function LoansPage() {
                       <div className="mt-2">
                         <Link
                           href={`/dashboard/loans/${loan.id}`}
-                          className="text-xs text-emerald-600 dark:text-emerald-400 hover:underline"
+                          className="inline-flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 hover:underline"
                         >
-                          View details →
+                          View details <ArrowRight className="size-3" />
                         </Link>
                       </div>
                     )}
@@ -250,9 +251,9 @@ export default async function LoansPage() {
                         )}
                         <Link
                           href={`/dashboard/loans/${loan.id}/rejected`}
-                          className="text-xs text-emerald-600 dark:text-emerald-400 hover:underline"
+                          className="inline-flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 hover:underline"
                         >
-                          View details & retry →
+                          View details & retry <ArrowRight className="size-3" />
                         </Link>
                       </div>
                     )}

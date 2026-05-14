@@ -1,4 +1,4 @@
-﻿export const dynamic = "force-dynamic";
+export const dynamic = "force-dynamic";
 
 import { getSession } from "@/app/lib/auth-helpers";
 import { redirect } from "next/navigation";
@@ -9,6 +9,14 @@ import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { PageHeader } from "@/app/components/PageHeader";
 import { cn } from "@/app/lib/utils";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export default async function TransactionsPage() {
   const session = await getSession();
@@ -94,62 +102,45 @@ export default async function TransactionsPage() {
             No transactions yet.
           </p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead className="bg-zinc-50 dark:bg-zinc-800/50 border-b border-zinc-200 dark:border-zinc-800">
-                <tr>
-                  <th className="px-4 py-3 text-left font-medium text-zinc-500 dark:text-zinc-400">
-                    Date
-                  </th>
-                  <th className="px-4 py-3 text-left font-medium text-zinc-500 dark:text-zinc-400">
-                    Type
-                  </th>
-                  <th className="px-4 py-3 text-right font-medium text-zinc-500 dark:text-zinc-400">
-                    Amount
-                  </th>
-                  <th className="px-4 py-3 text-left font-medium text-zinc-500 dark:text-zinc-400">
-                    Status
-                  </th>
-                  <th className="px-4 py-3 text-left font-medium text-zinc-500 dark:text-zinc-400 hidden sm:table-cell">
-                    Ref
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-                {rows.map((tx, i) => (
-                  <tr
-                    key={i}
-                    className="hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors"
-                  >
-                    <td className="px-4 py-3 text-zinc-600 dark:text-zinc-400 whitespace-nowrap">
-                      {tx.date.toLocaleDateString()}
-                    </td>
-                    <td className="px-4 py-3">
-                      <Badge
-                        variant={
-                          tx.kind === "contribution" ? "default" : "secondary"
-                        }
-                      >
-                        {tx.kind === "contribution"
-                          ? "Contribution"
-                          : "Repayment"}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3 text-right font-semibold text-zinc-900 dark:text-zinc-100 whitespace-nowrap">
-                      {sym}
-                      {tx.amount.toLocaleString()}
-                    </td>
-                    <td className="px-4 py-3">
-                      <StatusBadge status={tx.status} />
-                    </td>
-                    <td className="px-4 py-3 font-mono text-xs text-zinc-400 hidden sm:table-cell">
-                      ...{tx.ref}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Date</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead className="text-right">Amount</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="hidden sm:table-cell">Ref</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rows.map((tx, i) => (
+                <TableRow key={i}>
+                  <TableCell className="text-zinc-600 dark:text-zinc-400">
+                    {tx.date.toLocaleDateString()}
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={
+                        tx.kind === "contribution" ? "default" : "secondary"
+                      }
+                    >
+                      {tx.kind === "contribution" ? "Contribution" : "Repayment"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right font-semibold text-zinc-900 dark:text-zinc-100">
+                    {sym}
+                    {tx.amount.toLocaleString()}
+                  </TableCell>
+                  <TableCell>
+                    <StatusBadge status={tx.status} />
+                  </TableCell>
+                  <TableCell className="font-mono text-xs text-zinc-400 hidden sm:table-cell">
+                    ...{tx.ref}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         )}
       </div>
     </div>
@@ -160,11 +151,7 @@ function StatusBadge({ status }: { status: string }) {
   switch (status) {
     case "VERIFIED":
     case "RECORDED":
-      return (
-        <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-500/20">
-          Verified
-        </Badge>
-      );
+      return <Badge variant="success">Verified</Badge>;
     case "PENDING_VERIFICATION":
       return <Badge variant="outline">Pending</Badge>;
     case "REJECTED":

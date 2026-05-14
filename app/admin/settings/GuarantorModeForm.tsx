@@ -113,7 +113,7 @@ export function GuarantorModeForm({
           )}
         />
 
-        <Button type="submit" size="sm" disabled={pending}>
+        <Button type="submit" size="sm" disabled={pending || !form.formState.isDirty}>
           {pending ? "Saving…" : "Save Changes"}
         </Button>
       </form>

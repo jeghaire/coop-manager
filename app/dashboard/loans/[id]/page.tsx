@@ -16,6 +16,14 @@ import {
   ProgressLabel,
   ProgressValue,
 } from "@/components/ui/progress";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 function statusBadge(status: string) {
   switch (status) {
@@ -329,67 +337,55 @@ export default async function LoanDetailsPage({
               Repayment Schedule
             </h2>
           </div>
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead>
-                <tr className="border-b border-zinc-100 dark:border-zinc-800">
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                    Month
-                  </th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider hidden sm:table-cell">
-                    Due Date
-                  </th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                    Due
-                  </th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                    Paid
-                  </th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider hidden md:table-cell">
-                    Balance
-                  </th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                    Status
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-                {scheduleRows.map((row) => (
-                  <tr
-                    key={row.month}
-                    className={
-                      row.status === "BEHIND" || row.status === "PARTIAL"
-                        ? "bg-amber-50/40 dark:bg-amber-500/5"
-                        : ""
-                    }
-                  >
-                    <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300 font-medium">
-                      {row.month}
-                    </td>
-                    <td className="px-4 py-3 text-zinc-500 dark:text-zinc-400 hidden sm:table-cell">
-                      {row.dueDate.toLocaleDateString("en-GB", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </td>
-                    <td className="px-4 py-3 text-right text-zinc-700 dark:text-zinc-300">
-                      {fmt(row.monthlyDue)}
-                    </td>
-                    <td className="px-4 py-3 text-right text-emerald-600 dark:text-emerald-400">
-                      {row.amountPaid > 0 ? fmt(row.amountPaid) : "—"}
-                    </td>
-                    <td className="px-4 py-3 text-right text-zinc-500 dark:text-zinc-400 hidden md:table-cell">
-                      {fmt(row.runningBalance)}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      {monthStatusBadge(row.status)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Month</TableHead>
+                <TableHead className="hidden sm:table-cell">Due Date</TableHead>
+                <TableHead className="text-right">Due</TableHead>
+                <TableHead className="text-right">Paid</TableHead>
+                <TableHead className="text-right hidden md:table-cell">
+                  Balance
+                </TableHead>
+                <TableHead className="text-right">Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {scheduleRows.map((row) => (
+                <TableRow
+                  key={row.month}
+                  className={
+                    row.status === "BEHIND" || row.status === "PARTIAL"
+                      ? "bg-amber-50/40 dark:bg-amber-500/5"
+                      : ""
+                  }
+                >
+                  <TableCell className="text-zinc-700 dark:text-zinc-300 font-medium">
+                    {row.month}
+                  </TableCell>
+                  <TableCell className="text-zinc-500 dark:text-zinc-400 hidden sm:table-cell">
+                    {row.dueDate.toLocaleDateString("en-GB", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </TableCell>
+                  <TableCell className="text-right text-zinc-700 dark:text-zinc-300">
+                    {fmt(row.monthlyDue)}
+                  </TableCell>
+                  <TableCell className="text-right text-emerald-600 dark:text-emerald-400">
+                    {row.amountPaid > 0 ? fmt(row.amountPaid) : "—"}
+                  </TableCell>
+                  <TableCell className="text-right text-zinc-500 dark:text-zinc-400 hidden md:table-cell">
+                    {fmt(row.runningBalance)}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {monthStatusBadge(row.status)}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       )}
 

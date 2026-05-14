@@ -6,6 +6,7 @@ import prisma from "@/app/lib/prisma";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
 import { cn } from "@/app/lib/utils";
 import { PageHeader } from "@/app/components/PageHeader";
 import { getCurrencySymbol } from "@/app/lib/currency";
@@ -109,7 +110,7 @@ export default async function AdminNotificationsPage() {
                   href="/admin/loans"
                   className={cn(buttonVariants({ size: "sm" }))}
                 >
-                  Review →
+                  Review <ArrowRight className="size-3.5" />
                 </Link>
               </div>
             </div>

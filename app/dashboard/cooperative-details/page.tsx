@@ -1,4 +1,4 @@
-﻿export const dynamic = "force-dynamic";
+export const dynamic = "force-dynamic";
 
 import { getSession } from "@/app/lib/auth-helpers";
 import { redirect } from "next/navigation";
@@ -6,6 +6,14 @@ import prisma from "@/app/lib/prisma";
 import { PageHeader } from "@/app/components/PageHeader";
 import { getCurrencySymbol } from "@/app/lib/currency";
 import { Star } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export default async function CooperativeDetailsPage() {
   const session = await getSession();
@@ -91,46 +99,37 @@ export default async function CooperativeDetailsPage() {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead>
-                <tr className="border-b border-zinc-100 dark:border-zinc-800">
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                    Account Name
-                  </th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider hidden sm:table-cell">
-                    Account Number
-                  </th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                    Bank
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-                {cooperative.bankAccounts.map((account) => (
-                  <tr
-                    key={account.id}
-                    className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/20"
-                  >
-                    <td className="px-4 py-3 font-medium text-zinc-900 dark:text-zinc-100">
-                      <span className="flex items-center gap-1.5">
-                        {account.accountName}
-                        {account.isPreferred && (
-                          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />
-                        )}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300 font-mono hidden sm:table-cell">
-                      {account.accountNumber}
-                    </td>
-                    <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">
-                      {account.bankName}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Account Name</TableHead>
+                <TableHead className="hidden sm:table-cell">
+                  Account Number
+                </TableHead>
+                <TableHead>Bank</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {cooperative.bankAccounts.map((account) => (
+                <TableRow key={account.id}>
+                  <TableCell className="font-medium text-zinc-900 dark:text-zinc-100">
+                    <span className="flex items-center gap-1.5">
+                      {account.accountName}
+                      {account.isPreferred && (
+                        <Star className="size-3.5 fill-amber-400 text-amber-400 shrink-0" />
+                      )}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-zinc-700 dark:text-zinc-300 font-mono hidden sm:table-cell">
+                    {account.accountNumber}
+                  </TableCell>
+                  <TableCell className="text-zinc-700 dark:text-zinc-300">
+                    {account.bankName}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         )}
       </div>
     </div>

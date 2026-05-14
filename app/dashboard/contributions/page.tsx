@@ -4,30 +4,13 @@ import { getSession } from "@/app/lib/auth-helpers";
 import { redirect } from "next/navigation";
 import prisma from "@/app/lib/prisma";
 import { getPublicUrl } from "@/app/lib/s3-upload";
-import { ReceiptViewerDialog } from "@/app/components/ReceiptViewerDialog";
-import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/app/components/PageHeader";
 import { ContributionSubmitSheet } from "@/app/components/ContributionSubmitSheet";
 import { getCurrencySymbol } from "@/app/lib/currency";
+import { ContributionList } from "./ContributionList";
+import type { ContributionItem } from "@/app/actions/contributions";
 
-const PAYMENT_METHOD_LABEL: Record<string, string> = {
-  BANK_TRANSFER: "Bank Transfer",
-  MOBILE_MONEY: "Mobile Money",
-  CASH: "Cash",
-};
-
-function statusBadge(status: string) {
-  switch (status) {
-    case "PENDING_VERIFICATION":
-      return <Badge variant="warning">Pending</Badge>;
-    case "VERIFIED":
-      return <Badge variant="success">Verified</Badge>;
-    case "REJECTED":
-      return <Badge variant="destructive">Rejected</Badge>;
-    default:
-      return <Badge variant="secondary">{status}</Badge>;
-  }
-}
+const PAGE_SIZE = 6;
 
 export default async function ContributionsPage() {
   const session = await getSession();
@@ -36,10 +19,15 @@ export default async function ContributionsPage() {
   const userId = session.user.id;
   const cooperativeId = session.user.cooperativeId as string;
 
-  const [raw, cooperative] = await Promise.all([
+  const [raw, verifiedAgg, cooperative] = await Promise.all([
     prisma.contribution.findMany({
       where: { userId, cooperativeId, deletedAt: null },
-      orderBy: { submittedAt: "desc" },
+      orderBy: [{ submittedAt: "desc" }, { id: "desc" }],
+      take: PAGE_SIZE + 1,
+    }),
+    prisma.contribution.aggregate({
+      where: { userId, cooperativeId, status: "VERIFIED", deletedAt: null },
+      _sum: { amount: true },
     }),
     prisma.cooperative.findUnique({
       where: { id: cooperativeId },
@@ -47,14 +35,21 @@ export default async function ContributionsPage() {
     }),
   ]);
 
-  const contributions = raw.map((c) => ({
-    ...c,
-    receiptUrl: c.receiptKey ? getPublicUrl(c.receiptKey) : c.receiptUrl,
+  const hasMore = raw.length > PAGE_SIZE;
+  const initialItems: ContributionItem[] = raw.slice(0, PAGE_SIZE).map((c) => ({
+    id: c.id,
+    amount: Number(c.amount),
+    submittedAt: c.submittedAt.toISOString(),
+    status: c.status,
+    paymentMethod: c.paymentMethod,
+    receiptUrl: c.receiptKey ? getPublicUrl(c.receiptKey) : (c.receiptUrl ?? null),
+    receiptFileType: c.receiptFileType ?? null,
+    receiptFileName: c.receiptFileName ?? null,
+    rejectionReason: c.rejectionReason ?? null,
   }));
 
-  const verifiedTotal = contributions
-    .filter((c) => c.status === "VERIFIED")
-    .reduce((sum, c) => sum + Number(c.amount), 0);
+  const verifiedTotal = Number(verifiedAgg._sum.amount ?? 0);
+
   const sym = getCurrencySymbol(cooperative?.currency ?? "NGN");
 
   return (
@@ -77,59 +72,18 @@ export default async function ContributionsPage() {
       </div>
 
       {/* Contribution list */}
-      {contributions.length === 0 ? (
+      {initialItems.length === 0 ? (
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-2xl p-8 text-center">
           <p className="text-zinc-500 dark:text-zinc-400 text-sm">
             No contributions yet.
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {contributions.map((c) => (
-            <div
-              key={c.id}
-              className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-2xl p-5"
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <span className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-                      {sym}
-                      {Number(c.amount).toLocaleString()}
-                    </span>
-                    {statusBadge(c.status)}
-                    <span className="text-xs text-muted-foreground">
-                      {PAYMENT_METHOD_LABEL[c.paymentMethod] ?? c.paymentMethod}
-                    </span>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Submitted{" "}
-                    {new Date(c.submittedAt).toLocaleDateString("en-GB", {
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric",
-                    })}
-                  </p>
-                  {c.receiptUrl && (
-                    <ReceiptViewerDialog
-                      url={c.receiptUrl}
-                      fileType={c.receiptFileType}
-                      fileName={c.receiptFileName}
-                      className="text-xs text-emerald-600 dark:text-emerald-400 hover:underline mt-1 inline-block"
-                    >
-                      View receipt
-                    </ReceiptViewerDialog>
-                  )}
-                  {c.status === "REJECTED" && c.rejectionReason && (
-                    <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">
-                      Reason: {c.rejectionReason}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        <ContributionList
+          initialItems={initialItems}
+          initialHasMore={hasMore}
+          currencySymbol={sym}
+        />
       )}
     </div>
   );

@@ -1,5 +1,49 @@
-﻿import { getLoanDecisions } from "./data";
+import { getLoanDecisions } from "./data";
 import { Badge } from "@/components/ui/badge";
+
+function LoanStat({
+  label,
+  value,
+  sub,
+  accent,
+}: {
+  label: string;
+  value: string | number;
+  sub?: string;
+  accent?: "emerald" | "red";
+}) {
+  const containerClass =
+    accent === "emerald"
+      ? "bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20"
+      : accent === "red"
+        ? "bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/20"
+        : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800/60";
+  const valueClass =
+    accent === "emerald"
+      ? "text-emerald-800 dark:text-emerald-300"
+      : accent === "red"
+        ? "text-red-800 dark:text-red-300"
+        : "text-zinc-900 dark:text-zinc-100";
+  return (
+    <div className={`rounded-xl p-5 border ${containerClass}`}>
+      <p className="text-sm font-medium text-muted-foreground mb-2">{label}</p>
+      <p className={`text-2xl font-semibold tracking-tight ${valueClass}`}>
+        {value}
+      </p>
+      {sub && (
+        <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">{sub}</p>
+      )}
+    </div>
+  );
+}
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export async function LoanDecisions({
   cooperativeId,
@@ -22,41 +66,18 @@ export async function LoanDecisions({
     <div className="space-y-6">
       {/* Top-line stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-4">
-          <p className="text-xs font-mono font-semibold uppercase tracking-wider text-muted-foreground mb-1">
-            Total Decided
-          </p>
-          <p className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
-            {data.total}
-          </p>
-        </div>
-        <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-xl p-4">
-          <p className="text-xs font-mono font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-500 mb-1">
-            Approved
-          </p>
-          <p className="text-2xl font-semibold text-emerald-800 dark:text-emerald-300">
-            {data.approvedCount}
-          </p>
-          <p className="text-xs text-emerald-600 dark:text-emerald-500 mt-0.5">
-            {data.approvalRate}% approval rate
-          </p>
-        </div>
-        <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl p-4">
-          <p className="text-xs font-mono font-semibold uppercase tracking-wider text-red-600 dark:text-red-500 mb-1">
-            Rejected
-          </p>
-          <p className="text-2xl font-semibold text-red-800 dark:text-red-300">
-            {data.rejectedCount}
-          </p>
-        </div>
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl p-4">
-          <p className="text-xs font-mono font-semibold uppercase tracking-wider text-muted-foreground mb-1">
-            Total Approved Amount
-          </p>
-          <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
-            {data.totalApprovedAmount.toLocaleString()}
-          </p>
-        </div>
+        <LoanStat label="Total Decided" value={data.total} />
+        <LoanStat
+          label="Approved"
+          value={data.approvedCount}
+          sub={`${data.approvalRate}% approval rate`}
+          accent="emerald"
+        />
+        <LoanStat label="Rejected" value={data.rejectedCount} accent="red" />
+        <LoanStat
+          label="Total Approved Amount"
+          value={data.totalApprovedAmount.toLocaleString()}
+        />
       </div>
 
       {/* By reviewer */}
@@ -67,49 +88,39 @@ export async function LoanDecisions({
               Decisions by Admin
             </p>
           </div>
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead>
-                <tr className="border-b border-zinc-100 dark:border-zinc-800">
-                  <th className="text-left px-5 py-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                    Admin
-                  </th>
-                  <th className="text-center px-4 py-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                    Approved
-                  </th>
-                  <th className="text-center px-4 py-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                    Rejected
-                  </th>
-                  <th className="text-right px-5 py-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                    Rate
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-                {data.byReviewer.map((r) => {
-                  const total = r.approved + r.rejected;
-                  const rate =
-                    total > 0 ? Math.round((r.approved / total) * 100) : 0;
-                  return (
-                    <tr key={r.name}>
-                      <td className="px-5 py-3 font-medium text-zinc-900 dark:text-zinc-100">
-                        {r.name}
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <Badge variant="success">{r.approved}</Badge>
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <Badge variant="destructive">{r.rejected}</Badge>
-                      </td>
-                      <td className="px-5 py-3 text-right text-zinc-600 dark:text-zinc-400">
-                        {rate}%
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Admin</TableHead>
+                <TableHead className="text-center">Approved</TableHead>
+                <TableHead className="text-center">Rejected</TableHead>
+                <TableHead className="text-right">Rate</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {data.byReviewer.map((r) => {
+                const total = r.approved + r.rejected;
+                const rate =
+                  total > 0 ? Math.round((r.approved / total) * 100) : 0;
+                return (
+                  <TableRow key={r.name}>
+                    <TableCell className="font-medium text-zinc-900 dark:text-zinc-100">
+                      {r.name}
+                    </TableCell>
+                    <TableCell className="text-center text-primary">
+                      {r.approved}
+                    </TableCell>
+                    <TableCell className="text-center text-destructive">
+                      {r.rejected}
+                    </TableCell>
+                    <TableCell className="text-right text-zinc-600 dark:text-zinc-400">
+                      {rate}%
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
         </div>
       )}
 
@@ -138,74 +149,63 @@ export async function LoanDecisions({
       )}
 
       {/* Decision log */}
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-xl overflow-hidden">
-        <div className="px-5 py-3.5 border-b border-zinc-100 dark:border-zinc-800">
-          <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-            Decision Log
-          </p>
+      <div className="bg-card border rounded-xl overflow-hidden">
+        <div className="px-5 py-3.5 border-b">
+          <p className="text-sm font-semibold">Decision Log</p>
         </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead>
-              <tr className="border-b border-zinc-100 dark:border-zinc-800">
-                <th className="text-left px-5 py-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                  Applicant
-                </th>
-                <th className="text-right px-4 py-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider hidden sm:table-cell">
-                  Amount
-                </th>
-                <th className="text-center px-4 py-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                  Decision
-                </th>
-                <th className="text-left px-5 py-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider hidden md:table-cell">
-                  Reviewed by
-                </th>
-                <th className="text-right px-5 py-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider hidden sm:table-cell">
-                  Date
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-              {data.loans.map((loan) => (
-                <tr
-                  key={loan.id}
-                  className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/20"
-                >
-                  <td className="px-5 py-3 font-medium text-zinc-900 dark:text-zinc-100">
-                    {loan.applicant.name}
-                    {loan.status === "REJECTED" && loan.rejectionReason && (
-                      <p className="text-xs text-muted-foreground font-normal truncate max-w-50">
-                        {loan.rejectionReason}
-                      </p>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-right font-mono text-zinc-700 dark:text-zinc-300 hidden sm:table-cell">
-                    {Number(loan.amountRequested).toLocaleString()}
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    {loan.status === "APPROVED" ? (
-                      <Badge variant="success">Approved</Badge>
-                    ) : (
-                      <Badge variant="destructive">Rejected</Badge>
-                    )}
-                  </td>
-                  <td className="px-5 py-3 text-zinc-600 dark:text-zinc-400 hidden md:table-cell">
-                    {loan.reviewer?.name ?? "—"}
-                  </td>
-                  <td className="px-5 py-3 text-right text-zinc-500 dark:text-zinc-500 text-xs hidden sm:table-cell">
-                    {loan.reviewedAt
-                      ? new Date(loan.reviewedAt).toLocaleDateString("en-GB", {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                        })
-                      : "-"}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Applicant</TableHead>
+              <TableHead className="text-right hidden sm:table-cell">
+                Amount
+              </TableHead>
+              <TableHead className="text-center">Decision</TableHead>
+              <TableHead className="hidden md:table-cell">
+                Reviewed by
+              </TableHead>
+              <TableHead className="text-right hidden sm:table-cell">
+                Date
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {data.loans.map((loan) => (
+              <TableRow key={loan.id}>
+                <TableCell className="font-medium text-zinc-900 dark:text-zinc-100">
+                  {loan.applicant.name}
+                  {loan.status === "REJECTED" && loan.rejectionReason && (
+                    <p className="text-xs text-muted-foreground font-normal truncate max-w-50">
+                      {loan.rejectionReason}
+                    </p>
+                  )}
+                </TableCell>
+                <TableCell className="text-right hidden sm:table-cell">
+                  {Number(loan.amountRequested).toLocaleString()}
+                </TableCell>
+                <TableCell className="text-center">
+                  {loan.status === "APPROVED" ? (
+                    <Badge variant="success">Approved</Badge>
+                  ) : (
+                    <Badge variant="destructive">Rejected</Badge>
+                  )}
+                </TableCell>
+                <TableCell className="hidden md:table-cell">
+                  {loan.reviewer?.name ?? "—"}
+                </TableCell>
+                <TableCell className="text-right text-muted-foreground text-xs hidden sm:table-cell">
+                  {loan.reviewedAt
+                    ? new Date(loan.reviewedAt).toLocaleDateString("en-GB", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })
+                    : "-"}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
     </div>
   );
