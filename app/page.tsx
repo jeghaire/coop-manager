@@ -503,8 +503,8 @@ function StatsBar() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {stats.map((s, i) => (
-            <ScrollReveal key={s.label} direction="up" delay={i * 60}>
-              <Card className="bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 shadow-none">
+            <ScrollReveal key={s.label} direction="up" delay={i * 60} className="h-full">
+              <Card className="bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 shadow-none h-full">
                 <CardContent className="pt-5 pb-5">
                   <p className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50 tracking-tight mb-1">
                     {s.value}
@@ -750,7 +750,7 @@ function LoansFeature() {
                 "Admins approve or reject with documented decisions",
                 "Rejection reasons preserved for transparency and appeals",
               ].map((p, i) => (
-                <ScrollReveal key={p} direction="up" delay={60 + i * 80}>
+                <ScrollReveal key={i} direction="up" delay={60 + i * 80}>
                   <li className="flex items-start gap-3">
                     <CheckCircle
                       className="w-4 h-4 text-sky-500 dark:text-sky-400 mt-0.5 shrink-0"
